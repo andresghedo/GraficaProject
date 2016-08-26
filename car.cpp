@@ -14,12 +14,12 @@
 #include "mesh.h"
 
 // var globale di tipo mesh
-Mesh carlinga((char *)"Ferrari_chassis.obj"); // chiama il costruttore
-Mesh wheelBR1((char *)"Ferrari_wheel_back_R.obj"); 
-Mesh wheelFR1((char *)"Ferrari_wheel_front_R.obj"); 
-Mesh wheelBR2((char *)"Ferrari_wheel_back_R_metal.obj"); 
-Mesh wheelFR2((char *)"Ferrari_wheel_front_R_metal.obj"); 
-Mesh pista((char *)"pista.obj");
+Mesh carlinga((char *)"./obj/Ferrari_chassis.obj"); // chiama il costruttore
+Mesh wheelBR1((char *)"./obj/Ferrari_wheel_back_R.obj");
+Mesh wheelFR1((char *)"./obj/Ferrari_wheel_front_R.obj");
+Mesh wheelBR2((char *)"./obj/Ferrari_wheel_back_R_metal.obj");
+Mesh wheelFR2((char *)"./obj/Ferrari_wheel_front_R_metal.obj");
+Mesh pista((char *)"./obj/pista.obj");
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
 extern bool useHeadlight; // var globale esterna: per usare i fari
