@@ -15,6 +15,7 @@ public:
     void Init();
     void EatKey(int keycode, int* keymap, bool pressed_or_released);
     void Joy(int keymap, bool pressed_or_released);
+    void drawTarget();
 
     Controller() {
         Init();

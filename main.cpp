@@ -393,6 +393,7 @@ void rendering(SDL_Window *win) {
     //drawPista();    // DISEGNO PISTA
     drawPoke();     // DISEGNO POKEBALL
     //drawMinimap(scrH, scrW);
+    car.controller.drawTarget();
 
     car.Render();   // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
