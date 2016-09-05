@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <iostream> 
+#include <stdlib.h> 
+#include <math.h> 
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -20,28 +23,17 @@ Mesh wheelFR1((char *) "./obj/Ferrari_wheel_front_R.obj");
 Mesh wheelBR2((char *) "./obj/Ferrari_wheel_back_R_metal.obj");
 Mesh wheelFR2((char *) "./obj/Ferrari_wheel_front_R_metal.obj");
 Mesh pista((char *) "./obj/pista.obj");
+Mesh poke((char *) "./obj/roadV2.obj");
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
 extern bool useHeadlight; // var globale esterna: per usare i fari
 extern bool useShadow; // var globale esterna: per generare l'ombra
 
-// da invocare quando e' stato premuto/rilasciato il tasto numero "keycode"
-
-void Controller::EatKey(int keycode, int* keymap, bool pressed_or_released) {
-    for (int i = 0; i < NKEYS; i++) {
-        if (keycode == keymap[i]) key[i] = pressed_or_released;
-    }
-}
-
-// da invocare quando e' stato premuto/rilasciato un jbutton
-
-void Controller::Joy(int keymap, bool pressed_or_released) {
-    key[keymap] = pressed_or_released;
-}
-
 // Funzione che prepara tutto per usare un env map
 
+// TEXTURE MACCHINA CARROZZERIA
 void SetupEnvmapTexture() {
+    //printf("[DEBUG] Texture per l'ambiente...\n");
     // facciamo binding con la texture 1
     glBindTexture(GL_TEXTURE_2D, 1);
 
@@ -51,19 +43,20 @@ void SetupEnvmapTexture() {
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glColor3f(1, 1, 1); // metto il colore neutro (viene moltiplicato col colore texture, componente per componente)
-    glDisable(GL_LIGHTING); // disabilito il lighting OpenGL standard (lo faccio con la texture)
+    //glDisable(GL_LIGHTING); // disabilito il lighting OpenGL standard (lo faccio con la texture)
 }
 
 // funzione che prepara tutto per creare le coordinate texture (s,t) da (x,y,z)
 // Mappo l'intervallo [ minY , maxY ] nell'intervallo delle T [0..1]
 //     e l'intervallo [ minZ , maxZ ] nell'intervallo delle S [0..1]
 
+// TEXTURE RUOTE 
 void SetupWheelTexture(Point3 min, Point3 max) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
-
+    
     // ulilizzo le coordinate OGGETTO
     // cioe' le coordnate originali, PRIMA della moltiplicazione per la ModelView
     // in modo che la texture sia "attaccata" all'oggetto, e non "proiettata" su esso
@@ -130,6 +123,7 @@ void Car::DoStep() {
     px += vx;
     py += vy;
     pz += vz;
+    //printf("[DEBUG] FISICA   PX: %f | PY: %f | PZ: %f \n", px, py, pz);
 }
 
 //void drawCube(); // questa e' definita altrove (quick hack)
@@ -138,27 +132,31 @@ void drawAxis(); // anche questa
 void drawPista() {
     glPushMatrix();
     glColor3f(0.4, 0.4, .8);
-    glScalef(0.75, 1.0, 0.75);
-    glTranslatef(0, 0.01, 0);
-    //pista.RenderNxV();
-    pista.RenderNxF();
+    glScalef(0.1, 0.1, 0.1);//0.75 1 0.75
+    glTranslatef(0, 3, 0);// se la alzo la macchina si immerge nella pista X Y Z
+    pista.RenderNxV();
+    //pista.RenderNxF();
     glPopMatrix();
 }
 
-/*
-// diesgna una ruota come due cubi intersecati a 45 gradi
-void drawWheel(){
-  glPushMatrix();
-  glScalef(1, 1.0/sqrt(2.0),  1.0/sqrt(2.0));
-  drawCube();
-  glRotatef(45,  1,0,0);
-  drawCube();
-  glPopMatrix();
-}
- */
-
-void Controller::Init() {
-    for (int i = 0; i < NKEYS; i++) key[i] = false;
+void drawPoke() {
+    
+    printf("[DEBUG] BBMAX X: %f  Y: %f  Z: %f \n",poke.bbmax.X(),poke.bbmax.Y(),poke.bbmax.Z());
+    printf("[DEBUG] BBMIN X: %f  Y: %f  Z: %f \n",poke.bbmin.X(),poke.bbmin.Y(),poke.bbmin.Z());
+    
+    float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    glPushMatrix();
+    //glDisable(GL_LIGHTING); // disabilitato le luci
+    glColor3f(0.5, 0.5, .5);
+    glScalef(2.0, 1.0, 250.0);
+    glTranslatef(-1.0, 0.1, +3);// se la alzo la macchina si immerge nella poke X Y Z
+    //glTranslatef(x, y, z);
+    poke.RenderNxV();
+    //poke.RenderNxF();
+    glPopMatrix();
+    glEnable(GL_LIGHTING); // abilito le luci
 }
 
 void Car::Init() {
@@ -191,48 +189,6 @@ void Car::Init() {
 
     grip = 0.45; // quanto il facing macchina si adegua velocemente allo sterzo
 }
-
-/*
-//vecchio codice ora commentato
-// disegna carlinga composta da 1 cubo traslato e scalato
-static void drawCarlinga(){
-  // disegna carlinga
-  
-  glColor3f(1,0,0);
-  
-  // sono nel frame CAR
-  glPushMatrix();
-  
-  // vado al frame pezzo_A
-  glScalef(0.25 , 0.14 , 1);
-  drawCube();  
-  
-  // torno al frame CAR
-  glPopMatrix();
-  
-  // vado frame pezzo_B
-  glPushMatrix();
-  glTranslatef(0,-0.11,-0.95);
-  glScalef(0.6, 0.05, 0.15);
-  drawCube();
-  glPopMatrix();
- 
-   // vado frame pezzo_C
-  glPushMatrix();
-  glTranslatef(0,-0.11,0);
-  glScalef(0.6, 0.05, 0.3);
-  drawCube();
-  glPopMatrix();
-  
-  // vado frame pezzo_D
-  glPushMatrix();
-  glRotatef(-5,1,0,0);
-  glTranslatef(0,+0.2,+0.95);
-  glScalef(0.6, 0.05, 0.3);
-  drawCube();
-  glPopMatrix();
-}
- */
 
 // attiva una luce di openGL per simulare un faro della macchina
 
@@ -280,11 +236,11 @@ void Car::RenderAllParts(bool usecolor) const {
     if (!useEnvmap) {
         if (usecolor) glColor3f(1, 0, 0); // colore rosso, da usare con Lighting
     } else {
-        if (usecolor) SetupEnvmapTexture();
+        if (usecolor) SetupEnvmapTexture(); // METTO LA TEXTURE DEL CORPO DELLA MACCHINA
     }
-    carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice
+    carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice, DISEGNA IL CORPO DELLA MACCHINA PROPRIO
     if (usecolor) glEnable(GL_LIGHTING);
-
+    // QUESTO CICLO FOR DISEGNA LE RUOTE ...
     for (int i = 0; i < 2; i++) {
         // i==0 -> disegno ruote destre.
         // i==1 -> disegno ruote sinistre.
@@ -330,46 +286,7 @@ void Car::RenderAllParts(bool usecolor) const {
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
         wheelBR2.RenderNxV();
         glPopMatrix();
-    }
-    /*
-      // modo vecchio: disegno le ruote senza usare le mesh
-      // ruota posteriore D
-      glPushMatrix();
-      glTranslatef( 0.58,+raggioRuotaP-0.28,+0.8);
-      glRotatef(mozzoP,1,0,0);
-      // SONO NELLO SPAZIO RUOTA
-      glScalef(0.1, raggioRuotaP, raggioRuotaP);
-      drawWheel();
-      glPopMatrix();
-  
-      // ruota posteriore S
-      glPushMatrix();
-      glTranslatef(-0.58,+raggioRuotaP-0.28,+0.8);
-      glRotatef(mozzoP,1,0,0);
-      glScalef(0.1, raggioRuotaP, raggioRuotaP);
-      drawWheel();
-      glPopMatrix();
- 
-      // ruota anteriore D
-      glPushMatrix();
-      glTranslatef( 0.58,+raggioRuotaA-0.28,-0.55);
-      glRotatef(sterzo,0,1,0);
-      glRotatef(mozzoA,1,0,0);
-      glScalef(0.08, raggioRuotaA, raggioRuotaA);
-      drawWheel();
-      glPopMatrix();
-  
-      // ruota anteriore S
-      glPushMatrix();
-      glTranslatef(-0.58,+raggioRuotaA-0.28,-0.55);
-      glRotatef(sterzo,0,1,0);
-      glRotatef(mozzoA,1,0,0);
-      drawAxis();
-      glScalef(0.08, raggioRuotaA, raggioRuotaA);
-      drawWheel();
-      glPopMatrix(); 
-     */
-
+    }// FINE DISEGNO RUOTE
     glPopMatrix();
 }
 
@@ -381,8 +298,8 @@ void Car::Render() const {
     //drawAxis(); // disegno assi spazio mondo
     glPushMatrix();
 
-    glTranslatef(px, py, pz);
-    glRotatef(facing, 0, 1, 0);
+    glTranslatef(px, py, pz);       // QUI GLI DAI LE NUOVE XYZ DELLA MACCHINA
+    glRotatef(facing, 0, 1, 0);     // QUI RUOTA 
 
     // sono nello spazio MACCHINA
     //drawAxis(); // disegno assi spazio macchina
@@ -390,19 +307,17 @@ void Car::Render() const {
     DrawHeadlight(-0.3, 0, -1, 0, useHeadlight); // accendi faro sinistro
     DrawHeadlight(+0.3, 0, -1, 1, useHeadlight); // accendi faro destro
 
-    RenderAllParts(true);
+    RenderAllParts(true);// DISEGNA TUTTA LA MACCHINA TRANNE L'OMBRA
 
-    // ombra!
+    // DISEGNA L'OMBRA VERDE!
     if (useShadow) {
-        glColor3f(0.4, 0.4, 0.4); // colore fisso
-        glTranslatef(0, 0.01, 0); // alzo l'ombra di un epsilon per evitare z-fighting con il pavimento
+        glColor3f(0, 1, 0); // OMBRA VERDE
+        glTranslatef(0, 0.03, 0); // alzo l'ombra di un epsilon per evitare z-fighting con il pavimento
         glScalef(1.01, 0, 1.01); // appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X 
         glDisable(GL_LIGHTING); // niente lighing per l'ombra
         RenderAllParts(false); // disegno la macchina appiattita
 
         glEnable(GL_LIGHTING);
     }
-    glPopMatrix();
-
     glPopMatrix();
 }

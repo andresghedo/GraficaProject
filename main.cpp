@@ -34,6 +34,7 @@ int fpsNow = 0; // quanti fotogrammi ho disegnato fin'ora nell'intervallo attual
 Uint32 timeLastInterval = 0; // quando e' cominciato l'ultimo intervallo
 
 extern void drawPista();
+extern void drawPoke();
 
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord 
@@ -48,7 +49,11 @@ void SetCoordToPixel() {
     glScalef(2.0 / scrW, 2.0 / scrH, 1);
 }
 
+// CARICO PRELIMINARMENTE LE TEXTURE
 bool LoadTexture(int textbind, char *filename) {
+    
+    printf("[DEBUG]Carico l'immagine per la texture : %s \n", filename);
+    // carica l'immagine tramite una chiamata SDL
     SDL_Surface *s = IMG_Load(filename);
     if (!s) return false;
 
@@ -76,123 +81,37 @@ bool LoadTexture(int textbind, char *filename) {
 
 void drawAxis() {
     const float K = 0.10;
-    glColor3f(0, 0, 1);
+    glColor3f(0, 1, 0);// GREEN
     glBegin(GL_LINES);
-    glVertex3f(-1, 0, 0);
-    glVertex3f(+1, 0, 0);
+    glVertex3f(-2, 0, 0);
+    glVertex3f(+2, 0, 0);
 
-    glVertex3f(0, -1, 0);
-    glVertex3f(0, +1, 0);
+    glColor3f(1, 0, 0);// RED
+    glVertex3f(0, -2, 0);
+    glVertex3f(0, +2, 0);
 
-    glVertex3f(0, 0, -1);
-    glVertex3f(0, 0, +1);
+    glColor3f(0, 0, 1);// BLUE
+    glVertex3f(0, 0, -2);
+    glVertex3f(0, 0, +2);
     glEnd();
 
     glBegin(GL_TRIANGLES);
-    glVertex3f(0, +1, 0);
-    glVertex3f(K, +1 - K, 0);
-    glVertex3f(-K, +1 - K, 0);
+    glVertex3f(0, +2, 0);
+    glVertex3f(K, +2 - K, 0);
+    glVertex3f(-K, +2 - K, 0);
 
-    glVertex3f(+1, 0, 0);
-    glVertex3f(+1 - K, +K, 0);
-    glVertex3f(+1 - K, -K, 0);
+    glVertex3f(+2, 0, 0);
+    glVertex3f(+2 - K, +K, 0);
+    glVertex3f(+2 - K, -K, 0);
 
-    glVertex3f(0, 0, +1);
-    glVertex3f(0, +K, +1 - K);
-    glVertex3f(0, -K, +1 - K);
+    glVertex3f(0, 0, +2);
+    glVertex3f(0, +K, +2 - K);
+    glVertex3f(0, -K, +2 - K);
     glEnd();
 
 }
 
-/*
-//vecchio codice ora commentato
-// disegna un cubo rasterizzando quads
-void drawCubeFill()
-{
-const float S=100;
-
-  glBegin(GL_QUADS); 
-    
-    glNormal3f(  0,0,+1  );
-    glVertex3f( +S,+S,+S );
-    glVertex3f( -S,+S,+S );
-    glVertex3f( -S,-S,+S );
-    glVertex3f( +S,-S,+S );
-
-    glNormal3f(  0,0,-1  );
-    glVertex3f( +S,-S,-S );
-    glVertex3f( -S,-S,-S );
-    glVertex3f( -S,+S,-S );
-    glVertex3f( +S,+S,-S );
-
-    glNormal3f(  0,+1,0  );
-    glVertex3f( +S,+S,+S );
-    glVertex3f( -S,+S,+S );
-    glVertex3f( -S,+S,-S );
-    glVertex3f( +S,+S,-S );
-
-    glNormal3f(  0,-1,0  );
-    glVertex3f( +S,-S,-S );
-    glVertex3f( -S,-S,-S );
-    glVertex3f( -S,-S,+S );
-    glVertex3f( +S,-S,+S );
-
-    glNormal3f( +1,0,0  );
-    glVertex3f( +S,+S,+S );
-    glVertex3f( +S,-S,+S );
-    glVertex3f( +S,-S,-S );
-    glVertex3f( +S,+S,-S );
-
-    glNormal3f( -1,0,0  );
-    glVertex3f( -S,+S,-S );
-    glVertex3f( -S,-S,-S );
-    glVertex3f( -S,-S,+S );
-    glVertex3f( -S,+S,+S );
-
-  glEnd();
-}
-
-// disegna un cubo in wireframe
-void drawCubeWire()
-{
-  glBegin(GL_LINE_LOOP); // faccia z=+1
-    glVertex3f( +1,+1,+1 );
-    glVertex3f( -1,+1,+1 );
-    glVertex3f( -1,-1,+1 );
-    glVertex3f( +1,-1,+1 );
-  glEnd();
-
-  glBegin(GL_LINE_LOOP); // faccia z=-1
-    glVertex3f( +1,-1,-1 );
-    glVertex3f( -1,-1,-1 );
-    glVertex3f( -1,+1,-1 );
-    glVertex3f( +1,+1,-1 );
-  glEnd();
-
-  glBegin(GL_LINES);  // 4 segmenti da -z a +z
-    glVertex3f( -1,-1,-1 );
-    glVertex3f( -1,-1,+1 );
-
-    glVertex3f( +1,-1,-1 );
-    glVertex3f( +1,-1,+1 );
-
-    glVertex3f( +1,+1,-1 );
-    glVertex3f( +1,+1,+1 );
-
-    glVertex3f( -1,+1,-1 );
-    glVertex3f( -1,+1,+1 );  
-  glEnd();
-}
-
-void drawCube()
-{
-  glColor3f(.9,.9,.9);
-  drawCubeFill();
-  glColor3f(0,0,0);
-  drawCubeWire();
-}
- */
-
+// DISEGNO DEL "CIELO"
 void drawSphere(double r, int lats, int longs) {
     int i, j;
     for (i = 0; i <= lats; i++) {
@@ -220,23 +139,11 @@ void drawSphere(double r, int lats, int longs) {
     }
 }
 
+// DISEGNA LA PAVIMENTAZIONE
 void drawFloor() {
     const float S = 100; // size
     const float H = 0; // altezza
     const int K = 150; //disegna K x K quads
-
-    /*
-    //vecchio codice ora commentato
-    // disegna un quad solo 
-    glBegin(GL_QUADS);
-      glColor3f(0.5, 0.2, 0.0);
-      glNormal3f(0,1,0);
-      glVertex3d(-S, H, -S);
-      glVertex3d(+S, H, -S);
-      glVertex3d(+S, H, +S);
-      glVertex3d(-S, H, +S);
-    glEnd();
-     */
 
     // disegna KxK quads
     glBegin(GL_QUADS);
@@ -256,10 +163,61 @@ void drawFloor() {
     glEnd();
 }
 
+/****************************************/
+/* function per disegnare una minimappa */
+/****************************************/
+void drawMinimap(int scrH, int scrW) {
+    printf("scrH: %d scrW: %d\n", scrH, scrW);
+  /* calcolo delle coordinate reali dell'oggetto su minimappa */
+  float minimap_posx;
+  float minimap_posz;
+  minimap_posx = ((50*car.px)/67) + 50 + 20;
+  minimap_posz = ((50*car.pz)/67) + 50 + scrH-20-100;
+
+//  float minimap_cubex;
+//  float minimap_cubez;
+//  minimap_cubex = ((50*pos_x)/67) + 50 + 20;
+//  minimap_cubez = ((50*pos_z)/67) + 50 + scrH-20-100;
+
+  /* disegno del cursore */
+  glColor3ub(0,0,255);
+  glBegin(GL_QUADS);
+    glVertex2d(minimap_posx, minimap_posz + 3);
+    glVertex2d(minimap_posx + 3, minimap_posz);
+    glVertex2d(minimap_posx, minimap_posz - 3);
+    glVertex2d(minimap_posx - 3, minimap_posz);
+  glEnd();
+
+  /* disegno del target */
+//  glColor3ub(255,0,0);
+//  glBegin(GL_QUADS);
+//    glVertex2d(minimap_cubex, minimap_cubez + 3);
+//    glVertex2d(minimap_cubex + 3, minimap_cubez);
+//    glVertex2d(minimap_cubex, minimap_cubez - 3);
+//    glVertex2d(minimap_cubex - 3, minimap_cubez);
+//  glEnd();
+
+  /* disegno minimappa */
+  glColor3ub(0,0,0);
+  glBegin(GL_LINE_LOOP);
+    glVertex2d(20,scrH -20 -100);
+    glVertex2d(20,scrH -20);
+    glVertex2d(120,scrH-20);
+    glVertex2d(120,scrH-20-100);
+  glEnd();
+
+  glColor3ub(210,210,210);
+  glBegin(GL_POLYGON);
+    glVertex2d(20,scrH -20 -100);
+    glVertex2d(20,scrH -20);
+    glVertex2d(120,scrH -20);
+    glVertex2d(120,scrH-20-100);
+   glEnd();
+}
+
 // setto la posizione della camera
-
 void setCamera() {
-
+    //printf("[DEBUG]Setta la posizione della CAM %d...\n", cameraType);
     double px = car.px;
     double py = car.py;
     double pz = car.pz;
@@ -272,17 +230,24 @@ void setCamera() {
     // controllo la posizione della camera a seconda dell'opzione selezionata
     switch (cameraType) {
         case CAMERA_BACK_CAR:
+            printf("[DEBUG] Camera:  CAMERA_BACK_CAR\n");
             camd = 2.5;
             camh = 1.0;
+            // PUNTO DI AZIONE
             ex = px + camd*sinf;
             ey = py + camh;
             ez = pz + camd*cosf;
+            // PUNTO VERSO CUI GUARDO
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
+            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_TOP_FIXED:
+            printf("[DEBUG] Camera:  CAMERA_TOP_FIXED\n");
             camd = 0.5;
             camh = 0.55;
             angle = car.facing + 40.0;
@@ -294,9 +259,13 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
+            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_TOP_CAR:
+            printf("[DEBUG] Camera:  CAMERA_TOP_CAR\n");
             camd = 2.5;
             camh = 1.0;
             ex = px + camd*sinf;
@@ -305,9 +274,13 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
+            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey + 5, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_PILOT:
+            printf("[DEBUG] Camera:  CAMERA_PILOT\n");
             camd = 0.2;
             camh = 0.55;
             ex = px + camd*sinf;
@@ -316,26 +289,21 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
+            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_MOUSE:
+            printf("[DEBUG] Camera:  CAMERA_MOUSE\n");
             glTranslatef(0, 0, -eyeDist);
             glRotatef(viewBeta, 1, 0, 0);
             glRotatef(viewAlpha, 0, 1, 0);
-            /*
-            printf("%f %f %f\n",viewAlpha,viewBeta,eyeDist);
-                            ex=eyeDist*cos(viewAlpha)*sin(viewBeta);
-                            ey=eyeDist*sin(viewAlpha)*sin(viewBeta);
-                            ez=eyeDist*cos(viewBeta);
-                            cx = px - camd*sinf;
-                            cy = py + camh;
-                            cz = pz - camd*cosf;
-                            gluLookAt(ex,ey,ez,cx,cy,cz,0.0,1.0,0.0);
-             */
             break;
     }
 }
 
+// disegna il cielo
 void drawSky() {
     int H = 100;
 
@@ -375,7 +343,7 @@ void rendering(SDL_Window *win) {
     // un frame in piu'!!!
     fpsNow++;
 
-    glLineWidth(3); // linee larghe
+    glLineWidth(3); // larchezza linee che vengono disegnate in scena
 
     // settiamo il viewport
     glViewport(0, 0, scrW, scrH);
@@ -405,15 +373,10 @@ void rendering(SDL_Window *win) {
     float tmpv[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
     glLightfv(GL_LIGHT0, GL_POSITION, tmpv);
 
-
-    // settiamo matrice di vista
-    //glTranslatef(0,0,-eyeDist);
-    //glRotatef(viewBeta,  1,0,0);
-    //glRotatef(viewAlpha, 0,1,0);
-    setCamera();
+    setCamera(); // QUI SPOSTO LA VISUALE!!!!
 
 
-    //drawAxis(); // disegna assi frame MONDO
+    drawAxis(); // disegna assi frame MONDO
 
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
@@ -422,15 +385,16 @@ void rendering(SDL_Window *win) {
     glEnable(GL_LIGHTING);
 
     // settiamo matrice di modellazione
-    //drawAxis(); // disegna assi frame OGGETTO
+    drawAxis(); // disegna assi frame OGGETTO
     //drawCubeWire();
 
-    drawSky(); // disegna il cielo come sfondo
+    drawSky();      // DISEGNO CIELO
+    drawFloor();    // DISEGNO SUOLO
+    //drawPista();    // DISEGNO PISTA
+    drawPoke();     // DISEGNO POKEBALL
+    //drawMinimap(scrH, scrW);
 
-    drawFloor(); // disegna il suolo
-    drawPista(); // disegna la pista
-
-    car.Render(); // disegna la macchina
+    car.Render();   // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
     // attendiamo la fine della rasterizzazione di 
     // tutte le primitive mandate 
@@ -440,6 +404,8 @@ void rendering(SDL_Window *win) {
 
     // disegnamo i fps (frame x sec) come una barra a sinistra.
     // (vuota = 0 fps, piena = 100 fps)
+    
+    //DISEGNA LA BARRA A SX
     SetCoordToPixel();
 
     glBegin(GL_QUADS);
@@ -454,7 +420,7 @@ void rendering(SDL_Window *win) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
-
+    // FINE DISEGNO BARRA A SX
 
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
@@ -470,6 +436,7 @@ void redraw() {
     SDL_PushEvent(&e);
 }
 
+/*Scheletro adottato nelle prime esercitazioni SDL*/
 int main(int argc, char* argv[]) {
     SDL_Window *win;
     SDL_GLContext mainContext;
@@ -520,7 +487,9 @@ int main(int argc, char* argv[]) {
             // se si: processa evento
             switch (e.type) {
                 case SDL_KEYDOWN:
+                    // pressione di un tasto movimento macchina
                     car.controller.EatKey(e.key.keysym.sym, keymap, true);
+                    // cambia camera
                     if (e.key.keysym.sym == SDLK_F1) cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
                     if (e.key.keysym.sym == SDLK_F2) useWireframe = !useWireframe;
                     if (e.key.keysym.sym == SDLK_F3) useEnvmap = !useEnvmap;
@@ -535,9 +504,11 @@ int main(int argc, char* argv[]) {
                     break;
                 case SDL_WINDOWEVENT:
                     // dobbiamo ridisegnare la finestra
-                    if (e.window.event == SDL_WINDOWEVENT_EXPOSED)
+                    if (e.window.event == SDL_WINDOWEVENT_EXPOSED) {
                         rendering(win);
-                    else {
+                        //printf("[DEBUG] windows event if!\n");
+                    } else {
+                        //printf("[DEBUG] windows event else!\n");
                         windowID = SDL_GetWindowID(win);
                         if (e.window.windowID == windowID) {
                             switch (e.window.event) {
@@ -579,7 +550,7 @@ int main(int argc, char* argv[]) {
                     };
                     break;
 
-                case SDL_JOYAXISMOTION: /* Handle Joystick Motion */
+                case SDL_JOYAXISMOTION: // Handle Joystick Motion 
                     if (e.jaxis.axis == 0) {
                         if (e.jaxis.value < -3200) {
                             car.controller.Joy(0, true);
@@ -600,7 +571,7 @@ int main(int argc, char* argv[]) {
                         //redraw();
                     }
                     break;
-                case SDL_JOYBUTTONDOWN: /* Handle Joystick Button Presses */
+                case SDL_JOYBUTTONDOWN: // Handle Joystick Button Presses 
                     if (e.jbutton.button == 0) {
                         car.controller.Joy(2, true);
                         //	   printf("jbutton 0\n");
@@ -610,12 +581,13 @@ int main(int argc, char* argv[]) {
                         //	   printf("jbutton 2\n");
                     }
                     break;
-                case SDL_JOYBUTTONUP: /* Handle Joystick Button Presses */
+                case SDL_JOYBUTTONUP: // Handle Joystick Button Presses 
                     car.controller.Joy(2, false);
                     car.controller.Joy(3, false);
                     break;
             }
         } else {
+            //printf("[DEBUG]Else while\n");
             // nessun evento: siamo IDLE
 
             Uint32 timeNow = SDL_GetTicks(); // che ore sono?

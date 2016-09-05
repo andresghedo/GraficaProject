@@ -8,6 +8,8 @@
       </df>
       <in>car.cpp</in>
       <in>car.h</in>
+      <in>controller.cpp</in>
+      <in>controller.h</in>
       <in>main.cpp</in>
       <in>mesh.cpp</in>
       <in>mesh.h</in>

@@ -3,6 +3,8 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
       <in>car.cpp</in>
+      <in>controller.cpp</in>
+      <in>controller.h</in>
       <in>main.cpp</in>
       <in>mesh.cpp</in>
     </df>
@@ -36,6 +38,10 @@
         </makeTool>
       </makefileType>
       <item path="car.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
