@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include "controller.h"
 #include "car.h"
 
 #define CAMERA_BACK_CAR 0
@@ -24,6 +25,7 @@ bool useShadow = true;
 int cameraType = 0;
 
 Car car; // la nostra macchina
+Controller controller;
 int nstep = 0; // numero di passi di FISICA fatti fin'ora
 const int PHYS_SAMPLING_STEP = 10; // numero di millisec che un passo di fisica simula
 
@@ -34,7 +36,8 @@ int fpsNow = 0; // quanti fotogrammi ho disegnato fin'ora nell'intervallo attual
 Uint32 timeLastInterval = 0; // quando e' cominciato l'ultimo intervallo
 
 extern void drawPista();
-extern void drawPoke();
+extern void drawExtremeSX();
+extern void drawExtremeDX();
 
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord 
@@ -391,9 +394,11 @@ void rendering(SDL_Window *win) {
     drawSky();      // DISEGNO CIELO
     drawFloor();    // DISEGNO SUOLO
     //drawPista();    // DISEGNO PISTA
-    drawPoke();     // DISEGNO POKEBALL
+    drawExtremeSX();     // DISEGNO POKEBALL
+    drawExtremeDX();     // DISEGNO POKEBALL
+    
     //drawMinimap(scrH, scrW);
-    car.controller.drawTarget();
+    controller.drawTarget();
 
     car.Render();   // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
@@ -489,7 +494,7 @@ int main(int argc, char* argv[]) {
             switch (e.type) {
                 case SDL_KEYDOWN:
                     // pressione di un tasto movimento macchina
-                    car.controller.EatKey(e.key.keysym.sym, keymap, true);
+                    controller.EatKey(e.key.keysym.sym, keymap, true);
                     // cambia camera
                     if (e.key.keysym.sym == SDLK_F1) cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
                     if (e.key.keysym.sym == SDLK_F2) useWireframe = !useWireframe;
@@ -498,7 +503,7 @@ int main(int argc, char* argv[]) {
                     if (e.key.keysym.sym == SDLK_F5) useShadow = !useShadow;
                     break;
                 case SDL_KEYUP:
-                    car.controller.EatKey(e.key.keysym.sym, keymap, false);
+                    controller.EatKey(e.key.keysym.sym, keymap, false);
                     break;
                 case SDL_QUIT:
                     done = 1;
@@ -554,18 +559,18 @@ int main(int argc, char* argv[]) {
                 case SDL_JOYAXISMOTION: // Handle Joystick Motion 
                     if (e.jaxis.axis == 0) {
                         if (e.jaxis.value < -3200) {
-                            car.controller.Joy(0, true);
-                            car.controller.Joy(1, false);
+                            controller.Joy(0, true);
+                            controller.Joy(1, false);
                             //	      printf("%d <-3200 \n",e.jaxis.value);
                         }
                         if (e.jaxis.value > 3200) {
-                            car.controller.Joy(0, false);
-                            car.controller.Joy(1, true);
+                            controller.Joy(0, false);
+                            controller.Joy(1, true);
                             //	      printf("%d >3200 \n",e.jaxis.value);
                         }
                         if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
-                            car.controller.Joy(0, false);
-                            car.controller.Joy(1, false);
+                            controller.Joy(0, false);
+                            controller.Joy(1, false);
                             //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
                         }
                         rendering(win);
@@ -574,17 +579,17 @@ int main(int argc, char* argv[]) {
                     break;
                 case SDL_JOYBUTTONDOWN: // Handle Joystick Button Presses 
                     if (e.jbutton.button == 0) {
-                        car.controller.Joy(2, true);
+                        controller.Joy(2, true);
                         //	   printf("jbutton 0\n");
                     }
                     if (e.jbutton.button == 2) {
-                        car.controller.Joy(3, true);
+                        controller.Joy(3, true);
                         //	   printf("jbutton 2\n");
                     }
                     break;
                 case SDL_JOYBUTTONUP: // Handle Joystick Button Presses 
-                    car.controller.Joy(2, false);
-                    car.controller.Joy(3, false);
+                    controller.Joy(2, false);
+                    controller.Joy(3, false);
                     break;
             }
         } else {
@@ -605,7 +610,7 @@ int main(int argc, char* argv[]) {
             // finche' il tempo simulato e' rimasto indietro rispetto
             // al tempo reale...
             while (nstep * PHYS_SAMPLING_STEP < timeNow) {
-                car.DoStep();
+                car.DoStep(controller.key[Controller::LEFT], controller.key[Controller::RIGHT], controller.key[Controller::ACC], controller.key[Controller::DEC]);
                 nstep++;
                 doneSomething = true;
                 timeNow = SDL_GetTicks();

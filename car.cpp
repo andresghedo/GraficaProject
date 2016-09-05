@@ -23,7 +23,8 @@ Mesh wheelFR1((char *) "./obj/Ferrari_wheel_front_R.obj");
 Mesh wheelBR2((char *) "./obj/Ferrari_wheel_back_R_metal.obj");
 Mesh wheelFR2((char *) "./obj/Ferrari_wheel_front_R_metal.obj");
 Mesh pista((char *) "./obj/pista.obj");
-Mesh poke((char *) "./obj/roadV2.obj");
+Mesh poke((char *) "./obj/plane.obj");
+int distanceLine = 25;
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
 extern bool useHeadlight; // var globale esterna: per usare i fari
@@ -75,9 +76,8 @@ void SetupWheelTexture(Point3 min, Point3 max) {
 // Indipendente dal rendering.
 //
 // ricordiamoci che possiamo LEGGERE ma mai SCRIVERE
-// la struttura controller da DoStep
 
-void Car::DoStep() {
+void Car::DoStep(bool LeftKey, bool RightKey, bool AccKey, bool DecKey) {
     // computiamo l'evolversi della macchina
     static int i = 5;
 
@@ -91,12 +91,12 @@ void Car::DoStep() {
     vzm = +sinf * vx + cosf*vz;
 
     // gestione dello sterzo
-    if (controller.key[Controller::LEFT]) sterzo += velSterzo;
-    if (controller.key[Controller::RIGHT]) sterzo -= velSterzo;
+    if (LeftKey) sterzo += velSterzo;
+    if (RightKey) sterzo -= velSterzo;
     sterzo *= velRitornoSterzo; // ritorno a volante dritto
 
-    if (controller.key[Controller::ACC]) vzm -= accMax; // accelerazione in avanti 
-    if (controller.key[Controller::DEC]) vzm += accMax; // accelerazione indietro
+    if (AccKey) vzm -= accMax; // accelerazione in avanti 
+    if (DecKey) vzm += accMax; // accelerazione indietro
 
     // attirti (semplificando)
     vxm *= attritoX;
@@ -139,7 +139,7 @@ void drawPista() {
     glPopMatrix();
 }
 
-void drawPoke() {
+void drawExtremeSX() {
     
     printf("[DEBUG] BBMAX X: %f  Y: %f  Z: %f \n",poke.bbmax.X(),poke.bbmax.Y(),poke.bbmax.Z());
     printf("[DEBUG] BBMIN X: %f  Y: %f  Z: %f \n",poke.bbmin.X(),poke.bbmin.Y(),poke.bbmin.Z());
@@ -148,10 +148,30 @@ void drawPoke() {
     float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     glPushMatrix();
-    //glDisable(GL_LIGHTING); // disabilitato le luci
-    glColor3f(0.5, 0.5, .5);
-    glScalef(2.0, 1.0, 250.0);
-    glTranslatef(-1.0, 0.1, +3);// se la alzo la macchina si immerge nella poke X Y Z
+    glDisable(GL_LIGHTING); // disabilitato le luci
+    glColor3f(1, 1, 1);
+    glScalef(0.1, 1, 500);
+    glTranslatef(distanceLine, 0.01, 0);// se la alzo la macchina si immerge nella poke X Y Z
+    //glTranslatef(x, y, z);
+    poke.RenderNxV();
+    //poke.RenderNxF();
+    glPopMatrix();
+    glEnable(GL_LIGHTING); // abilito le luci
+}
+
+void drawExtremeDX() {
+    
+    printf("[DEBUG] BBMAX X: %f  Y: %f  Z: %f \n",poke.bbmax.X(),poke.bbmax.Y(),poke.bbmax.Z());
+    printf("[DEBUG] BBMIN X: %f  Y: %f  Z: %f \n",poke.bbmin.X(),poke.bbmin.Y(),poke.bbmin.Z());
+    
+    float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    glPushMatrix();
+    glDisable(GL_LIGHTING); // disabilitato le luci
+    glColor3f(1, 1, 1);
+    glScalef(0.1, 1, 500);
+    glTranslatef(-distanceLine, 0.01, 0);// se la alzo la macchina si immerge nella poke X Y Z
     //glTranslatef(x, y, z);
     poke.RenderNxV();
     //poke.RenderNxF();
@@ -166,8 +186,6 @@ void Car::Init() {
 
     mozzoA = mozzoP = sterzo = 0; // stato
     vx = vy = vz = 0; // velocita' attuale
-    // inizializzo la struttura di controllo
-    controller.Init();
 
     //velSterzo=3.4;         // A
     velSterzo = 2.4; // A

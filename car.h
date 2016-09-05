@@ -1,5 +1,3 @@
-#include "controller.h"
-
 class Car {
     void RenderAllParts(bool usecolor) const;
     // disegna tutte le parti della macchina
@@ -9,13 +7,11 @@ public:
     // Metodi
     void Init(); // inizializza variabili
     void Render() const; // disegna a schermo
-    void DoStep(); // computa un passo del motore fisico
+    void DoStep(bool LeftKey, bool RightKey, bool AccKey, bool DecKey); // computa un passo del motore fisico
 
     Car() {
         Init();
     } // costruttore
-
-    Controller controller;
 
     // STATO DELLA MACCHINA
     // (DoStep fa evolvere queste variabili nel tempo)
