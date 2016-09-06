@@ -176,6 +176,84 @@ void drawFloor() {
     glEnd();
 }
 
+// DISEGNA LA PAVIMENTAZIONE
+void drawPistaTexture() {
+    const float S = 500; // OLD 100 size
+    const float H = 0; // altezza
+    const int K = 750; //OLD 150 disegna K x K quads
+
+    // disegno il terreno ripetendo una texture su di esso
+    glBindTexture(GL_TEXTURE_2D, 4);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  // disegna KxK quads
+  glBegin(GL_QUADS);
+    glNormal3f(0,1,0); // normale verticale uguale x tutti
+    for (int x=0; x<K; x++) 
+        for (int z=0; z<K; z++) {
+        // scelgo il colore per quel quad
+
+        float x0=-S + 2*(x+0)*S/K;
+        float x1=-S + 2*(x+1)*S/K;
+        float z0=-S + 2*(z+0)*S/K;
+        float z1=-S + 2*(z+1)*S/K;
+        if((x0<=2)&&(x0>=-3)) {
+            glTexCoord2f(0.0, 0.0);
+            glVertex3d(x0, H, z0);
+            glTexCoord2f(1.0, 0.0);
+            glVertex3d(x1, H, z0);
+            glTexCoord2f(1.0, 1.0);
+            glVertex3d(x1, H, z1);
+            glTexCoord2f(0.0, 1.0);
+            glVertex3d(x0, H, z1);}
+        }
+  glEnd();
+  glDisable(GL_TEXTURE_2D);
+}
+
+// DISEGNA LA PAVIMENTAZIONE
+void drawFloorTexture() {
+    const float S = 500; // OLD 100 size
+    const float H = 0; // altezza
+    const int K = 750; //OLD 150 disegna K x K quads
+
+    // disegno il terreno ripetendo una texture su di esso
+    glBindTexture(GL_TEXTURE_2D, 5);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  // disegna KxK quads
+  glBegin(GL_QUADS);
+    glNormal3f(0,1,0); // normale verticale uguale x tutti
+    for (int x=0; x<K; x++) 
+        for (int z=0; z<K; z++) {
+        // scelgo il colore per quel quad
+
+        float x0=-S + 2*(x+0)*S/K;
+        float x1=-S + 2*(x+1)*S/K;
+        float z0=-S + 2*(z+0)*S/K;
+        float z1=-S + 2*(z+1)*S/K;
+        if((x0>2)||(x0<-3)) {
+            glTexCoord2f(0.0, 0.0);
+            glVertex3d(x0, H, z0);
+            glTexCoord2f(1.0, 0.0);
+            glVertex3d(x1, H, z0);
+            glTexCoord2f(1.0, 1.0);
+            glVertex3d(x1, H, z1);
+            glTexCoord2f(0.0, 1.0);
+            glVertex3d(x0, H, z1);}
+        }
+  glEnd();
+  glDisable(GL_TEXTURE_2D);
+}
+
 /****************************************/
 /* function per disegnare una minimappa */
 /****************************************/
@@ -408,8 +486,8 @@ void rendering(SDL_Window *win) {
     //drawCubeWire();
 
     drawSky();      // DISEGNO CIELO
-    drawFloor();    // DISEGNO SUOLO
-    //drawPista();    // DISEGNO PISTA
+    drawFloorTexture();    // DISEGNO SUOLO
+    drawPistaTexture();    // DISEGNO PISTA
     drawExtremeSX();     // DISEGNO POKEBALL
     drawMiddleLine();
     drawExtremeDX();     // DISEGNO POKEBALL
@@ -500,6 +578,8 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(1, (char *) "./img/envmap_flipped.jpg")) return 0;
     if (!LoadTexture(2, (char *) "./img/sky_ok.jpg")) return -1;
     if (!LoadTexture(3, (char *) "./img/selfie.jpg")) return -1;
+    if (!LoadTexture(4, (char *) "./img/asfalto.png")) return -1;
+    if (!LoadTexture(5, (char *) "./img/erba.jpg")) return -1;
 
     bool done = 0;
     while (!done) {

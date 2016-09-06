@@ -342,7 +342,7 @@ void Car::Render() const {
 
     // DISEGNA L'OMBRA VERDE!
     if (useShadow) {
-        glColor3f(0, 1, 0); // OMBRA VERDE
+        glColor3f(0.1, 0.1, 0.1); // OMBRA VERDE
         glTranslatef(0, 0.03, 0); // alzo l'ombra di un epsilon per evitare z-fighting con il pavimento
         glScalef(1.01, 0, 1.01); // appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X 
         glDisable(GL_LIGHTING); // niente lighing per l'ombra
