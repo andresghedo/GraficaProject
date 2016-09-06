@@ -414,10 +414,10 @@ void rendering(SDL_Window *win) {
     drawMiddleLine();
     drawExtremeDX();     // DISEGNO POKEBALL
     
-    //drawMinimap(scrH, scrW);
-    controller.drawTarget(car.px, car.pz);
-
-    car.Render();   // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
+    // drawMinimap(scrH, scrW);
+    // controller.drawBirillo(car.px, car.pz);
+    controller.drawTargetCube(car.mozzoA);
+    car.Render();        // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
     // attendiamo la fine della rasterizzazione di 
     // tutte le primitive mandate 
@@ -499,6 +499,7 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(0, (char *) "./img/logo.jpg")) return 0;
     if (!LoadTexture(1, (char *) "./img/envmap_flipped.jpg")) return 0;
     if (!LoadTexture(2, (char *) "./img/sky_ok.jpg")) return -1;
+    if (!LoadTexture(3, (char *) "./img/selfie.jpg")) return -1;
 
     bool done = 0;
     while (!done) {

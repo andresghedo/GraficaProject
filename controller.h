@@ -15,7 +15,8 @@ public:
     void Init();
     void EatKey(int keycode, int* keymap, bool pressed_or_released);
     void Joy(int keymap, bool pressed_or_released);
-    void drawTarget(float carX, float carZ);
+    void drawBirillo(float carX, float carZ);
+    void drawTargetCube(float mozzo);
     void checkVisibilityTarget(float carX, float carY, float carZ);
 
     Controller() {
