@@ -17,7 +17,7 @@ public:
     float Z() const {
         return coord[2];
     }
-
+    
     // costruttore 1
 
     Point3(float x, float y, float z) {
@@ -107,6 +107,18 @@ public:
 
     void SendAsNormal() const {
         glNormal3fv(coord);
+    }
+    
+    void setX(float x) {
+        coord[0] = x;
+    }
+    
+    void setY(float y) {
+        coord[1] = y;
+    }
+    
+    void setZ(float z) {
+        coord[2] = z;
     }
 };
 

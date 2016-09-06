@@ -15,7 +15,7 @@ public:
     void Init();
     void EatKey(int keycode, int* keymap, bool pressed_or_released);
     void Joy(int keymap, bool pressed_or_released);
-    void drawTarget();
+    void drawTarget(float carX, float carZ);
     void checkVisibilityTarget(float carX, float carY, float carZ);
 
     Controller() {

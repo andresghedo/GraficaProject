@@ -282,7 +282,6 @@ void Car::RenderAllParts(bool usecolor) const {
             glTranslatef(0, +wheelFR1.Center().Y(), 0);
             glRotatef(180, 0, 0, 1);
             glTranslatef(0, -wheelFR1.Center().Y(), 0);
-            printf("[DEBUG RUOTE] FR1: X: %f  Y: %f  Z: %f\n", wheelFR1.Center().X(), wheelFR1.Center().Y(),wheelFR1.Center().Z());
         }
 
         glTranslate(wheelFR1.Center());
@@ -317,8 +316,6 @@ void Car::RenderAllParts(bool usecolor) const {
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
         wheelBR2.RenderNxV();
         
-        printf("[DEBUG RUOTE] BR2: X: %f  Y: %f  Z: %f\n", wheelBR2.Center().X(), wheelBR2.Center().Y(),wheelBR2.Center().Z());
-        printf("[DEBUG RUOTE] BR1: X: %f  Y: %f  Z: %f\n", wheelBR1.Center().X(), wheelBR1.Center().Y(),wheelBR1.Center().Z());
         glPopMatrix();
     }// FINE DISEGNO RUOTE
     glPopMatrix();

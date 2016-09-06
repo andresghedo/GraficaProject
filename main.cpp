@@ -154,9 +154,9 @@ void drawSphere(double r, int lats, int longs) {
 
 // DISEGNA LA PAVIMENTAZIONE
 void drawFloor() {
-    const float S = 100; // size
+    const float S = 500; // OLD 100 size
     const float H = 0; // altezza
-    const int K = 150; //disegna K x K quads
+    const int K = 750; //OLD 150 disegna K x K quads
 
     // disegna KxK quads
     glBegin(GL_QUADS);
@@ -325,7 +325,7 @@ void drawSky() {
         glColor3f(0, 0, 0);
         glDisable(GL_LIGHTING);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        drawSphere(100.0, 20, 20);
+        drawSphere(500.0, 20, 20); // OLD 100
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glColor3f(1, 1, 1);
         glEnable(GL_LIGHTING);
@@ -340,7 +340,7 @@ void drawSky() {
         glDisable(GL_LIGHTING);
 
         //   drawCubeFill();
-        drawSphere(100.0, 20, 20);
+        drawSphere(500.0, 20, 20);// old 100
 
         glDisable(GL_TEXTURE_GEN_S);
         glDisable(GL_TEXTURE_GEN_T);
@@ -415,7 +415,7 @@ void rendering(SDL_Window *win) {
     drawExtremeDX();     // DISEGNO POKEBALL
     
     //drawMinimap(scrH, scrW);
-    controller.drawTarget();
+    controller.drawTarget(car.px, car.pz);
 
     car.Render();   // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
