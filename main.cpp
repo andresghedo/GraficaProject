@@ -37,6 +37,7 @@ Uint32 timeLastInterval = 0; // quando e' cominciato l'ultimo intervallo
 
 extern void drawPista();
 extern void drawExtremeSX();
+extern void drawMiddleLine();
 extern void drawExtremeDX();
 
 // setta le matrici di trasformazione in modo
@@ -112,6 +113,15 @@ void drawAxis() {
     glVertex3f(0, -K, +2 - K);
     glEnd();
 
+}
+
+void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2) {
+    glColor3f(0, 0, 1);// GREEN
+    glBegin(GL_LINES);
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x2, y2, z2);
+
+    glEnd();
 }
 
 // DISEGNO DEL "CIELO"
@@ -233,7 +243,7 @@ void setCamera() {
     // controllo la posizione della camera a seconda dell'opzione selezionata
     switch (cameraType) {
         case CAMERA_BACK_CAR:
-            printf("[DEBUG] Camera:  CAMERA_BACK_CAR\n");
+            //printf("[DEBUG] Camera:  CAMERA_BACK_CAR\n");
             camd = 2.5;
             camh = 1.0;
             // PUNTO DI AZIONE
@@ -244,13 +254,13 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
+//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_TOP_FIXED:
-            printf("[DEBUG] Camera:  CAMERA_TOP_FIXED\n");
+//            printf("[DEBUG] Camera:  CAMERA_TOP_FIXED\n");
             camd = 0.5;
             camh = 0.55;
             angle = car.facing + 40.0;
@@ -262,13 +272,13 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
+//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_TOP_CAR:
-            printf("[DEBUG] Camera:  CAMERA_TOP_CAR\n");
+//            printf("[DEBUG] Camera:  CAMERA_TOP_CAR\n");
             camd = 2.5;
             camh = 1.0;
             ex = px + camd*sinf;
@@ -277,13 +287,13 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
+//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey + 5, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_PILOT:
-            printf("[DEBUG] Camera:  CAMERA_PILOT\n");
+//            printf("[DEBUG] Camera:  CAMERA_PILOT\n");
             camd = 0.2;
             camh = 0.55;
             ex = px + camd*sinf;
@@ -292,13 +302,13 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
+//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
+//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
+//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_MOUSE:
-            printf("[DEBUG] Camera:  CAMERA_MOUSE\n");
+//            printf("[DEBUG] Camera:  CAMERA_MOUSE\n");
             glTranslatef(0, 0, -eyeDist);
             glRotatef(viewBeta, 1, 0, 0);
             glRotatef(viewAlpha, 0, 1, 0);
@@ -380,7 +390,13 @@ void rendering(SDL_Window *win) {
 
 
     drawAxis(); // disegna assi frame MONDO
-
+    
+    drawLineToDebug(car.px-0.5, 1, car.pz-1.2, car.px-0.5, -1, car.pz-1.2); // A
+    drawLineToDebug(car.px+0.5, +1, car.pz-1.2, car.px+0.5, -1, car.pz-1.2);   // B
+    drawLineToDebug(car.px-0.5, +1, car.pz+1.2, car.px-0.5, -1, car.pz+1.2);   // C
+    drawLineToDebug(car.px+0.5, +1, car.pz+1.2, car.px+0.5, -1, car.pz+1.2);     // D
+    
+    
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
@@ -395,6 +411,7 @@ void rendering(SDL_Window *win) {
     drawFloor();    // DISEGNO SUOLO
     //drawPista();    // DISEGNO PISTA
     drawExtremeSX();     // DISEGNO POKEBALL
+    drawMiddleLine();
     drawExtremeDX();     // DISEGNO POKEBALL
     
     //drawMinimap(scrH, scrW);
@@ -620,10 +637,10 @@ int main(int argc, char* argv[]) {
                 } // siamo troppo lenti!
             }
 
-            if (doneSomething)
+            if (doneSomething){
                 rendering(win);
-                //redraw();
-            else {
+                controller.checkVisibilityTarget(car.px, car.py, car.pz);
+            } else {
                 // tempo libero!!!
             }
         }

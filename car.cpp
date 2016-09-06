@@ -140,10 +140,6 @@ void drawPista() {
 }
 
 void drawExtremeSX() {
-    
-    printf("[DEBUG] BBMAX X: %f  Y: %f  Z: %f \n",poke.bbmax.X(),poke.bbmax.Y(),poke.bbmax.Z());
-    printf("[DEBUG] BBMIN X: %f  Y: %f  Z: %f \n",poke.bbmin.X(),poke.bbmin.Y(),poke.bbmin.Z());
-    
     float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -160,10 +156,6 @@ void drawExtremeSX() {
 }
 
 void drawExtremeDX() {
-    
-    printf("[DEBUG] BBMAX X: %f  Y: %f  Z: %f \n",poke.bbmax.X(),poke.bbmax.Y(),poke.bbmax.Z());
-    printf("[DEBUG] BBMIN X: %f  Y: %f  Z: %f \n",poke.bbmin.X(),poke.bbmin.Y(),poke.bbmin.Z());
-    
     float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -176,6 +168,28 @@ void drawExtremeDX() {
     poke.RenderNxV();
     //poke.RenderNxF();
     glPopMatrix();
+    glEnable(GL_LIGHTING); // abilito le luci
+}
+
+void drawMiddleLine() {
+//    float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+//    float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+//    float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+    float posZ = 0;
+    glDisable(GL_LIGHTING); // disabilitato le luci
+    for (int i = 0; i < 2000; i++) {
+        glPushMatrix();
+        
+        glColor3f(1, 1, 1);
+        //glColor3f(0, 0, 0);
+        glScalef(0.1, 1, 2.5);
+        glTranslatef(0, 0.01, posZ);// se la alzo la macchina si immerge nella poke X Y Z
+        poke.RenderNxV();
+        glPopMatrix();
+        
+        posZ -= 3.0;
+    }
     glEnable(GL_LIGHTING); // abilito le luci
 }
 
@@ -246,8 +260,6 @@ void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight
 
 void Car::RenderAllParts(bool usecolor) const {
 
-    // drawCarlinga(); // disegna la carliga con pochi parallelepidedi
-
     // disegna la carliga con una mesh
     glPushMatrix();
     glScalef(-0.05, 0.05, -0.05); // patch: riscaliamo la mesh di 1/10 
@@ -270,6 +282,7 @@ void Car::RenderAllParts(bool usecolor) const {
             glTranslatef(0, +wheelFR1.Center().Y(), 0);
             glRotatef(180, 0, 0, 1);
             glTranslatef(0, -wheelFR1.Center().Y(), 0);
+            printf("[DEBUG RUOTE] FR1: X: %f  Y: %f  Z: %f\n", wheelFR1.Center().X(), wheelFR1.Center().Y(),wheelFR1.Center().Z());
         }
 
         glTranslate(wheelFR1.Center());
@@ -303,6 +316,9 @@ void Car::RenderAllParts(bool usecolor) const {
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
         wheelBR2.RenderNxV();
+        
+        printf("[DEBUG RUOTE] BR2: X: %f  Y: %f  Z: %f\n", wheelBR2.Center().X(), wheelBR2.Center().Y(),wheelBR2.Center().Z());
+        printf("[DEBUG RUOTE] BR1: X: %f  Y: %f  Z: %f\n", wheelBR1.Center().X(), wheelBR1.Center().Y(),wheelBR1.Center().Z());
         glPopMatrix();
     }// FINE DISEGNO RUOTE
     glPopMatrix();
