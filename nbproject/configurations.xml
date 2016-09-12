@@ -34,7 +34,7 @@
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
-          <executablePath>progettoCar4</executablePath>
+          <executablePath>GRA_PRJ</executablePath>
         </makeTool>
       </makefileType>
       <item path="car.cpp" ex="false" tool="1" flavor2="0">

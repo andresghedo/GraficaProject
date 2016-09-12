@@ -14,6 +14,7 @@
 #define CAMERA_PILOT 3
 #define CAMERA_MOUSE 4
 #define CAMERA_TYPE_MAX 5
+#define PI 3.14159265
 
 float viewAlpha = 20, viewBeta = 40; // angoli che definiscono la vista
 float eyeDist = 5.0; // distanza dell'occhio dall'origine
@@ -35,10 +36,10 @@ float fps = 0; // valore di fps dell'intervallo precedente
 int fpsNow = 0; // quanti fotogrammi ho disegnato fin'ora nell'intervallo attuale
 Uint32 timeLastInterval = 0; // quando e' cominciato l'ultimo intervallo
 
-extern void drawPista();
 extern void drawExtremeSX();
 extern void drawMiddleLine();
 extern void drawExtremeDX();
+extern void drawStatua();
 
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord 
@@ -120,7 +121,6 @@ void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2)
     glBegin(GL_LINES);
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
-
     glEnd();
 }
 
@@ -469,11 +469,32 @@ void rendering(SDL_Window *win) {
 
     drawAxis(); // disegna assi frame MONDO
     
-    drawLineToDebug(car.px-0.5, 1, car.pz-1.2, car.px-0.5, -1, car.pz-1.2); // A
-    drawLineToDebug(car.px+0.5, +1, car.pz-1.2, car.px+0.5, -1, car.pz-1.2);   // B
-    drawLineToDebug(car.px-0.5, +1, car.pz+1.2, car.px-0.5, -1, car.pz+1.2);   // C
-    drawLineToDebug(car.px+0.5, +1, car.pz+1.2, car.px+0.5, -1, car.pz+1.2);     // D
+    float angle = 360 - car.facing;
+    float cosA = cos(angle*PI/180.0);
+    float sinA = sin(angle*PI/180.0);
+    float Z2B = 2.5; // distanza da baricentro Z
+    float Z2BTop = 4.5; // distanza da baricentro Z
+    float X2B = 0.5; // distanza da baricentro X
+    float X2BTop = 0; // distanza da baricentro Z
     
+    float X1  = X2B * cosA - Z2B * sinA;
+    float Z1  = X2B * sinA + Z2B * cosA;
+    
+    float X2  = -X2B * cosA - Z2B * sinA;
+    float Z2  = -X2B * sinA + Z2B * cosA;
+
+    float X3  = -X2BTop * cosA - Z2BTop * sinA;
+    float Z3  = -X2BTop * sinA + Z2BTop * cosA;
+
+    //drawLineToDebug(car.px+X1, +1, car.pz+Z1, car.px+X1, -1, car.pz+Z1);   
+    drawLineToDebug(car.px-X1, +1, car.pz-Z1, car.px-X1, -1, car.pz-Z1);      
+    
+    //drawLineToDebug(car.px+X2, +1, car.pz+Z2, car.px+X2, -1, car.pz+Z2);   
+    drawLineToDebug(car.px-X2, +1, car.pz-Z2, car.px-X2, -1, car.pz-Z2);      
+    
+    
+    drawLineToDebug(car.px-X3, +1, car.pz-Z3, car.px-X3, -1, car.pz-Z3);
+    controller.drawTriangleForTarget(car.px-X1, car.pz-Z1, car.px-X2, car.pz-Z2, car.px-X3, car.pz-Z3);
     
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
@@ -491,7 +512,8 @@ void rendering(SDL_Window *win) {
     drawExtremeSX();     // DISEGNO POKEBALL
     drawMiddleLine();
     drawExtremeDX();     // DISEGNO POKEBALL
-    
+    drawStatua();
+
     // drawMinimap(scrH, scrW);
     // controller.drawBirillo(car.px, car.pz);
     controller.drawTargetCube(car.mozzoA);
@@ -544,7 +566,7 @@ int main(int argc, char* argv[]) {
     Uint32 windowID;
     SDL_Joystick *joystick;
     static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
-
+    
     // inizializzazione di SDL
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
 
@@ -721,6 +743,7 @@ int main(int argc, char* argv[]) {
             if (doneSomething){
                 rendering(win);
                 controller.checkVisibilityTarget(car.px, car.py, car.pz);
+                printf("[DEBUG] FACING: %f  |  Car X: %f | Car Z: %f\n", car.facing, car.px, car.pz);
             } else {
                 // tempo libero!!!
             }

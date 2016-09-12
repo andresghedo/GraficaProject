@@ -6,12 +6,9 @@
 #include <iostream> 
 #include <stdlib.h> 
 #include <math.h> 
-
 #include <GL/gl.h>
 #include <GL/glu.h>
-
 #include <vector> // la classe vector di STL 
-
 #include "car.h"
 #include "point3.h"
 #include "mesh.h"
@@ -23,7 +20,9 @@ Mesh wheelFR1((char *) "./obj/Ferrari_wheel_front_R.obj");
 Mesh wheelBR2((char *) "./obj/Ferrari_wheel_back_R_metal.obj");
 Mesh wheelFR2((char *) "./obj/Ferrari_wheel_front_R_metal.obj");
 Mesh pista((char *) "./obj/pista.obj");
-Mesh poke((char *) "./obj/plane.obj");
+Mesh striscia((char *) "./obj/plane.obj");
+Mesh statua((char *) "./obj/statua_corpo.obj");
+Mesh fuocoStatua((char *) "./obj/statua_fuoco.obj");
 int distanceLine = 25;
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
@@ -34,7 +33,6 @@ extern bool useShadow; // var globale esterna: per generare l'ombra
 
 // TEXTURE MACCHINA CARROZZERIA
 void SetupEnvmapTexture() {
-    //printf("[DEBUG] Texture per l'ambiente...\n");
     // facciamo binding con la texture 1
     glBindTexture(GL_TEXTURE_2D, 1);
 
@@ -123,34 +121,37 @@ void Car::DoStep(bool LeftKey, bool RightKey, bool AccKey, bool DecKey) {
     px += vx;
     py += vy;
     pz += vz;
-    //printf("[DEBUG] FISICA   PX: %f | PY: %f | PZ: %f \n", px, py, pz);
+    if(pz > 0)
+        pz = 0;
+    if(pz < -438)
+        pz = -438;
+    if(px > 20)
+        px = 20;
+    if(px < -20)
+        px = -20;
 }
 
 //void drawCube(); // questa e' definita altrove (quick hack)
 void drawAxis(); // anche questa
 
-void drawPista() {
+void drawStatua() {
     glPushMatrix();
-    glColor3f(0.4, 0.4, .8);
-    glScalef(0.1, 0.1, 0.1);//0.75 1 0.75
-    glTranslatef(0, 3, 0);// se la alzo la macchina si immerge nella pista X Y Z
-    pista.RenderNxV();
-    //pista.RenderNxF();
+    glColor3f(.4, .6, .5);
+    glTranslatef(2.5, -1, -450);
+    glScalef(60, 60, 60);//0.75 1 0.75
+    statua.RenderNxV();
+    glColor3f(.8, .0, .0);
+    fuocoStatua.RenderNxV();
     glPopMatrix();
 }
 
 void drawExtremeSX() {
-    float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     glPushMatrix();
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);
     glScalef(0.1, 1, 500);
-    glTranslatef(distanceLine, 0.01, 0);// se la alzo la macchina si immerge nella poke X Y Z
-    //glTranslatef(x, y, z);
-    poke.RenderNxV();
-    //poke.RenderNxF();
+    glTranslatef(distanceLine, 0.01, 0);
+    striscia.RenderNxV();
     glPopMatrix();
     glEnable(GL_LIGHTING); // abilito le luci
 }
@@ -163,29 +164,22 @@ void drawExtremeDX() {
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);
     glScalef(0.1, 1, 500);
-    glTranslatef(-distanceLine, 0.01, 0);// se la alzo la macchina si immerge nella poke X Y Z
-    //glTranslatef(x, y, z);
-    poke.RenderNxV();
-    //poke.RenderNxF();
+    glTranslatef(-distanceLine, 0.01, 0);
+    striscia.RenderNxV();
     glPopMatrix();
     glEnable(GL_LIGHTING); // abilito le luci
 }
 
 void drawMiddleLine() {
-//    float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-//    float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-//    float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
     float posZ = 0;
     glDisable(GL_LIGHTING); // disabilitato le luci
     for (int i = 0; i < 2000; i++) {
         glPushMatrix();
         
         glColor3f(1, 1, 1);
-        //glColor3f(0, 0, 0);
         glScalef(0.1, 1, 2.5);
-        glTranslatef(0, 0.01, posZ);// se la alzo la macchina si immerge nella poke X Y Z
-        poke.RenderNxV();
+        glTranslatef(0, 0.01, posZ);
+        striscia.RenderNxV();
         glPopMatrix();
         
         posZ -= 3.0;
@@ -223,7 +217,7 @@ void Car::Init() {
 }
 
 // attiva una luce di openGL per simulare un faro della macchina
-
+//
 void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight) const {
     int usedLight = GL_LIGHT1 + lightN;
 
@@ -250,7 +244,6 @@ void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight
     } else
         glDisable(usedLight);
 }
-
 
 // funzione che disegna tutti i pezzi della macchina
 // (carlinga, + 4 route)
@@ -291,11 +284,11 @@ void Car::RenderAllParts(bool usecolor) const {
 
         if (usecolor) glColor3f(.6, .6, .6);
         if (usecolor) SetupWheelTexture(wheelFR1.bbmin, wheelFR1.bbmax);
-        wheelFR1.RenderNxF(); // la ruota viene meglio FLAT SHADED - normali per faccia
+        wheelFR1.RenderNxF(); // Gomma davanti
         // provare x credere
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
-        wheelFR2.RenderNxV();
+        wheelFR2.RenderNxV();   // cerchione davanti
         glPopMatrix();
 
         glPushMatrix();
@@ -311,10 +304,10 @@ void Car::RenderAllParts(bool usecolor) const {
 
         if (usecolor) glColor3f(.6, .6, .6);
         if (usecolor) SetupWheelTexture(wheelBR1.bbmin, wheelBR1.bbmax);
-        wheelBR1.RenderNxF();
+        wheelBR1.RenderNxF();   //gomme dietro
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
-        wheelBR2.RenderNxV();
+        wheelBR2.RenderNxV();     //cerchione dietro
         
         glPopMatrix();
     }// FINE DISEGNO RUOTE
@@ -331,9 +324,6 @@ void Car::Render() const {
 
     glTranslatef(px, py, pz);       // QUI GLI DAI LE NUOVE XYZ DELLA MACCHINA
     glRotatef(facing, 0, 1, 0);     // QUI RUOTA 
-
-    // sono nello spazio MACCHINA
-    //drawAxis(); // disegno assi spazio macchina
 
     DrawHeadlight(-0.3, 0, -1, 0, useHeadlight); // accendi faro sinistro
     DrawHeadlight(+0.3, 0, -1, 1, useHeadlight); // accendi faro destro

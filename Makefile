@@ -2,7 +2,7 @@
 
 CPP  = g++
 CC   = gcc
-BIN  = progettoCar4
+BIN  = GRA_PRJ
 
 OBJ  = main.o car.o mesh.o controller.o
 LINKOBJ  = main.o car.o mesh.o controller.o
