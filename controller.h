@@ -17,7 +17,8 @@ public:
     void Joy(int keymap, bool pressed_or_released);
     void drawTargetCube(float mozzo);
     void checkVisibilityTarget(float carX, float carY, float carZ);
-    void drawTriangleForTarget(float x1, float z1, float x2, float z2, float x3, float z3);
+    void drawTriangleForTarget(float facing, float carX, float carZ);
+    void drawLightTorciaStatua();
 
     Controller() {
         Init();

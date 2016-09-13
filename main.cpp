@@ -116,14 +116,6 @@ void drawAxis() {
 
 }
 
-void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2) {
-    glColor3f(0, 0, 1);// GREEN
-    glBegin(GL_LINES);
-    glVertex3f(x1, y1, z1);
-    glVertex3f(x2, y2, z2);
-    glEnd();
-}
-
 // DISEGNO DEL "CIELO"
 void drawSphere(double r, int lats, int longs) {
     int i, j;
@@ -457,45 +449,15 @@ void rendering(SDL_Window *win) {
 
     // riempe tutto lo screen buffer di pixel color sfondo
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    setCamera();
 
-    //drawAxis(); // disegna assi frame VISTA
-
-    // setto la posizione luce
     float tmpv[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
     glLightfv(GL_LIGHT0, GL_POSITION, tmpv);
-
-    setCamera(); // QUI SPOSTO LA VISUALE!!!!
-
+    controller.drawLightTorciaStatua();
 
     drawAxis(); // disegna assi frame MONDO
-    
-    float angle = 360 - car.facing;
-    float cosA = cos(angle*PI/180.0);
-    float sinA = sin(angle*PI/180.0);
-    float Z2B = 2.5; // distanza da baricentro Z
-    float Z2BTop = 4.5; // distanza da baricentro Z
-    float X2B = 0.5; // distanza da baricentro X
-    float X2BTop = 0; // distanza da baricentro Z
-    
-    float X1  = X2B * cosA - Z2B * sinA;
-    float Z1  = X2B * sinA + Z2B * cosA;
-    
-    float X2  = -X2B * cosA - Z2B * sinA;
-    float Z2  = -X2B * sinA + Z2B * cosA;
 
-    float X3  = -X2BTop * cosA - Z2BTop * sinA;
-    float Z3  = -X2BTop * sinA + Z2BTop * cosA;
-
-    //drawLineToDebug(car.px+X1, +1, car.pz+Z1, car.px+X1, -1, car.pz+Z1);   
-    drawLineToDebug(car.px-X1, +1, car.pz-Z1, car.px-X1, -1, car.pz-Z1);      
-    
-    //drawLineToDebug(car.px+X2, +1, car.pz+Z2, car.px+X2, -1, car.pz+Z2);   
-    drawLineToDebug(car.px-X2, +1, car.pz-Z2, car.px-X2, -1, car.pz-Z2);      
-    
-    
-    drawLineToDebug(car.px-X3, +1, car.pz-Z3, car.px-X3, -1, car.pz-Z3);
-    controller.drawTriangleForTarget(car.px-X1, car.pz-Z1, car.px-X2, car.pz-Z2, car.px-X3, car.pz-Z3);
-    
+    controller.drawTriangleForTarget(car.facing, car.px, car.pz);
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
