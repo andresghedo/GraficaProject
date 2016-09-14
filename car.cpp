@@ -23,7 +23,7 @@ Mesh pista((char *) "./obj/pista.obj");
 Mesh striscia((char *) "./obj/plane.obj");
 Mesh statua((char *) "./obj/statua_corpo.obj");
 Mesh fuocoStatua((char *) "./obj/statua_fuoco.obj");
-int distanceLine = 25;
+int distanceLine = 50;
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
 extern bool useHeadlight; // var globale esterna: per usare i fari
@@ -157,9 +157,6 @@ void drawExtremeSX() {
 }
 
 void drawExtremeDX() {
-    float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     glPushMatrix();
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);

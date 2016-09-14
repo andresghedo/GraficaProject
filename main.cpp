@@ -193,7 +193,7 @@ void drawPistaTexture() {
         float x1=-S + 2*(x+1)*S/K;
         float z0=-S + 2*(z+0)*S/K;
         float z1=-S + 2*(z+1)*S/K;
-        if((x0<=2)&&(x0>=-3)) {
+        if((x0<=4)&&(x0>=-6)) {
             glTexCoord2f(0.0, 0.0);
             glVertex3d(x0, H, z0);
             glTexCoord2f(1.0, 0.0);
@@ -218,7 +218,6 @@ void drawFloorTexture() {
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
-    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
   // disegna KxK quads
@@ -232,7 +231,7 @@ void drawFloorTexture() {
         float x1=-S + 2*(x+1)*S/K;
         float z0=-S + 2*(z+0)*S/K;
         float z1=-S + 2*(z+1)*S/K;
-        if((x0>2)||(x0<-3)) {
+        if((x0>4)||(x0<-6)) {
             glTexCoord2f(0.0, 0.0);
             glVertex3d(x0, H, z0);
             glTexCoord2f(1.0, 0.0);
@@ -246,30 +245,21 @@ void drawFloorTexture() {
   glDisable(GL_TEXTURE_2D);
 }
 
-/****************************************/
-/* function per disegnare una minimappa */
-/****************************************/
 void drawMinimap(int scrH, int scrW) {
-    printf("scrH: %d scrW: %d\n", scrH, scrW);
-  /* calcolo delle coordinate reali dell'oggetto su minimappa */
-  float minimap_posx;
-  float minimap_posz;
-  minimap_posx = ((50*car.px)/67) + 50 + 20;
-  minimap_posz = ((50*car.pz)/67) + 50 + scrH-20-100;
 
-//  float minimap_cubex;
-//  float minimap_cubez;
-//  minimap_cubex = ((50*pos_x)/67) + 50 + 20;
-//  minimap_cubez = ((50*pos_z)/67) + 50 + scrH-20-100;
+    float minimap_posx;
+    float minimap_posz;
+    minimap_posx = ((50*car.px)/100) + 50 + 20;
+    minimap_posz = ((50*car.pz)/100) + 50 + scrH-20-100;
 
-  /* disegno del cursore */
-  glColor3ub(0,0,255);
-  glBegin(GL_QUADS);
-    glVertex2d(minimap_posx, minimap_posz + 3);
-    glVertex2d(minimap_posx + 3, minimap_posz);
-    glVertex2d(minimap_posx, minimap_posz - 3);
-    glVertex2d(minimap_posx - 3, minimap_posz);
-  glEnd();
+    /* disegno del cursore */
+    glColor3ub(0,0,255);
+    glBegin(GL_QUADS);
+      glVertex2d(minimap_posx, minimap_posz + 3);
+      glVertex2d(minimap_posx + 3, minimap_posz);
+      glVertex2d(minimap_posx, minimap_posz - 3);
+      glVertex2d(minimap_posx - 3, minimap_posz);
+    glEnd();
 
   /* disegno del target */
 //  glColor3ub(255,0,0);
@@ -280,27 +270,29 @@ void drawMinimap(int scrH, int scrW) {
 //    glVertex2d(minimap_cubex - 3, minimap_cubez);
 //  glEnd();
 
-  /* disegno minimappa */
-  glColor3ub(0,0,0);
-  glBegin(GL_LINE_LOOP);
-    glVertex2d(20,scrH -20 -100);
-    glVertex2d(20,scrH -20);
-    glVertex2d(120,scrH-20);
-    glVertex2d(120,scrH-20-100);
-  glEnd();
+    /* disegno minimappa */
+    glDisable(GL_LIGHTING);
+    glColor3ub(0,0,0);
+    glBegin(GL_LINE_LOOP);
+      glVertex2d(20,scrH -20 -100);
+      glVertex2d(20,scrH -20);
+      glVertex2d(120,scrH-20);
+      glVertex2d(120,scrH-20-100);
+    glEnd();
 
-  glColor3ub(210,210,210);
-  glBegin(GL_POLYGON);
-    glVertex2d(20,scrH -20 -100);
-    glVertex2d(20,scrH -20);
-    glVertex2d(120,scrH -20);
-    glVertex2d(120,scrH-20-100);
-   glEnd();
+    glColor3ub(210,210,210);
+    glBegin(GL_POLYGON);
+      glVertex2d(20,scrH -20 -100);
+      glVertex2d(20,scrH -20);
+      glVertex2d(120,scrH -20);
+      glVertex2d(120,scrH-20-100);
+     glEnd();
+     glEnable(GL_LIGHTING);
 }
 
 // setto la posizione della camera
 void setCamera() {
-    //printf("[DEBUG]Setta la posizione della CAM %d...\n", cameraType);
+
     double px = car.px;
     double py = car.py;
     double pz = car.pz;
@@ -324,13 +316,9 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_TOP_FIXED:
-//            printf("[DEBUG] Camera:  CAMERA_TOP_FIXED\n");
             camd = 0.5;
             camh = 0.55;
             angle = car.facing + 40.0;
@@ -342,13 +330,9 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_TOP_CAR:
-//            printf("[DEBUG] Camera:  CAMERA_TOP_CAR\n");
             camd = 2.5;
             camh = 1.0;
             ex = px + camd*sinf;
@@ -357,13 +341,9 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey + 5, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_PILOT:
-//            printf("[DEBUG] Camera:  CAMERA_PILOT\n");
             camd = 0.2;
             camh = 0.55;
             ex = px + camd*sinf;
@@ -372,13 +352,9 @@ void setCamera() {
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
-//            printf("[DEBUG] CAR X: %f  Y: %f  Z:%f\n", px,py,pz);
-//            printf("[DEBUG] CAM EX: %f  EY: %f  EZ:%f\n", ex,ey,ez);
-//            printf("[DEBUG] CAM CX: %f  CY: %f  CZ:%f\n", cx,cy,cz);
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
         case CAMERA_MOUSE:
-//            printf("[DEBUG] Camera:  CAMERA_MOUSE\n");
             glTranslatef(0, 0, -eyeDist);
             glRotatef(viewBeta, 1, 0, 0);
             glRotatef(viewAlpha, 0, 1, 0);
@@ -466,7 +442,6 @@ void rendering(SDL_Window *win) {
 
     // settiamo matrice di modellazione
     drawAxis(); // disegna assi frame OGGETTO
-    //drawCubeWire();
 
     drawSky();      // DISEGNO CIELO
     drawFloorTexture();    // DISEGNO SUOLO
@@ -475,15 +450,13 @@ void rendering(SDL_Window *win) {
     drawMiddleLine();
     drawExtremeDX();     // DISEGNO POKEBALL
     drawStatua();
+    controller.drawRecinzione();
 
-    // drawMinimap(scrH, scrW);
-    // controller.drawBirillo(car.px, car.pz);
     controller.drawTargetCube(car.mozzoA);
     car.Render();        // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
     // attendiamo la fine della rasterizzazione di 
-    // tutte le primitive mandate 
-
+    // tutte le primitive mandate
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
 
@@ -505,8 +478,9 @@ void rendering(SDL_Window *win) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
-    // FINE DISEGNO BARRA A SX
 
+    glLineWidth(2);
+    drawMinimap(scrH, scrW);
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
@@ -561,9 +535,10 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(0, (char *) "./img/logo.jpg")) return 0;
     if (!LoadTexture(1, (char *) "./img/envmap_flipped.jpg")) return 0;
     if (!LoadTexture(2, (char *) "./img/sky_ok.jpg")) return -1;
-    if (!LoadTexture(3, (char *) "./img/selfie.jpg")) return -1;
+    if (!LoadTexture(3, (char *) "./img/tnt.png")) return -1;
     if (!LoadTexture(4, (char *) "./img/asfalto.png")) return -1;
     if (!LoadTexture(5, (char *) "./img/erba.jpg")) return -1;
+    if (!LoadTexture(6, (char *) "./img/wood1.jpg")) return -1;
 
     bool done = 0;
     while (!done) {
@@ -705,7 +680,6 @@ int main(int argc, char* argv[]) {
             if (doneSomething){
                 rendering(win);
                 controller.checkVisibilityTarget(car.px, car.py, car.pz);
-                printf("[DEBUG] FACING: %f  |  Car X: %f | Car Z: %f\n", car.facing, car.px, car.pz);
             } else {
                 // tempo libero!!!
             }

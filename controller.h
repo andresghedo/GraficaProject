@@ -19,6 +19,7 @@ public:
     void checkVisibilityTarget(float carX, float carY, float carZ);
     void drawTriangleForTarget(float facing, float carX, float carZ);
     void drawLightTorciaStatua();
+    void drawRecinzione();
 
     Controller() {
         Init();
