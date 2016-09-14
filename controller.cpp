@@ -24,11 +24,21 @@ Mesh recinzione((char *) "./obj/recinzione.obj");
 Point3 targetPoint = Point3(0, 0, -20);
 Point3 triangleTopPoint = Point3(0, 0, 0);
 bool generate;
+bool isTnt = false;
+bool isGoal = true;
 int punteggio = 0;
-float X_POS_TARGET_MAX = +5.0;
-float X_POS_TARGET_MIN = -5.0;
-float Z_POS_TARGET_MAX = -10.0;
-float Z_POS_TARGET_MIN = -35.0;
+// Random limiti per generazione casuale di un GOAL
+float X_POS_GOAL_MAX = +5.0;
+float X_POS_GOAL_MIN = -5.0;
+float Z_POS_GOAL_MAX = -10.0;
+float Z_POS_GOAL_MIN = -35.0;
+// Random limiti per generazione casuale di un TNT
+// Genero un TNT in posizione piu centrale e più vicino alla macchina in corsa 
+// in modo da mettere in difficoltà il Player
+float X_POS_TNT_MAX = +0;
+float X_POS_TNT_MIN = -0;
+float Z_POS_TNT_MAX = -12.0;
+float Z_POS_TNT_MIN = -17.0;
 // CUBE TARGET DIMENSION
 const float DIM_CUBE = 0.8;
 const float DIM_X_MIN_TARGET = -DIM_CUBE, DIM_X_MAX_TARGET = DIM_CUBE;
@@ -52,22 +62,45 @@ void Controller::Joy(int keymap, bool pressed_or_released) {
     key[keymap] = pressed_or_released;
 }
 
+bool isInTarget() {
+    return ((triangleTopPoint.X() >= targetPoint.X()-DIM_CUBE) && (triangleTopPoint.X() <= targetPoint.X()+DIM_CUBE))&&((triangleTopPoint.Z() >= targetPoint.Z()-DIM_CUBE) && (triangleTopPoint.Z() <= targetPoint.Z()+DIM_CUBE));
+}
+
+bool generateTarget(float carZ) {
+    
+    float targetX, targetZ;
+    if ((((float) rand()) / (float) RAND_MAX) > 0.75) {     // genero un TNT
+        isTnt = true;
+        isGoal = false;
+        targetX = (X_POS_TNT_MAX - X_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + X_POS_TNT_MIN ;
+        targetZ = (Z_POS_TNT_MAX - Z_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Z_POS_TNT_MIN ;
+    } else {                                                // genero un GOAL
+        isTnt = false;
+        isGoal =true;
+        targetX = (X_POS_GOAL_MAX - X_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + X_POS_GOAL_MIN ;
+        targetZ = (Z_POS_GOAL_MAX - Z_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Z_POS_GOAL_MIN ;
+    }
+    targetPoint.setX(targetX);
+    targetPoint.setZ(carZ + targetZ);
+}
+
 void Controller::checkVisibilityTarget(float carX, float carY, float carZ) {
     if((targetPoint.Z() - carZ) > 5) {
         generate = true;
-        punteggio -=1;
-    }else if(((triangleTopPoint.X() >= targetPoint.X()-DIM_CUBE) && (triangleTopPoint.X() <= targetPoint.X()+DIM_CUBE))&&((triangleTopPoint.Z() >= targetPoint.Z()-DIM_CUBE) && (triangleTopPoint.Z() <= targetPoint.Z()+DIM_CUBE))) {
+        if (isGoal)
+            punteggio -=1;
+    } else if(isInTarget() && isGoal) {
         punteggio += 1;
+        generate = true;
+    } else if (isInTarget() && isTnt) {
+        punteggio -= 1;
         generate = true;
     } else {
         generate = false;
     }
 
     if(generate) {
-        float targetX = (X_POS_TARGET_MAX - X_POS_TARGET_MIN) * ((((float) rand()) / (float) RAND_MAX)) + X_POS_TARGET_MIN ;
-        float targetZ = (Z_POS_TARGET_MAX - Z_POS_TARGET_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Z_POS_TARGET_MIN ;
-        targetPoint.setX(targetX);
-        targetPoint.setZ(carZ + targetZ);
+        generateTarget(carZ);
     }
     printf("PUNTEGGIO: %d\n", punteggio);
 }
@@ -76,7 +109,10 @@ void Controller::drawTargetCube(float mozzo) {
 
     // disegno del cubo con una texture personale su tutti e sei i lati
     glPushMatrix();
-    glBindTexture(GL_TEXTURE_2D, 3);
+    if (isTnt)
+        glBindTexture(GL_TEXTURE_2D, 3);
+    else
+        glBindTexture(GL_TEXTURE_2D, 7);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);

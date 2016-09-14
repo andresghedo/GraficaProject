@@ -539,6 +539,7 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(4, (char *) "./img/asfalto.png")) return -1;
     if (!LoadTexture(5, (char *) "./img/erba.jpg")) return -1;
     if (!LoadTexture(6, (char *) "./img/wood1.jpg")) return -1;
+    if (!LoadTexture(7, (char *) "./img/selfie.jpg")) return -1;
 
     bool done = 0;
     while (!done) {
