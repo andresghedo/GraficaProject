@@ -27,7 +27,7 @@ bool generate;
 int punteggio = 0;
 float X_POS_TARGET_MAX = +5.0;
 float X_POS_TARGET_MIN = -5.0;
-float Z_POS_TARGET_MAX = -35.0;
+float Z_POS_TARGET_MAX = -10.0;
 float Z_POS_TARGET_MIN = -35.0;
 // CUBE TARGET DIMENSION
 const float DIM_CUBE = 0.8;
@@ -183,8 +183,8 @@ void Controller::drawTargetCube(float mozzo) {
     glPopMatrix();
 }
 
-void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2) {
-    glColor3f(0, 0, 1);// GREEN
+void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2, float colorR, float colorG, float colorB) {
+    glColor3f(colorR, colorG, colorB);// GREEN
     glBegin(GL_LINES);
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
@@ -195,9 +195,9 @@ void Controller::drawTriangleForTarget(float facing, float carX, float carZ) {
     float angle = 360 - facing;
     float cosA = cos(angle*M_PI/180.0);
     float sinA = sin(angle*M_PI/180.0);
-    float Z2B = 1.0; // distanza da baricentro Z
+    float Z2B = 2.5; // distanza da baricentro Z
     float Z2BTop = 2.5; // distanza da baricentro Z
-    float X2B = 0.5; // distanza da baricentro X
+    float X2B = 0.1; // distanza da baricentro X
     float X2BTop = 0; // distanza da baricentro Z
     float y = 0.5;
 
@@ -223,15 +223,16 @@ void Controller::drawTriangleForTarget(float facing, float carX, float carZ) {
     triangleTopPoint.setX(xC);
     triangleTopPoint.setZ(zC);
 
-    drawLineToDebug(xA, +1, zA, xA, -1, zA);
-    drawLineToDebug(xB, +1, zB, xB, -1, zB);
-    drawLineToDebug(xC, +1, zC, xC, -1, zC);
+//    drawLineToDebug(xA, +1, zA, xA, 0, zA);
+//    drawLineToDebug(xB, +1, zB, xB, 0, zB);
+//    drawLineToDebug(xC, +1, zC, xC, 0, zC);
 
-    glBegin(GL_TRIANGLES);
-    glColor3f(0.1, 0.2, 0.3);
-    glVertex3f(xA, y, zA);
-    glVertex3f(xB, y, zB);
-    glVertex3f(xC, y, zC);
+    // X and +
+    drawLineToDebug(xA, 0.6, zA, xB, 0.3, zB, 1, 0, 0);//x
+    drawLineToDebug(xB, 0.6, zB, xA, 0.3, zA, 1, 0, 0);//x
+    drawLineToDebug(xA, 0.45, zA, xB, 0.45, zB, 1, 0, 0);//+
+    drawLineToDebug(xC, 0.3, zC, xC, 0.6, zC, 1, 0, 0);//+
+
     glEnd();
 }
 
