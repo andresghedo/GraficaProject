@@ -505,7 +505,7 @@ int main(int argc, char* argv[]) {
     
     // inizializzazione di SDL
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-
+    
     SDL_JoystickEventState(SDL_ENABLE);
     joystick = SDL_JoystickOpen(0);
 

@@ -6,7 +6,7 @@ BIN  = GRA_PRJ
 
 OBJ  = main.o car.o mesh.o controller.o
 LINKOBJ  = main.o car.o mesh.o controller.o
-LIBS = -L/usr/X11R6 -lGL -lGLU -lSDL2_image -lSDL2 -lm
+LIBS = -L/usr/X11R6 -lGL -lGLU -lSDL2_image -lSDL2 -lSDL2_ttf -lm
 INCS = -I. -I/usr/X11R6/include
 CXXINCS=#
 CXXFLAGS = $(CXXINCS)

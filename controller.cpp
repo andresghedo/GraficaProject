@@ -4,6 +4,7 @@
  * 
  * Created on 5 settembre 2016, 15.47
  */
+
 #include <stdio.h>
 #include <math.h> 
 #include <time.h>
@@ -13,6 +14,7 @@
 #include <GL/glu.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include <vector> 
 #include "controller.h"
@@ -36,7 +38,7 @@ float Z_POS_GOAL_MIN = -35.0;
 // Genero un TNT in posizione piu centrale e più vicino alla macchina in corsa 
 // in modo da mettere in difficoltà il Player
 float X_POS_TNT_MAX = +0;
-float X_POS_TNT_MIN = -0;
+float X_POS_TNT_MIN = -0.0;
 float Z_POS_TNT_MAX = -12.0;
 float Z_POS_TNT_MIN = -17.0;
 // CUBE TARGET DIMENSION
