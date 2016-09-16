@@ -23,7 +23,7 @@
 #include "car.h"
 
 Mesh recinzione((char *) "./obj/recinzione.obj");
-Point3 targetPoint = Point3(0, 0, -20);
+Point3 targetPoint = Point3(0, 0, -20 + 490);
 Point3 triangleTopPoint = Point3(0, 0, 0);
 bool generate;
 bool isTnt = false;
@@ -325,3 +325,19 @@ void Controller::drawRecinzione() {
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_LIGHTING);
 }
+
+float Controller::getTargetX() { 
+    return targetPoint.X(); 
+};
+
+float Controller::getTargetZ() { 
+    return targetPoint.Z(); 
+};
+
+bool Controller::goal() { 
+    return isGoal; 
+};
+
+bool Controller::tnt() { 
+    return isTnt; 
+};

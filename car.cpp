@@ -121,8 +121,8 @@ void Car::DoStep(bool LeftKey, bool RightKey, bool AccKey, bool DecKey) {
     px += vx;
     py += vy;
     pz += vz;
-    if(pz > 0)
-        pz = 0;
+    if(pz > 500)
+        pz = 500;
     if(pz < -438)
         pz = -438;
     if(px > 20)
@@ -170,12 +170,12 @@ void drawExtremeDX() {
 void drawMiddleLine() {
     float posZ = 0;
     glDisable(GL_LIGHTING); // disabilitato le luci
-    for (int i = 0; i < 2000; i++) {
+    for (int i = 0; i < 300; i++) {
         glPushMatrix();
         
         glColor3f(1, 1, 1);
         glScalef(0.1, 1, 2.5);
-        glTranslatef(0, 0.01, posZ);
+        glTranslatef(0, 0.01, 500+posZ);
         striscia.RenderNxV();
         glPopMatrix();
         
@@ -186,7 +186,9 @@ void drawMiddleLine() {
 
 void Car::Init() {
     // inizializzo lo stato della macchina
-    px = pz = facing = 0; // posizione e orientamento
+    px = 0;
+    pz = 480;
+    facing = 0; // posizione e orientamento
     py = 0.0;
 
     mozzoA = mozzoP = sterzo = 0; // stato

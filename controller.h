@@ -20,6 +20,10 @@ public:
     void drawTriangleForTarget(float facing, float carX, float carZ);
     void drawLightTorciaStatua();
     void drawRecinzione();
+    float getTargetX();
+    float getTargetZ();
+    bool goal();
+    bool tnt();
 
     Controller() {
         Init();

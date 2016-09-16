@@ -245,21 +245,55 @@ void drawFloorTexture() {
   glDisable(GL_TEXTURE_2D);
 }
 
-void drawMinimap(int scrH, int scrW) {
-
-    float minimap_posx;
-    float minimap_posz;
-    minimap_posx = ((50*car.px)/100) + 50 + 20;
-    minimap_posz = ((50*car.pz)/100) + 50 + scrH-20-100;
-
-    /* disegno del cursore */
-    glColor3ub(0,0,255);
-    glBegin(GL_QUADS);
-      glVertex2d(minimap_posx, minimap_posz + 3);
-      glVertex2d(minimap_posx + 3, minimap_posz);
-      glVertex2d(minimap_posx, minimap_posz - 3);
-      glVertex2d(minimap_posx - 3, minimap_posz);
+void DrawCircle(float cx, float cy, float r, int num_segments) {
+    glBegin(GL_LINE_LOOP);
+    for (int ii = 0; ii < num_segments; ii++)   {
+        float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle 
+        float x = r * cos(theta);//calculate the x component 
+        float y = r * sin(theta);//calculate the y component 
+        glVertex2f(x + cx, y + cy);//output vertex 
+    }
     glEnd();
+}
+
+void drawMinimap(int scrH) {
+
+    glDisable(GL_LIGHTING);
+    float minimap_posx, minimap_pos_target_x;
+    float minimap_posz, minimap_pos_target_z;
+    minimap_posx = 70 + (100 * car.px / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
+    minimap_posz = scrH -120 + (-1 * (100*car.pz / 960)) + 50;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+    
+    minimap_pos_target_x = 70 + (100 * controller.getTargetX() / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
+    minimap_pos_target_z = scrH -120 + (-1 * (100 * controller.getTargetZ() / 960)) + 50;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+    printf("MINIMAP X: %f Z: %f\n", minimap_posx, minimap_posz);
+
+    // disegno cerchiolino macchina rossa
+    glColor3ub(255,0,0);
+    DrawCircle(minimap_posx, minimap_posz, 2, 300);
+
+    // disegno cerchiolino macchina rossa
+    if(controller.goal())
+        glColor3ub(0,255,0);
+    else
+        glColor3ub(0,0,0);
+    DrawCircle(minimap_pos_target_x, minimap_pos_target_z, 3, 300);
+    
+    glColor3ub(0,0,0);
+    glBegin(GL_LINES);
+        glVertex2d(57.50, scrH -120);
+        glVertex2d(57.50, scrH -20);
+
+        glVertex2d(82.5, scrH -120);
+        glVertex2d(82.5, scrH -20);
+    glEnd();
+    glBegin(GL_LINES);
+        for(int i = 0; i<100; i+=4) {
+            glVertex2d(70, scrH -120 + i);
+            glVertex2d(70, scrH -120 + i + 2);
+        }
+    glEnd();
+    
 
   /* disegno del target */
 //  glColor3ub(255,0,0);
@@ -271,7 +305,6 @@ void drawMinimap(int scrH, int scrW) {
 //  glEnd();
 
     /* disegno minimappa */
-    glDisable(GL_LIGHTING);
     glColor3ub(0,0,0);
     glBegin(GL_LINE_LOOP);
       glVertex2d(20,scrH -20 -100);
@@ -480,7 +513,7 @@ void rendering(SDL_Window *win) {
     glEnable(GL_LIGHTING);
 
     glLineWidth(2);
-    drawMinimap(scrH, scrW);
+    drawMinimap(scrH);
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
