@@ -21,31 +21,15 @@
 #include "point3.h"
 #include "mesh.h"
 #include "car.h"
+#include "constants.h"
 
 Mesh recinzione((char *) "./obj/recinzione.obj");
-Point3 targetPoint = Point3(0, 0, -20 + 490);
+Point3 targetPoint = Point3(0, 0, Constant::INITIAL_TARGET_Z);
 Point3 triangleTopPoint = Point3(0, 0, 0);
 bool generate;
 bool isTnt = false;
 bool isGoal = true;
 int punteggio = 0;
-// Random limiti per generazione casuale di un GOAL
-float X_POS_GOAL_MAX = +5.0;
-float X_POS_GOAL_MIN = -5.0;
-float Z_POS_GOAL_MAX = -10.0;
-float Z_POS_GOAL_MIN = -35.0;
-// Random limiti per generazione casuale di un TNT
-// Genero un TNT in posizione piu centrale e più vicino alla macchina in corsa 
-// in modo da mettere in difficoltà il Player
-float X_POS_TNT_MAX = +0;
-float X_POS_TNT_MIN = -0.0;
-float Z_POS_TNT_MAX = -12.0;
-float Z_POS_TNT_MIN = -17.0;
-// CUBE TARGET DIMENSION
-const float DIM_CUBE = 0.8;
-const float DIM_X_MIN_TARGET = -DIM_CUBE, DIM_X_MAX_TARGET = DIM_CUBE;
-const float DIM_Y_MIN_TARGET = 0.15, DIM_Y_MAX_TARGET = 1.75;
-const float DIM_Z_MIN_TARGET = -DIM_CUBE, DIM_Z_MAX_TARGET = DIM_CUBE;
 
 void Controller::Init() {
     srand(time(NULL));
@@ -65,7 +49,7 @@ void Controller::Joy(int keymap, bool pressed_or_released) {
 }
 
 bool isInTarget() {
-    return ((triangleTopPoint.X() >= targetPoint.X()-DIM_CUBE) && (triangleTopPoint.X() <= targetPoint.X()+DIM_CUBE))&&((triangleTopPoint.Z() >= targetPoint.Z()-DIM_CUBE) && (triangleTopPoint.Z() <= targetPoint.Z()+DIM_CUBE));
+    return ((triangleTopPoint.X() >= targetPoint.X()-Constant::DIM_CUBE) && (triangleTopPoint.X() <= targetPoint.X()+Constant::DIM_CUBE))&&((triangleTopPoint.Z() >= targetPoint.Z()-Constant::DIM_CUBE) && (triangleTopPoint.Z() <= targetPoint.Z()+Constant::DIM_CUBE));
 }
 
 bool generateTarget(float carZ) {
@@ -74,20 +58,20 @@ bool generateTarget(float carZ) {
     if ((((float) rand()) / (float) RAND_MAX) > 0.75) {     // genero un TNT
         isTnt = true;
         isGoal = false;
-        targetX = (X_POS_TNT_MAX - X_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + X_POS_TNT_MIN ;
-        targetZ = (Z_POS_TNT_MAX - Z_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Z_POS_TNT_MIN ;
+        targetX = (Constant::X_POS_TNT_MAX - Constant::X_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::X_POS_TNT_MIN ;
+        targetZ = (Constant::Z_POS_TNT_MAX - Constant::Z_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_TNT_MIN ;
     } else {                                                // genero un GOAL
         isTnt = false;
         isGoal =true;
-        targetX = (X_POS_GOAL_MAX - X_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + X_POS_GOAL_MIN ;
-        targetZ = (Z_POS_GOAL_MAX - Z_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Z_POS_GOAL_MIN ;
+        targetX = (Constant::X_POS_GOAL_MAX - Constant::X_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::X_POS_GOAL_MIN ;
+        targetZ = (Constant::Z_POS_GOAL_MAX - Constant::Z_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_GOAL_MIN ;
     }
     targetPoint.setX(targetX);
     targetPoint.setZ(carZ + targetZ);
 }
 
-void Controller::checkVisibilityTarget(float carX, float carY, float carZ) {
-    if((targetPoint.Z() - carZ) > 5) {
+void Controller::checkVisibilityTarget(float carZ) {
+    if((targetPoint.Z() - carZ) > Constant::LIMIT_VISIBILITY_TARGET) {
         generate = true;
         if (isGoal)
             punteggio -=1;
@@ -127,63 +111,63 @@ void Controller::drawTargetCube(float mozzo) {
     glBegin(GL_QUADS);
     /* Front. */
     glTexCoord2f(0.0, 0.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(1.0, 0.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(1.0, 1.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(0.0, 1.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
 
     /* Down. */
     glTexCoord2f(0.0, 0.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
     glTexCoord2f(1.0, 0.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);  
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);  
     glTexCoord2f(1.0, 1.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(0.0, 1.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
 
     /* Back. */
     glTexCoord2f(0.0, 0.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
     glTexCoord2f(1.0, 0.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);  
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);  
     glTexCoord2f(1.0, 1.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
     glTexCoord2f(0.0, 1.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
 
     /* Up. */
     glTexCoord2f(0.0, 0.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(1.0, 0.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);  
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);  
     glTexCoord2f(1.0, 1.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
     glTexCoord2f(0.0, 1.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
 
     /* SideLeft. */
     glTexCoord2f(0.0, 0.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
     glTexCoord2f(1.0, 0.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);  
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);  
     glTexCoord2f(1.0, 1.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(0.0, 1.0);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
 
     /* SideRight. */
     glTexCoord2f(0.0, 0.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
     glTexCoord2f(1.0, 0.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(1.0, 1.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
     glTexCoord2f(0.0, 1.0);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
 
     glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -192,31 +176,31 @@ void Controller::drawTargetCube(float mozzo) {
     glLineWidth(1);
     glColor3f(0,0,0);
     glBegin(GL_LINE_LOOP);
-      glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
-      glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
-      glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
-      glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
+      glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
+      glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
+      glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
+      glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
     glEnd();
 
     glBegin(GL_LINE_LOOP);
-      glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
-      glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
-      glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
-      glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+      glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
+      glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
+      glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
+      glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
     glEnd();
 
     glBegin(GL_LINES);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
 
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MAX_TARGET);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MIN_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
 
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
-    glVertex3f(DIM_X_MIN_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
 
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MAX_TARGET);
-    glVertex3f(DIM_X_MAX_TARGET, DIM_Y_MAX_TARGET, DIM_Z_MIN_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
+    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
     glEnd();
     glPopMatrix();
 }
@@ -282,7 +266,7 @@ void Controller::drawLightTorciaStatua() {
     glLightfv(GL_LIGHT4, GL_DIFFUSE, diffuse);
     //GLfloat specular[] = { 1.0, 0.0, 1.0, 0.0 };
     //glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    GLfloat position[] = {0.0, 70, -440, 1}; // ultima comp=0 => luce direzionale
+    GLfloat position[] = {Constant::POS_TORCIA_X, Constant::POS_TORCIA_Y, Constant::POS_TORCIA_Z, 1}; // ultima comp=0 => luce direzionale
     glLightfv(GL_LIGHT4, GL_POSITION, position);
     GLfloat spot_direction[] = { 0, 0, -1.0, 0 };
     glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);

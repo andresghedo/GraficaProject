@@ -16,7 +16,7 @@ public:
     void EatKey(int keycode, int* keymap, bool pressed_or_released);
     void Joy(int keymap, bool pressed_or_released);
     void drawTargetCube(float mozzo);
-    void checkVisibilityTarget(float carX, float carY, float carZ);
+    void checkVisibilityTarget(float carZ);
     void drawTriangleForTarget(float facing, float carX, float carZ);
     void drawLightTorciaStatua();
     void drawRecinzione();

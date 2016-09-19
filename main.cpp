@@ -8,6 +8,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include "controller.h"
+#include "constants.h"
 #include "car.h"
 
 #define CAMERA_BACK_CAR 0
@@ -832,7 +833,7 @@ int main(int argc, char* argv[]) {
 
             if (doneSomething){
                 rendering(win, font);
-                controller.checkVisibilityTarget(car.px, car.py, car.pz);
+                controller.checkVisibilityTarget(car.pz);
             } else {
                 // tempo libero!!!
             }

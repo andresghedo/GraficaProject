@@ -12,6 +12,7 @@
 #include "car.h"
 #include "point3.h"
 #include "mesh.h"
+#include "constants.h"
 
 // var globale di tipo mesh
 Mesh carlinga((char *) "./obj/Ferrari_chassis.obj"); // chiama il costruttore
@@ -23,7 +24,6 @@ Mesh pista((char *) "./obj/pista.obj");
 Mesh striscia((char *) "./obj/plane.obj");
 Mesh statua((char *) "./obj/statua_corpo.obj");
 Mesh fuocoStatua((char *) "./obj/statua_fuoco.obj");
-int distanceLine = 50;
 
 extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
 extern bool useHeadlight; // var globale esterna: per usare i fari
@@ -150,7 +150,7 @@ void drawExtremeSX() {
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);
     glScalef(0.1, 1, 500);
-    glTranslatef(distanceLine, 0.01, 0);
+    glTranslatef(Constant::DISTANCE_LINES, 0.01, 0);
     striscia.RenderNxV();
     glPopMatrix();
     glEnable(GL_LIGHTING); // abilito le luci
@@ -161,7 +161,7 @@ void drawExtremeDX() {
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);
     glScalef(0.1, 1, 500);
-    glTranslatef(-distanceLine, 0.01, 0);
+    glTranslatef(-Constant::DISTANCE_LINES, 0.01, 0);
     striscia.RenderNxV();
     glPopMatrix();
     glEnable(GL_LIGHTING); // abilito le luci
@@ -175,7 +175,7 @@ void drawMiddleLine() {
         
         glColor3f(1, 1, 1);
         glScalef(0.1, 1, 2.5);
-        glTranslatef(0, 0.01, 500+posZ);
+        glTranslatef(0, 0.01, 500 + posZ);
         striscia.RenderNxV();
         glPopMatrix();
         
@@ -186,8 +186,8 @@ void drawMiddleLine() {
 
 void Car::Init() {
     // inizializzo lo stato della macchina
-    px = 0;
-    pz = 480;
+    px = Constant::INITIAL_CAR_X;
+    pz = Constant::INITIAL_CAR_Z;
     facing = 0; // posizione e orientamento
     py = 0.0;
 
