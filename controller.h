@@ -4,6 +4,7 @@
  *
  * Created on 5 settembre 2016, 15.47
  */
+#include <SDL2/SDL_ttf.h>
 
 class Controller {
 public:
@@ -22,8 +23,15 @@ public:
     void drawRecinzione();
     float getTargetX();
     float getTargetZ();
-    bool goal();
-    bool tnt();
+    bool isTargetGoal();
+    bool isTargetTnt();
+    int getScore();
+    int getGoal();
+    int getGoalChecked();
+    int getTnt();
+    int getTntChecked();
+    void SDL_GL_DrawText(TTF_Font *font, char fgR, char fgG, char fgB, char fgA, char bgR, char bgG, char bgB, char bgA, char *text, int x, int y);
+    double getSeconds();
 
     Controller() {
         Init();

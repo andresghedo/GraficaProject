@@ -30,10 +30,22 @@ bool generate;
 bool isTnt = false;
 bool isGoal = true;
 int punteggio = 0;
+int tntChecked = 0;
+int tnt = 0;
+int goalChecked = 0;
+int goal = 0;
+clock_t startTime;
 
 void Controller::Init() {
     srand(time(NULL));
+    startTime = clock();
     for (int i = 0; i < NKEYS; i++) key[i] = false;
+}
+
+double Controller::getSeconds() {
+    clock_t endTime = clock();
+    clock_t clockTicksTaken = endTime - startTime;
+    return clockTicksTaken / (double) CLOCKS_PER_SEC;
 }
 
 void Controller::EatKey(int keycode, int* keymap, bool pressed_or_released) {
@@ -58,11 +70,13 @@ bool generateTarget(float carZ) {
     if ((((float) rand()) / (float) RAND_MAX) > 0.75) {     // genero un TNT
         isTnt = true;
         isGoal = false;
+        tnt += 1;
         targetX = (Constant::X_POS_TNT_MAX - Constant::X_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::X_POS_TNT_MIN ;
         targetZ = (Constant::Z_POS_TNT_MAX - Constant::Z_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_TNT_MIN ;
     } else {                                                // genero un GOAL
         isTnt = false;
         isGoal =true;
+        goal += 1;
         targetX = (Constant::X_POS_GOAL_MAX - Constant::X_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::X_POS_GOAL_MIN ;
         targetZ = (Constant::Z_POS_GOAL_MAX - Constant::Z_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_GOAL_MIN ;
     }
@@ -76,9 +90,11 @@ void Controller::checkVisibilityTarget(float carZ) {
         if (isGoal)
             punteggio -=1;
     } else if(isInTarget() && isGoal) {
+        goalChecked += 1;
         punteggio += 1;
         generate = true;
     } else if (isInTarget() && isTnt) {
+        tntChecked += 1;
         punteggio -= 1;
         generate = true;
     } else {
@@ -318,10 +334,120 @@ float Controller::getTargetZ() {
     return targetPoint.Z(); 
 };
 
-bool Controller::goal() { 
+bool Controller::isTargetGoal() { 
     return isGoal; 
 };
 
-bool Controller::tnt() { 
+bool Controller::isTargetTnt() { 
     return isTnt; 
 };
+
+int Controller::getScore() { 
+    return punteggio; 
+};
+
+int Controller::getGoal() {
+    return goal;
+};
+
+int Controller::getGoalChecked() {
+    return goalChecked;
+};
+
+int Controller::getTnt() {
+    return tnt;
+};
+
+int Controller::getTntChecked() {
+    return tntChecked;
+};
+
+void Controller::SDL_GL_DrawText(TTF_Font *font, // font
+    char fgR, char fgG, char fgB, char fgA, // colore testo
+    char bgR, char bgG, char bgB, char bgA, // colore background
+    char *text, int x, int y) { // qualità del testo
+    SDL_Color tmpfontcolor = {fgR,fgG,fgB,fgA};
+    SDL_Color tmpfontbgcolor = {bgR, bgG, bgB, bgA};
+    SDL_Surface *initial;
+    SDL_Surface *intermediary;
+    SDL_Rect location;
+    int w,h;
+
+    /* Usiamo SDL_TTF per il rendering del testo */
+    initial=NULL;
+      initial = TTF_RenderText_Shaded(font, text, tmpfontcolor, tmpfontbgcolor);
+
+
+    /* Convertiamo il testo in un formato conosciuto */
+    w = initial->w;
+    h = initial->h;
+
+    /* Allochiamo una nuova surface RGB */
+    intermediary = SDL_CreateRGBSurface(0, w, h, 32,
+      0x000000ff,0x0000ff00, 0x00ff0000,0xff000000);
+
+    /* Copiamo il contenuto dalla prima alla seconda surface */
+    SDL_BlitSurface(initial, 0, intermediary, 0);
+
+    /* Informiamo GL della nuova texture */
+    glBindTexture(GL_TEXTURE_2D, -1);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA,
+        GL_UNSIGNED_BYTE, intermediary->pixels );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    if ( initial != NULL ){
+      location.x = x;
+      location.y = y;
+    }
+
+    glLineWidth(2);
+    glColor3f(0,0,0);
+    glBegin(GL_LINE_LOOP);
+        glVertex2f(location.x-2    , location.y-2);
+        glVertex2f(location.x + w+2, location.y-2);
+        glVertex2f(location.x + w+2, location.y + h+2);
+        glVertex2f(location.x   -2 , location.y + h+2);
+    glEnd();
+
+    /* prepariamoci al rendering del testo */
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, -1);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    /* Disegnamo un quads come location del testo */
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(location.x    , location.y);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(location.x + w, location.y);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(location.x + w, location.y + h);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(location.x    , location.y + h);
+      glEnd();
+
+    /* Disegnamo un contorno al quads */
+      glColor3f(0.0f, 0.0f, 0.0f);
+    //  glBegin(GL_LINE_STRIP);
+    //    glVertex2f((GLfloat)location.x-1, (GLfloat)location.y-1);
+    //    glVertex2f((GLfloat)location.x + w +1, (GLfloat)location.y-1);
+    //    glVertex2f((GLfloat)location.x + w +1, (GLfloat)location.y + h +1);
+    //    glVertex2f((GLfloat)location.x-1    , (GLfloat)location.y + h +1);
+    //    glVertex2f((GLfloat)location.x-1, (GLfloat)location.y-1);
+    //  glEnd();
+
+    /* Bad things happen if we delete the texture before it finishes */
+    glFinish();
+
+    /* return the deltas in the unused w,h part of the rect */
+    location.w = initial->w;
+    location.h = initial->h;
+
+    /* Clean up */
+    glDisable(GL_TEXTURE_2D);
+    SDL_FreeSurface(initial);
+    SDL_FreeSurface(intermediary);
+
+}

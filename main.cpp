@@ -44,112 +44,10 @@ extern void drawMiddleLine();
 extern void drawExtremeDX();
 extern void drawStatua();
 /* qualita del testo scritto e id della realtiva texture */
-enum textquality {solid, shaded, blended};
-uint font_id = -1;
-
-
-/**************************************
- * Function per la scrittura di testo *
- **************************************/
-void SDL_GL_DrawText(TTF_Font *font, // font
-    char fgR, char fgG, char fgB, char fgA, // colore testo
-    char bgR, char bgG, char bgB, char bgA, // colore background
-    char *text, int x, int y, // testo e posizione
-    enum textquality quality) { // qualità del testo
-  SDL_Color tmpfontcolor = {fgR,fgG,fgB,fgA};
-  SDL_Color tmpfontbgcolor = {bgR, bgG, bgB, bgA};
-  SDL_Surface *initial;
-  SDL_Surface *intermediary;
-  SDL_Rect location;
-  int w,h;
-
-  /* Usiamo SDL_TTF per il rendering del testo */
-  initial=NULL;
-  if (quality == solid)
-    initial = TTF_RenderText_Solid(font, text, tmpfontcolor);
-  else if (quality == shaded)
-    initial = TTF_RenderText_Shaded(font, text, tmpfontcolor, tmpfontbgcolor);
-  else if (quality == blended)
-    initial = TTF_RenderText_Blended(font, text, tmpfontcolor);
-
-  /* Convertiamo il testo in un formato conosciuto */
-  w = initial->w;
-  h = initial->h;
-
-  /* Allochiamo una nuova surface RGB */
-  intermediary = SDL_CreateRGBSurface(0, w, h, 32,
-    0x000000ff,0x0000ff00, 0x00ff0000,0xff000000);
-
-  /* Copiamo il contenuto dalla prima alla seconda surface */
-  SDL_BlitSurface(initial, 0, intermediary, 0);
-
-  /* Informiamo GL della nuova texture */
-  glBindTexture(GL_TEXTURE_2D, -1);
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA,
-      GL_UNSIGNED_BYTE, intermediary->pixels );
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  if ( initial != NULL ){
-    location.x = x;
-    location.y = y;
-  }
-
-  glLineWidth(2);
-  glColor3f(0,0,0);
-  glBegin(GL_LINE_LOOP);
-    glVertex2f(location.x-2    , location.y-2);
-    glVertex2f(location.x + w+2, location.y-2);
-    glVertex2f(location.x + w+2, location.y + h+2);
-    glVertex2f(location.x   -2 , location.y + h+2);
-  glEnd();
-
-  /* prepariamoci al rendering del testo */
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, -1);
-  glColor3f(1.0f, 1.0f, 1.0f);
-
-/* Disegnamo un quads come location del testo */
-  glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f);
-      glVertex2f(location.x    , location.y);
-    glTexCoord2f(1.0f, 1.0f);
-      glVertex2f(location.x + w, location.y);
-    glTexCoord2f(1.0f, 0.0f);
-      glVertex2f(location.x + w, location.y + h);
-    glTexCoord2f(0.0f, 0.0f);
-      glVertex2f(location.x    , location.y + h);
-  glEnd();
-
-/* Disegnamo un contorno al quads */
-  glColor3f(0.0f, 0.0f, 0.0f);
-//  glBegin(GL_LINE_STRIP);
-//    glVertex2f((GLfloat)location.x-1, (GLfloat)location.y-1);
-//    glVertex2f((GLfloat)location.x + w +1, (GLfloat)location.y-1);
-//    glVertex2f((GLfloat)location.x + w +1, (GLfloat)location.y + h +1);
-//    glVertex2f((GLfloat)location.x-1    , (GLfloat)location.y + h +1);
-//    glVertex2f((GLfloat)location.x-1, (GLfloat)location.y-1);
-//  glEnd();
-
-/* Bad things happen if we delete the texture before it finishes */
-  glFinish();
-
-/* return the deltas in the unused w,h part of the rect */
-  location.w = initial->w;
-  location.h = initial->h;
-
-/* Clean up */
-  glDisable(GL_TEXTURE_2D);
-  SDL_FreeSurface(initial);
-  SDL_FreeSurface(intermediary);
-
-}
 
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord 
 // del pixel sullo schemo
-
 void SetCoordToPixel() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -378,7 +276,7 @@ void drawMinimap(int scrH) {
     DrawCircle(minimap_posx, minimap_posz, 2, 300);
 
     // disegno cerchiolino macchina rossa
-    if(controller.goal())
+    if(controller.isTargetGoal())
         glColor3ub(0,255,0);
     else
         glColor3ub(0,0,0);
@@ -619,12 +517,22 @@ void rendering(SDL_Window *win, TTF_Font *font) {
 
     glLineWidth(2);
     drawMinimap(scrH);
-    char myword2[] = "UOUO";
+    char tnt[15];
+    sprintf(tnt, "TNT:  %d / %d   ", controller.getTntChecked(), controller.getTnt());
+    char goal[15];
+    sprintf(goal, "GOAL:  %d / %d   ", controller.getGoalChecked(), controller.getGoal());
+    char *tntAndGoal = strcat(tnt, goal);
+    char point[15];
+    sprintf(point, "SCORE:  %d   ", controller.getScore());
+    char time[15];
+    sprintf(time, "TIME:  %lf ", controller.getSeconds());
+    strcat(point, time);
     glDisable(GL_LIGHTING);
-    SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, myword2, scrW-150, scrH-50, shaded);
+    controller.SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW-550, scrH-50);
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
+    printf("Time in sec: %d\n", (int)controller.getSeconds());
 }
 
 void redraw() {
@@ -654,7 +562,7 @@ int main(int argc, char* argv[]) {
     }
     
     TTF_Font *font;
-    font = TTF_OpenFont ("FreeSans.ttf", 22);
+    font = TTF_OpenFont ("FreeSans.ttf", 18);
     if (font == NULL) {
       fprintf (stderr, "Impossibile caricare il font.\n");
     }
