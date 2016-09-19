@@ -261,6 +261,9 @@ void Car::RenderAllParts(bool usecolor) const {
         if (usecolor) SetupEnvmapTexture(); // METTO LA TEXTURE DEL CORPO DELLA MACCHINA
     }
     carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice, DISEGNA IL CORPO DELLA MACCHINA PROPRIO
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+
     if (usecolor) glEnable(GL_LIGHTING);
     // QUESTO CICLO FOR DISEGNA LE RUOTE ...
     for (int i = 0; i < 2; i++) {
@@ -339,5 +342,7 @@ void Car::Render() const {
 
         glEnable(GL_LIGHTING);
     }
+    glPopMatrix();
+
     glPopMatrix();
 }
