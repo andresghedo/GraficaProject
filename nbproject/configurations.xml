@@ -35,7 +35,7 @@
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
-          <executablePath>GRA_PRJ</executablePath>
+          <executablePath>play</executablePath>
         </makeTool>
       </makefileType>
       <item path="car.cpp" ex="false" tool="1" flavor2="0">

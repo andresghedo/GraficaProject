@@ -34,7 +34,6 @@ extern bool useShadow; // var globale esterna: per generare l'ombra
 void SetupEnvmapTexture() {
     // facciamo binding con la texture 1
     glBindTexture(GL_TEXTURE_2D, 1);
-
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S); // abilito la generazione automatica delle coord texture S e T
     glEnable(GL_TEXTURE_GEN_T);
@@ -135,11 +134,11 @@ void drawAxis(); // anche questa
 
 void drawStatua() {
     glPushMatrix();
-    glColor3f(.4, .6, .5);
-    glTranslatef(2.5, -1, -450);
-    glScalef(60, 60, 60);//0.75 1 0.75
+    glColor3f(0.4, 0.6, 0.5);
+    glTranslatef(2.5, -1.0, -450);
+    glScalef(60.0, 60.0, 60.0);
     statua.RenderNxV();
-    glColor3f(.8, .0, .0);
+    glColor3f(0.8, 0.0, 0.0);
     fuocoStatua.RenderNxV();
     glPopMatrix();
 }
@@ -148,7 +147,7 @@ void drawExtremeSX() {
     glPushMatrix();
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);
-    glScalef(0.1, 1, 500);
+    glScalef(0.1, 1, Constant::START_Z_STREET_LINES);
     glTranslatef(Constant::DISTANCE_LINES, 0.01, 0);
     striscia.RenderNxV();
     glPopMatrix();
@@ -159,7 +158,7 @@ void drawExtremeDX() {
     glPushMatrix();
     glDisable(GL_LIGHTING); // disabilitato le luci
     glColor3f(1, 1, 1);
-    glScalef(0.1, 1, 500);
+    glScalef(0.1, 1, Constant::START_Z_STREET_LINES);
     glTranslatef(-Constant::DISTANCE_LINES, 0.01, 0);
     striscia.RenderNxV();
     glPopMatrix();
@@ -174,7 +173,7 @@ void drawMiddleLine() {
         
         glColor3f(1, 1, 1);
         glScalef(0.1, 1, 2.5);
-        glTranslatef(0, 0.01, 500 + posZ);
+        glTranslatef(0, 0.01, Constant::START_Z_STREET_LINES + posZ);
         striscia.RenderNxV();
         glPopMatrix();
         

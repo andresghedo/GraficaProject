@@ -114,7 +114,7 @@ void Controller::drawTargetCube(float mozzo) {
     if (isTnt)
         glBindTexture(GL_TEXTURE_2D, 3);
     else
-        glBindTexture(GL_TEXTURE_2D, 7);
+        glBindTexture(GL_TEXTURE_2D, 6);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
@@ -294,36 +294,6 @@ void Controller::drawLightTorciaStatua() {
         attenuation = 0.02;
     glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, attenuation);
     //glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 12.0);
-}
-
-void Controller::drawRecinzione() {
-    
-    glBindTexture(GL_TEXTURE_2D, 6);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_GEN_S);
-    glEnable(GL_TEXTURE_GEN_T);
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
-    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-    glColor3f(1, 1, 1);
-   
-    glPushMatrix();
-    glDisable(GL_LIGHTING); // disabilitato le luci
-    glColor3f(1, 1, 1);
-    glScalef(0.5, 0.5, 0.5);
-    glRotatef(90, 0, 1, 0);
-    glTranslatef(0, 0, 40);
-    recinzione.RenderNxV();
-    for(int i=0; i<=400; i++){ 
-        glTranslatef(4.5, 0, 0);
-        recinzione.RenderNxV();
-    }
-    glPopMatrix();
-    //glEnable(GL_LIGHTING); // abilito le luci
-    
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
 }
 
 float Controller::getTargetX() { 

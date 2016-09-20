@@ -20,7 +20,6 @@ public:
     void checkVisibilityTarget(float carZ);
     void drawTriangleForTarget(float facing, float carX, float carZ);
     void drawLightTorciaStatua();
-    void drawRecinzione();
     float getTargetX();
     float getTargetZ();
     bool isTargetGoal();

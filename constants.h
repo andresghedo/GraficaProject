@@ -41,6 +41,8 @@ namespace Constant
     const float LIMIT_VISIBILITY_TARGET = 5.0;
     // RADAR LENGTH IN PIXEL
     const float RADAR_LENGTH = 250.0;
+    // INIZIO Z DELLE LINEE DELLA STRADA
+    const float START_Z_STREET_LINES = 500.0;
 }
 
 #endif	/* CONSTANTS_H */
