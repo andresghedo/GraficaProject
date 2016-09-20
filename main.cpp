@@ -208,6 +208,7 @@ void drawPistaTexture() {
         }
   glEnd();
   glDisable(GL_TEXTURE_2D);
+  return;
 }
 
 // DISEGNA LA PAVIMENTAZIONE
@@ -249,7 +250,7 @@ void drawFloorTexture() {
 }
 
 void DrawCircle(float cx, float cy, float r, int num_segments) {
-    glBegin(GL_LINE_LOOP);
+    glBegin(GL_POLYGON);
     for (int ii = 0; ii < num_segments; ii++)   {
         float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle 
         float x = r * cos(theta);//calculate the x component 
@@ -264,64 +265,66 @@ void drawMinimap(int scrH) {
     glDisable(GL_LIGHTING);
     float minimap_posx, minimap_pos_target_x;
     float minimap_posz, minimap_pos_target_z;
-    minimap_posx = 70 + (100 * car.px / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_posz = scrH -120 + (-1 * (100*car.pz / 960)) + 50;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
-    
-    minimap_pos_target_x = 70 + (100 * controller.getTargetX() / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_pos_target_z = scrH -120 + (-1 * (100 * controller.getTargetZ() / 960)) + 50;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+    minimap_posx = 70 + (200 * car.px / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
+    minimap_posz = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH*car.pz / 960)) + 110;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+
+    minimap_pos_target_x = 70 + (200 * controller.getTargetX() / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
+    minimap_pos_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
     printf("MINIMAP X: %f Z: %f\n", minimap_posx, minimap_posz);
 
-    // disegno cerchiolino macchina rossa
-    glColor3ub(255,0,0);
-    DrawCircle(minimap_posx, minimap_posz, 2, 300);
+    if (minimap_posx < 20)
+        minimap_posx = 20;
+    else if (minimap_posx > 120)
+        minimap_posx = 120;
 
-    // disegno cerchiolino macchina rossa
-    if(controller.isTargetGoal())
-        glColor3ub(0,255,0);
-    else
-        glColor3ub(0,0,0);
-    DrawCircle(minimap_pos_target_x, minimap_pos_target_z, 3, 300);
-    
-    glColor3ub(0,0,0);
+    glColor3ub(255,255,255);
     glBegin(GL_LINES);
-        glVertex2d(57.50, scrH -120);
-        glVertex2d(57.50, scrH -20);
+        glVertex2d(45.0, scrH -Constant::RADAR_LENGTH - 20);
+        glVertex2d(45.0, scrH -20);
 
-        glVertex2d(82.5, scrH -120);
-        glVertex2d(82.5, scrH -20);
+        glVertex2d(95.0, scrH -Constant::RADAR_LENGTH - 20);
+        glVertex2d(95.0, scrH -20);
     glEnd();
     glBegin(GL_LINES);
-        for(int i = 0; i<100; i+=4) {
-            glVertex2d(70, scrH -120 + i);
-            glVertex2d(70, scrH -120 + i + 2);
+        for(int i = 0; i < Constant::RADAR_LENGTH; i+=4) {
+            glVertex2d(70, scrH -Constant::RADAR_LENGTH - 20 + i);
+            glVertex2d(70, scrH -Constant::RADAR_LENGTH - 20 + i + 2);
         }
     glEnd();
     
+    // disegno cerchiolino macchina rossa
+    glColor3ub(255,0,0);
+    DrawCircle(minimap_posx, minimap_posz, 3, 300);
 
-  /* disegno del target */
-//  glColor3ub(255,0,0);
-//  glBegin(GL_QUADS);
-//    glVertex2d(minimap_cubex, minimap_cubez + 3);
-//    glVertex2d(minimap_cubex + 3, minimap_cubez);
-//    glVertex2d(minimap_cubex, minimap_cubez - 3);
-//    glVertex2d(minimap_cubex - 3, minimap_cubez);
-//  glEnd();
+    // disegno cerchiolino macchina rossa
+    if(controller.isTargetGoal())
+        glColor3ub(0, 153, 51);
+    else
+        glColor3ub(0, 0, 0);
+    DrawCircle(minimap_pos_target_x, minimap_pos_target_z, 5, 300);
 
     /* disegno minimappa */
     glColor3ub(0,0,0);
     glBegin(GL_LINE_LOOP);
-      glVertex2d(20,scrH -20 -100);
+      glVertex2d(20,scrH -20 -Constant::RADAR_LENGTH);
       glVertex2d(20,scrH -20);
       glVertex2d(120,scrH-20);
-      glVertex2d(120,scrH-20-100);
+      glVertex2d(120,scrH-20-Constant::RADAR_LENGTH);
     glEnd();
 
     glColor3ub(210,210,210);
     glBegin(GL_POLYGON);
-      glVertex2d(20,scrH -20 -100);
-      glVertex2d(20,scrH -20);
-      glVertex2d(120,scrH -20);
-      glVertex2d(120,scrH-20-100);
+      glVertex2d(45, scrH -20 -Constant::RADAR_LENGTH);
+      glVertex2d(45, scrH -20);
+      glVertex2d(95, scrH -20);
+      glVertex2d(95, scrH-20-Constant::RADAR_LENGTH);
+     glEnd();
+    glColor3ub(0, 179, 60);
+    glBegin(GL_POLYGON);
+      glVertex2d(20, scrH -20 -Constant::RADAR_LENGTH);
+      glVertex2d(20, scrH -20);
+      glVertex2d(120, scrH -20);
+      glVertex2d(120, scrH-20-Constant::RADAR_LENGTH);
      glEnd();
      glEnable(GL_LIGHTING);
 }
@@ -517,18 +520,18 @@ void rendering(SDL_Window *win, TTF_Font *font) {
 
     glLineWidth(2);
     drawMinimap(scrH);
-    char tnt[15];
+    char tnt[20];
     sprintf(tnt, "TNT:  %d / %d   ", controller.getTntChecked(), controller.getTnt());
-    char goal[15];
+    char goal[20];
     sprintf(goal, "GOAL:  %d / %d   ", controller.getGoalChecked(), controller.getGoal());
     char *tntAndGoal = strcat(tnt, goal);
-    char point[15];
+    char point[20];
     sprintf(point, "SCORE:  %d   ", controller.getScore());
-    char time[15];
+    char time[20];
     sprintf(time, "TIME:  %lf ", controller.getSeconds());
     strcat(point, time);
     glDisable(GL_LIGHTING);
-    controller.SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW-550, scrH-50);
+    controller.SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW-550, scrH-100);
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
@@ -562,7 +565,7 @@ int main(int argc, char* argv[]) {
     }
     
     TTF_Font *font;
-    font = TTF_OpenFont ("FreeSans.ttf", 18);
+    font = TTF_OpenFont ("./ttf/amatic.ttf", 45);
     if (font == NULL) {
       fprintf (stderr, "Impossibile caricare il font.\n");
     }

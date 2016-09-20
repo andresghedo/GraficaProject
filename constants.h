@@ -39,9 +39,8 @@ namespace Constant
     const float POS_TORCIA_Z = -440.0;
     // LIMITE CATTURA TARGET
     const float LIMIT_VISIBILITY_TARGET = 5.0;
-    
-    
-    
+    // RADAR LENGTH IN PIXEL
+    const float RADAR_LENGTH = 250.0;
 }
 
 #endif	/* CONSTANTS_H */

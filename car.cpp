@@ -20,8 +20,7 @@ Mesh wheelBR1((char *) "./obj/Ferrari_wheel_back_R.obj");
 Mesh wheelFR1((char *) "./obj/Ferrari_wheel_front_R.obj");
 Mesh wheelBR2((char *) "./obj/Ferrari_wheel_back_R_metal.obj");
 Mesh wheelFR2((char *) "./obj/Ferrari_wheel_front_R_metal.obj");
-Mesh pista((char *) "./obj/pista.obj");
-Mesh striscia((char *) "./obj/plane.obj");
+Mesh striscia((char *) "./obj/street_line.obj");
 Mesh statua((char *) "./obj/statua_corpo.obj");
 Mesh fuocoStatua((char *) "./obj/statua_fuoco.obj");
 
@@ -261,8 +260,10 @@ void Car::RenderAllParts(bool usecolor) const {
         if (usecolor) SetupEnvmapTexture(); // METTO LA TEXTURE DEL CORPO DELLA MACCHINA
     }
     carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice, DISEGNA IL CORPO DELLA MACCHINA PROPRIO
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
+    if(!usecolor) {
+        glDisable(GL_TEXTURE_GEN_S);
+        glDisable(GL_TEXTURE_GEN_T);
+    }
 
     if (usecolor) glEnable(GL_LIGHTING);
     // QUESTO CICLO FOR DISEGNA LE RUOTE ...
@@ -311,6 +312,10 @@ void Car::RenderAllParts(bool usecolor) const {
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
         wheelBR2.RenderNxV();     //cerchione dietro
         
+        if(usecolor) {
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
+        }
         glPopMatrix();
     }// FINE DISEGNO RUOTE
     glPopMatrix();
