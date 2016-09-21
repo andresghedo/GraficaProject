@@ -36,6 +36,7 @@ int tnt = 0;
 int goalChecked = 0;
 int goal = 0;
 clock_t startTime;
+double endTime = 0;
 
 void Controller::Init() {
     srand(time(NULL));
@@ -44,8 +45,8 @@ void Controller::Init() {
 }
 
 double Controller::getSeconds() {
-    clock_t endTime = clock();
-    clock_t clockTicksTaken = endTime - startTime;
+    clock_t currentTime = clock();
+    clock_t clockTicksTaken = currentTime - startTime;
     return clockTicksTaken / (double) CLOCKS_PER_SEC;
 }
 
@@ -111,8 +112,10 @@ void Controller::checkVisibilityTarget(float carZ) {
     if (generate) {
         generateTarget(carZ);
     }
-    if ((triangleTopPoint.Z() < -430) && ((triangleTopPoint.X() > -5.0) && (triangleTopPoint.X() < 5.0)))
+    if ((triangleTopPoint.Z() < -430) && ((triangleTopPoint.X() > -5.0) && (triangleTopPoint.X() < 5.0))) {
         gameOver = true;
+        endTime = Controller::getSeconds();
+    }
     printf("PUNTEGGIO: %d\n", punteggio);
 }
 
@@ -461,18 +464,30 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
     sprintf(punti, "%d", punteggio);
 
     char stringa_punti[] = "Punteggio: ";
-    char g_over[] = "GAME OVER";
-    char continuare[] = "Premi un tasto per continuare";
+    char str_game_over[] = "GAME OVER!!";
+    char continuare[] = "Premi un tasto\n per continuare";
+    
+    TTF_Font *fontTitle;
+    fontTitle = TTF_OpenFont("./ttf/amatic.ttf", 100);
+    if (font == NULL) {
+        fprintf(stderr, "Impossibile caricare il font.\n");
+    }
+    
+    char tnt[20];
+    sprintf(tnt, "TNT:  %d / %d   ", Controller::getTntChecked(), Controller::getTnt());
+    char goal[20];
+    sprintf(goal, "GOAL:  %d / %d   ", Controller::getGoalChecked(), Controller::getGoal());
+    char point[20];
+    sprintf(point, "SCORE:  %d   ", Controller::getScore());
+    char time[20];
+    sprintf(time, "TIME:  %f ", endTime);
 
-    int distanzaMargine;
-    if (punteggio >= 10)
-        distanzaMargine = 75;
-    else
-        distanzaMargine = 73;
-
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(stringa_punti, punti), scrW / 2 - distanzaMargine, scrH / 2 + 100);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, g_over, scrW / 2 - 80, scrH / 3 + 20);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, continuare, scrW / 2 - 150, scrH / 4 + 20);
+    Controller::SDL_GL_DrawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, str_game_over, scrW / 2 - 120, scrH  - 120);
+    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, point, 50, scrH / 2 + 100);
+    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, goal, 50, scrH / 2 + 30);
+    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, tnt, 50, scrH / 2 -40);
+    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, time, 50, scrH / 2 - 110);
+    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, continuare, 50, scrH / 2 - 180);
     glFinish();
 
     SDL_GL_SwapWindow(win);

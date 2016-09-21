@@ -814,10 +814,11 @@ int main(int argc, char* argv[]) {
             // se si: processa evento
             switch (e.type) {
                 case SDL_KEYDOWN:
-                    doneGO = true;
+                    if (e.key.keysym.sym == SDLK_k)
+                        doneGO = true;
                     break;
                 case SDL_QUIT:
-                    doneGO = 1;
+                    doneGO = true;
                     break;
                 case SDL_WINDOWEVENT:
                     windowID = SDL_GetWindowID(win);
