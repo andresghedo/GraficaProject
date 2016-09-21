@@ -24,12 +24,14 @@ public:
     float getTargetZ();
     bool isTargetGoal();
     bool isTargetTnt();
+    bool isGameOver();
     int getScore();
     int getGoal();
     int getGoalChecked();
     int getTnt();
     int getTntChecked();
     void SDL_GL_DrawText(TTF_Font *font, char fgR, char fgG, char fgB, char fgA, char bgR, char bgG, char bgB, char bgA, char *text, int x, int y);
+    void drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, int scrW);
     double getSeconds();
 
     Controller() {

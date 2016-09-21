@@ -48,6 +48,7 @@ extern void drawStatua();
 // setta le matrici di trasformazione in modo
 // che le coordinate in spazio oggetto siano le coord 
 // del pixel sullo schemo
+
 void SetCoordToPixel() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -58,8 +59,9 @@ void SetCoordToPixel() {
 }
 
 // CARICO PRELIMINARMENTE LE TEXTURE
+
 bool LoadTexture(int textbind, char *filename) {
-    
+
     printf("[DEBUG]Carico l'immagine per la texture : %s \n", filename);
     // carica l'immagine tramite una chiamata SDL
     SDL_Surface *s = IMG_Load(filename);
@@ -89,16 +91,16 @@ bool LoadTexture(int textbind, char *filename) {
 
 void drawAxis() {
     const float K = 0.10;
-    glColor3f(0, 1, 0);// GREEN
+    glColor3f(0, 1, 0); // GREEN
     glBegin(GL_LINES);
     glVertex3f(-2, 0, 0);
     glVertex3f(+2, 0, 0);
 
-    glColor3f(1, 0, 0);// RED
+    glColor3f(1, 0, 0); // RED
     glVertex3f(0, -2, 0);
     glVertex3f(0, +2, 0);
 
-    glColor3f(0, 0, 1);// BLUE
+    glColor3f(0, 0, 1); // BLUE
     glVertex3f(0, 0, -2);
     glVertex3f(0, 0, +2);
     glEnd();
@@ -120,6 +122,7 @@ void drawAxis() {
 }
 
 // DISEGNO DEL "CIELO"
+
 void drawSphere(double r, int lats, int longs) {
     int i, j;
     for (i = 0; i <= lats; i++) {
@@ -148,6 +151,7 @@ void drawSphere(double r, int lats, int longs) {
 }
 
 // DISEGNA LA PAVIMENTAZIONE
+
 void drawFloor() {
     const float S = 500; // OLD 100 size
     const float H = 0; // altezza
@@ -172,6 +176,7 @@ void drawFloor() {
 }
 
 // DISEGNA LA PAVIMENTAZIONE
+
 void drawPistaTexture() {
     const float S = 500; // OLD 100 size
     const float H = 0; // altezza
@@ -185,33 +190,76 @@ void drawPistaTexture() {
     //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-  // disegna KxK quads
-  glBegin(GL_QUADS);
-    glNormal3f(0,1,0); // normale verticale uguale x tutti
-    for (int x=0; x<K; x++) 
-        for (int z=0; z<K; z++) {
-        // scelgo il colore per quel quad
-
-        float x0=-S + 2*(x+0)*S/K;
-        float x1=-S + 2*(x+1)*S/K;
-        float z0=-S + 2*(z+0)*S/K;
-        float z1=-S + 2*(z+1)*S/K;
-        if((x0<=4)&&(x0>=-6)) {
-            glTexCoord2f(0.0, 0.0);
-            glVertex3d(x0, H, z0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3d(x1, H, z0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3d(x1, H, z1);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3d(x0, H, z1);}
+    // disegna KxK quads
+    glBegin(GL_QUADS);
+    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+    for (int x = 0; x < K; x++)
+        for (int z = 0; z < K; z++) {
+            // scelgo il colore per quel quad
+            float x0 = -S + 2 * (x + 0) * S / K;
+            float x1 = -S + 2 * (x + 1) * S / K;
+            float z0 = -S + 2 * (z + 0) * S / K;
+            float z1 = -S + 2 * (z + 1) * S / K;
+            if ((x0 <= 4) && (x0 >= -6) && ((z0 < -430) || (z0 > -428))) {
+                glTexCoord2f(0.0, 0.0);
+                glVertex3d(x0, H, z0);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3d(x1, H, z0);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3d(x1, H, z1);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3d(x0, H, z1);
+            }
         }
-  glEnd();
-  glDisable(GL_TEXTURE_2D);
-  return;
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    return;
 }
 
 // DISEGNA LA PAVIMENTAZIONE
+
+void drawArrivoTexture() {
+    const float S = 500; // OLD 100 size
+    const float H = 0; // altezza
+    const int K = 750; //OLD 150 disegna K x K quads
+
+    // disegno il terreno ripetendo una texture su di esso
+    glDisable(GL_LIGHTING);
+    glBindTexture(GL_TEXTURE_2D, 7);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+    // disegna KxK quads
+    glBegin(GL_QUADS);
+    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+    for (int x = 371; x <= 378; x++)
+        for (int z = 53; z <= 54; z++) {
+            // scelgo il colore per quel quad
+            float x0 = -S + 2 * (x + 0) * S / K;
+            float x1 = -S + 2 * (x + 1) * S / K;
+            float z0 = -S + 2 * (z + 0) * S / K;
+            float z1 = -S + 2 * (z + 1) * S / K;
+            if ((x0 <= 4) && (x0 >= -6) && (z0 >= -430) && (z0 <= -428)) {
+                glTexCoord2f(0.0, 0.0);
+                glVertex3d(x0, H, z0);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3d(x1, H, z0);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3d(x1, H, z1);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3d(x0, H, z1);
+            }
+        }
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    return;
+}
+
+// DISEGNA LA PAVIMENTAZIONE
+
 void drawFloorTexture() {
     const float S = 500; // OLD 100 size
     const float H = 0; // altezza
@@ -224,38 +272,39 @@ void drawFloorTexture() {
     glDisable(GL_TEXTURE_GEN_T);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-  // disegna KxK quads
-  glBegin(GL_QUADS);
-    glNormal3f(0,1,0); // normale verticale uguale x tutti
-    for (int x=0; x<K; x++) 
-        for (int z=0; z<K; z++) {
-        // scelgo il colore per quel quad
+    // disegna KxK quads
+    glBegin(GL_QUADS);
+    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+    for (int x = 0; x < K; x++)
+        for (int z = 0; z < K; z++) {
+            // scelgo il colore per quel quad
 
-        float x0=-S + 2*(x+0)*S/K;
-        float x1=-S + 2*(x+1)*S/K;
-        float z0=-S + 2*(z+0)*S/K;
-        float z1=-S + 2*(z+1)*S/K;
-        if((x0>4)||(x0<-6)) {
-            glTexCoord2f(0.0, 0.0);
-            glVertex3d(x0, H, z0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3d(x1, H, z0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3d(x1, H, z1);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3d(x0, H, z1);}
+            float x0 = -S + 2 * (x + 0) * S / K;
+            float x1 = -S + 2 * (x + 1) * S / K;
+            float z0 = -S + 2 * (z + 0) * S / K;
+            float z1 = -S + 2 * (z + 1) * S / K;
+            if ((x0 > 4) || (x0<-6)) {
+                glTexCoord2f(0.0, 0.0);
+                glVertex3d(x0, H, z0);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3d(x1, H, z0);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3d(x1, H, z1);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3d(x0, H, z1);
+            }
         }
-  glEnd();
-  glDisable(GL_TEXTURE_2D);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
 }
 
 void DrawCircle(float cx, float cy, float r, int num_segments) {
     glBegin(GL_POLYGON);
-    for (int ii = 0; ii < num_segments; ii++)   {
-        float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle 
-        float x = r * cos(theta);//calculate the x component 
-        float y = r * sin(theta);//calculate the y component 
-        glVertex2f(x + cx, y + cy);//output vertex 
+    for (int ii = 0; ii < num_segments; ii++) {
+        float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments); //get the current angle 
+        float x = r * cos(theta); //calculate the x component 
+        float y = r * sin(theta); //calculate the y component 
+        glVertex2f(x + cx, y + cy); //output vertex 
     }
     glEnd();
 }
@@ -265,71 +314,72 @@ void drawMinimap(int scrH) {
     glDisable(GL_LIGHTING);
     float minimap_posx, minimap_pos_target_x;
     float minimap_posz, minimap_pos_target_z;
-    minimap_posx = 70 + (200 * car.px / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_posz = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH*car.pz / 960)) + 110;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+    minimap_posx = 70 + (200 * car.px / 40); //70;//((50*car.px)/100) + 50 + 20 ;//(70)
+    minimap_posz = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * car.pz / 960)) + 110; //((50*car.pz)/100) + 50 + scrH-20-100;//(680)
 
-    minimap_pos_target_x = 70 + (200 * controller.getTargetX() / 40);//70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_pos_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110;//((50*car.pz)/100) + 50 + scrH-20-100;//(680)
-    printf("MINIMAP X: %f Z: %f\n", minimap_posx, minimap_posz);
+    minimap_pos_target_x = 70 + (200 * controller.getTargetX() / 40); //70;//((50*car.px)/100) + 50 + 20 ;//(70)
+    minimap_pos_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110; //((50*car.pz)/100) + 50 + scrH-20-100;//(680)
 
     if (minimap_posx < 20)
         minimap_posx = 20;
     else if (minimap_posx > 120)
         minimap_posx = 120;
 
-    glColor3ub(255,255,255);
+    glColor3ub(255, 255, 255);
     glBegin(GL_LINES);
-        glVertex2d(45.0, scrH -Constant::RADAR_LENGTH - 20);
-        glVertex2d(45.0, scrH -20);
+    glVertex2d(45.0, scrH - Constant::RADAR_LENGTH - 20);
+    glVertex2d(45.0, scrH - 20);
 
-        glVertex2d(95.0, scrH -Constant::RADAR_LENGTH - 20);
-        glVertex2d(95.0, scrH -20);
+    glVertex2d(95.0, scrH - Constant::RADAR_LENGTH - 20);
+    glVertex2d(95.0, scrH - 20);
     glEnd();
     glBegin(GL_LINES);
-        for(int i = 0; i < Constant::RADAR_LENGTH; i+=4) {
-            glVertex2d(70, scrH -Constant::RADAR_LENGTH - 20 + i);
-            glVertex2d(70, scrH -Constant::RADAR_LENGTH - 20 + i + 2);
-        }
+    for (int i = 0; i < Constant::RADAR_LENGTH; i += 4) {
+        glVertex2d(70, scrH - Constant::RADAR_LENGTH - 20 + i);
+        glVertex2d(70, scrH - Constant::RADAR_LENGTH - 20 + i + 2);
+    }
     glEnd();
-    
+
     // disegno cerchiolino macchina rossa
-    glColor3ub(255,0,0);
+    glColor3ub(255, 0, 0);
     DrawCircle(minimap_posx, minimap_posz, 3, 300);
 
-    // disegno cerchiolino macchina rossa
-    if(controller.isTargetGoal())
+    if (controller.isTargetGoal())
         glColor3ub(0, 153, 51);
     else
         glColor3ub(0, 0, 0);
-    DrawCircle(minimap_pos_target_x, minimap_pos_target_z, 5, 300);
+
+    if (controller.getTargetX() != -900)
+        DrawCircle(minimap_pos_target_x, minimap_pos_target_z, 5, 300);
 
     /* disegno minimappa */
-    glColor3ub(0,0,0);
+    glColor3ub(0, 0, 0);
     glBegin(GL_LINE_LOOP);
-      glVertex2d(20,scrH -20 -Constant::RADAR_LENGTH);
-      glVertex2d(20,scrH -20);
-      glVertex2d(120,scrH-20);
-      glVertex2d(120,scrH-20-Constant::RADAR_LENGTH);
+    glVertex2d(20, scrH - 20 - Constant::RADAR_LENGTH);
+    glVertex2d(20, scrH - 20);
+    glVertex2d(120, scrH - 20);
+    glVertex2d(120, scrH - 20 - Constant::RADAR_LENGTH);
     glEnd();
 
-    glColor3ub(210,210,210);
+    glColor3ub(210, 210, 210);
     glBegin(GL_POLYGON);
-      glVertex2d(45, scrH -20 -Constant::RADAR_LENGTH);
-      glVertex2d(45, scrH -20);
-      glVertex2d(95, scrH -20);
-      glVertex2d(95, scrH-20-Constant::RADAR_LENGTH);
-     glEnd();
+    glVertex2d(45, scrH - 20 - Constant::RADAR_LENGTH);
+    glVertex2d(45, scrH - 20);
+    glVertex2d(95, scrH - 20);
+    glVertex2d(95, scrH - 20 - Constant::RADAR_LENGTH);
+    glEnd();
     glColor3ub(0, 179, 60);
     glBegin(GL_POLYGON);
-      glVertex2d(20, scrH -20 -Constant::RADAR_LENGTH);
-      glVertex2d(20, scrH -20);
-      glVertex2d(120, scrH -20);
-      glVertex2d(120, scrH-20-Constant::RADAR_LENGTH);
-     glEnd();
-     glEnable(GL_LIGHTING);
+    glVertex2d(20, scrH - 20 - Constant::RADAR_LENGTH);
+    glVertex2d(20, scrH - 20);
+    glVertex2d(120, scrH - 20);
+    glVertex2d(120, scrH - 20 - Constant::RADAR_LENGTH);
+    glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 // setto la posizione della camera
+
 void setCamera() {
 
     double px = car.px;
@@ -402,6 +452,7 @@ void setCamera() {
 }
 
 // disegna il cielo
+
 void drawSky() {
     int H = 100;
 
@@ -425,7 +476,7 @@ void drawSky() {
         glDisable(GL_LIGHTING);
 
         //   drawCubeFill();
-        drawSphere(500.0, 20, 20);// old 100
+        drawSphere(500.0, 20, 20); // old 100
 
         glDisable(GL_TEXTURE_GEN_S);
         glDisable(GL_TEXTURE_GEN_T);
@@ -482,16 +533,17 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     // settiamo matrice di modellazione
     drawAxis(); // disegna assi frame OGGETTO
 
-    drawSky();      // DISEGNO CIELO
-    drawFloorTexture();    // DISEGNO SUOLO
-    drawPistaTexture();    // DISEGNO PISTA
-    drawExtremeSX();     // DISEGNO POKEBALL
+    drawSky(); // DISEGNO CIELO
+    drawFloorTexture(); // DISEGNO SUOLO
+    drawPistaTexture(); // DISEGNO PISTA
+    drawArrivoTexture();
+    drawExtremeSX(); // DISEGNO POKEBALL
     drawMiddleLine();
-    drawExtremeDX();     // DISEGNO POKEBALL
+    drawExtremeDX(); // DISEGNO POKEBALL
     drawStatua();
 
     controller.drawTargetCube(car.mozzoA);
-    car.Render();        // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
+    car.Render(); // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
     // attendiamo la fine della rasterizzazione di 
     // tutte le primitive mandate
@@ -500,7 +552,7 @@ void rendering(SDL_Window *win, TTF_Font *font) {
 
     // disegnamo i fps (frame x sec) come una barra a sinistra.
     // (vuota = 0 fps, piena = 100 fps)
-    
+
     //DISEGNA LA BARRA A SX
     SetCoordToPixel();
 
@@ -530,11 +582,11 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     sprintf(time, "TIME:  %lf ", controller.getSeconds());
     strcat(point, time);
     glDisable(GL_LIGHTING);
-    controller.SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW-550, scrH-100);
+    controller.SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW - 600, scrH - 100);
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
-    printf("Time in sec: %d\n", (int)controller.getSeconds());
+    printf("Time in sec: %d\n", (int) controller.getSeconds());
 }
 
 void redraw() {
@@ -553,22 +605,22 @@ int main(int argc, char* argv[]) {
     Uint32 windowID;
     SDL_Joystick *joystick;
     static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
-    
+
     // inizializzazione di SDL
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-    
-    if(TTF_Init() < 0) {
-        fprintf(stderr, "Impossibile inizializzare TTF: %s\n",SDL_GetError());
+
+    if (TTF_Init() < 0) {
+        fprintf(stderr, "Impossibile inizializzare TTF: %s\n", SDL_GetError());
         SDL_Quit();
-        return(2);
+        return (2);
     }
-    
+
     TTF_Font *font;
-    font = TTF_OpenFont ("./ttf/amatic.ttf", 45);
+    font = TTF_OpenFont("./ttf/amatic.ttf", 45);
     if (font == NULL) {
-      fprintf (stderr, "Impossibile caricare il font.\n");
+        fprintf(stderr, "Impossibile caricare il font.\n");
     }
-    
+
     SDL_JoystickEventState(SDL_ENABLE);
     joystick = SDL_JoystickOpen(0);
 
@@ -602,8 +654,10 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(4, (char *) "./img/asfalto.png")) return -1;
     if (!LoadTexture(5, (char *) "./img/erba.jpg")) return -1;
     if (!LoadTexture(6, (char *) "./img/selfie.jpg")) return -1;
+    if (!LoadTexture(7, (char *) "./img/traguardo.jpg")) return -1;
 
     bool done = 0;
+    bool doneGO = 0;
     while (!done) {
 
         SDL_Event e;
@@ -627,6 +681,7 @@ int main(int argc, char* argv[]) {
                     break;
                 case SDL_QUIT:
                     done = 1;
+                    doneGO = 1;
                     break;
                 case SDL_WINDOWEVENT:
                     // dobbiamo ridisegnare la finestra
@@ -740,12 +795,48 @@ int main(int argc, char* argv[]) {
                 } // siamo troppo lenti!
             }
 
-            if (doneSomething){
+            if ((doneSomething)&&(!controller.isGameOver())) {
                 rendering(win, font);
                 controller.checkVisibilityTarget(car.pz);
-            } else {
+            } else if (controller.isGameOver()) {
                 // tempo libero!!!
+                done = true;
+                //controller.drawGameOverLayout(win, font, scrH, scrW);
             }
+        }
+    }
+
+    while (!doneGO) {
+        SDL_Event e;
+
+        // guardo se c'e' un evento:
+        if (SDL_PollEvent(&e)) {
+            // se si: processa evento
+            switch (e.type) {
+                case SDL_KEYDOWN:
+                    doneGO = true;
+                    break;
+                case SDL_QUIT:
+                    doneGO = 1;
+                    break;
+                case SDL_WINDOWEVENT:
+                    windowID = SDL_GetWindowID(win);
+                    if (e.window.windowID == windowID) {
+                        switch (e.window.event) {
+                            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                            {
+                                scrW = e.window.data1;
+                                scrH = e.window.data2;
+                                glViewport(0, 0, scrW, scrH);
+                                break;
+                            }
+                        }
+                    }
+
+                    break;
+            }
+        } else {
+            controller.drawGameOverLayout(win, font, scrH, scrW);
         }
     }
     SDL_GL_DeleteContext(mainContext);

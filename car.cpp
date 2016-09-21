@@ -31,6 +31,7 @@ extern bool useShadow; // var globale esterna: per generare l'ombra
 // Funzione che prepara tutto per usare un env map
 
 // TEXTURE MACCHINA CARROZZERIA
+
 void SetupEnvmapTexture() {
     // facciamo binding con la texture 1
     glBindTexture(GL_TEXTURE_2D, 1);
@@ -48,12 +49,13 @@ void SetupEnvmapTexture() {
 //     e l'intervallo [ minZ , maxZ ] nell'intervallo delle S [0..1]
 
 // TEXTURE RUOTE 
+
 void SetupWheelTexture(Point3 min, Point3 max) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
-    
+
     // ulilizzo le coordinate OGGETTO
     // cioe' le coordnate originali, PRIMA della moltiplicazione per la ModelView
     // in modo che la texture sia "attaccata" all'oggetto, e non "proiettata" su esso
@@ -119,13 +121,13 @@ void Car::DoStep(bool LeftKey, bool RightKey, bool AccKey, bool DecKey) {
     px += vx;
     py += vy;
     pz += vz;
-    if(pz > 500)
+    if (pz > 500)
         pz = 500;
-    if(pz < -438)
+    if (pz < -438)
         pz = -438;
-    if(px > 20)
+    if (px > 20)
         px = 20;
-    if(px < -20)
+    if (px < -20)
         px = -20;
 }
 
@@ -169,15 +171,19 @@ void drawMiddleLine() {
     float posZ = 0;
     glDisable(GL_LIGHTING); // disabilitato le luci
     for (int i = 0; i < 300; i++) {
-        glPushMatrix();
-        
-        glColor3f(1, 1, 1);
-        glScalef(0.1, 1, 2.5);
-        glTranslatef(0, 0.01, Constant::START_Z_STREET_LINES + posZ);
-        striscia.RenderNxV();
-        glPopMatrix();
-        
-        posZ -= 3.0;
+        float z = Constant::START_Z_STREET_LINES / 2.5 + posZ;
+        float limitInf = -430 / 2.5;
+
+        if (z > limitInf) {
+            glPushMatrix();
+            glColor3f(1, 1, 1);
+            glScalef(0.1, 1, 2.5);
+            glTranslatef(0, 0.01, z);
+            striscia.RenderNxV();
+            glPopMatrix();
+
+            posZ -= 3.0;
+        }
     }
     glEnable(GL_LIGHTING); // abilito le luci
 }
@@ -215,6 +221,7 @@ void Car::Init() {
 
 // attiva una luce di openGL per simulare un faro della macchina
 //
+
 void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight) const {
     int usedLight = GL_LIGHT1 + lightN;
 
@@ -259,7 +266,7 @@ void Car::RenderAllParts(bool usecolor) const {
         if (usecolor) SetupEnvmapTexture(); // METTO LA TEXTURE DEL CORPO DELLA MACCHINA
     }
     carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice, DISEGNA IL CORPO DELLA MACCHINA PROPRIO
-    if(!usecolor) {
+    if (!usecolor) {
         glDisable(GL_TEXTURE_GEN_S);
         glDisable(GL_TEXTURE_GEN_T);
     }
@@ -290,7 +297,7 @@ void Car::RenderAllParts(bool usecolor) const {
         // provare x credere
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
-        wheelFR2.RenderNxV();   // cerchione davanti
+        wheelFR2.RenderNxV(); // cerchione davanti
         glPopMatrix();
 
         glPushMatrix();
@@ -306,12 +313,12 @@ void Car::RenderAllParts(bool usecolor) const {
 
         if (usecolor) glColor3f(.6, .6, .6);
         if (usecolor) SetupWheelTexture(wheelBR1.bbmin, wheelBR1.bbmax);
-        wheelBR1.RenderNxF();   //gomme dietro
+        wheelBR1.RenderNxF(); //gomme dietro
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
-        wheelBR2.RenderNxV();     //cerchione dietro
-        
-        if(usecolor) {
+        wheelBR2.RenderNxV(); //cerchione dietro
+
+        if (usecolor) {
             glDisable(GL_TEXTURE_GEN_S);
             glDisable(GL_TEXTURE_GEN_T);
         }
@@ -328,13 +335,13 @@ void Car::Render() const {
     //drawAxis(); // disegno assi spazio mondo
     glPushMatrix();
 
-    glTranslatef(px, py, pz);       // QUI GLI DAI LE NUOVE XYZ DELLA MACCHINA
-    glRotatef(facing, 0, 1, 0);     // QUI RUOTA 
+    glTranslatef(px, py, pz); // QUI GLI DAI LE NUOVE XYZ DELLA MACCHINA
+    glRotatef(facing, 0, 1, 0); // QUI RUOTA 
 
     DrawHeadlight(-0.3, 0, -1, 0, useHeadlight); // accendi faro sinistro
     DrawHeadlight(+0.3, 0, -1, 1, useHeadlight); // accendi faro destro
 
-    RenderAllParts(true);// DISEGNA TUTTA LA MACCHINA TRANNE L'OMBRA
+    RenderAllParts(true); // DISEGNA TUTTA LA MACCHINA TRANNE L'OMBRA
 
     // DISEGNA L'OMBRA VERDE!
     if (useShadow) {
