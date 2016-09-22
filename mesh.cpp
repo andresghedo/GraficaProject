@@ -1,29 +1,27 @@
-// file mesh.cpp
-//
-// Implementazione dei metodi di Mesh
+/*
+ *  Implementazione dei metodi della classe Mesh in mesh.h 
+ */
 
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
 #include <GL/gl.h>
-
 #include "point3.h"
 #include "mesh.h"
 
-extern bool useWireframe; // quick hack: una var globale definita altrove 
+/* variabile globale definita il main.cc */
+extern bool useWireframe;
 
+/* Computo normali per facce */
 void Mesh::ComputeNormalsPerFace() {
     for (int i = 0; i < f.size(); i++) {
         f[i].ComputeNormal();
     }
 }
 
-// Computo normali per vertice
-// (come media rinormalizzata delle normali delle facce adjacenti)
-
+/* Computo normali per vertice (come media rinormalizzata delle normali delle facce adjacenti) */
 void Mesh::ComputeNormalsPerVertex() {
-    // uso solo le strutture di navigazione FV (da Faccia a Vertice)!
 
     // fase uno: ciclo sui vertici, azzero tutte le normali
     for (int i = 0; i < v.size(); i++) {
@@ -45,8 +43,7 @@ void Mesh::ComputeNormalsPerVertex() {
 
 }
 
-// renderizzo la mesh in wireframe
-
+/* renderizzo la mesh in wireframe */
 void Mesh::RenderWire() {
     glLineWidth(1.0);
     // (nota: ogni edge viene disegnato due volte. 
@@ -61,8 +58,7 @@ void Mesh::RenderWire() {
     }
 }
 
-// Render usando la normale per faccia (FLAT SHADING)
-
+/* Render usando la normale per faccia (FLAT SHADING) */
 void Mesh::RenderNxF() {
     if (useWireframe) {
         glDisable(GL_TEXTURE_2D);
@@ -85,8 +81,7 @@ void Mesh::RenderNxF() {
     glEnd();
 }
 
-// Render usando la normale per vertice (GOURAUD SHADING)
-
+/* Render usando la normale per vertice (GOURAUD SHADING) */
 void Mesh::RenderNxV() {
     if (useWireframe) {
         glDisable(GL_TEXTURE_2D);
@@ -110,8 +105,7 @@ void Mesh::RenderNxV() {
     glEnd();
 }
 
-// trova l'AXIS ALIGNED BOUNDIG BOX
-
+/* trova l'AXIS ALIGNED BOUNDIG BOX */
 void Mesh::ComputeBoundingBox() {
     // basta trovare la min x, y, e z, e la max x, y, e z di tutti i vertici
     // (nota: non e' necessario usare le facce: perche?) 
@@ -125,11 +119,11 @@ void Mesh::ComputeBoundingBox() {
     }
 }
 
-// carica la mesh da un file in formato Obj
-//   Nota: nel file, possono essere presenti sia quads che tris
-//   ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
-//
-
+/* 
+ *  Carica la mesh da un file in formato Obj
+ *  Nota: nel file, possono essere presenti sia quads che tris  
+ *  ma nella rappresentazione interna (classe Mesh) abbiamo solo tris.
+ */
 bool Mesh::LoadFromObj(char* filename) {
 
     FILE* file = fopen(filename, "rt"); // apriamo il file in lettura
@@ -330,8 +324,6 @@ bool Mesh::LoadFromObj(char* filename) {
                 break;
         }
     }
-
-    //printf("dopo SecondPass nv=%d nt=%d\n",nv,nt);
 
     fclose(file);
     return true;

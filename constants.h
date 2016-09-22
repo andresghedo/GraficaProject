@@ -10,13 +10,15 @@
 
 namespace Constant
 {
-    const int DISTANCE_LINES = 50;    // distanza tra linee della strada/pista
-    const int INITIAL_CAR_X = 0;    // posizione iniziale della macchina X
-    const int INITIAL_CAR_Z = -420;//480;    // posizione iniziale della macchina Z
-
-    const int INITIAL_TARGET_Z = +470;    // posizione iniziale della macchina Z
-    
-    // Random limiti per generazione casuale di un GOAL
+    // DISTANZA TRA LINEE STRADALI
+    const int DISTANCE_LINES = 50;
+    // POSIZIONE INIZIALE GOAL X
+    const int INITIAL_CAR_X = 0;
+    // POSIZIONE INIZIALE GOAL Z
+    const int INITIAL_CAR_Z = 480;
+    // POSIZIONE INIZIALE TARGET Z
+    const int INITIAL_TARGET_Z = +470;
+    // LIMITI RANDOM PER GENERAZIONE CASUALE GOAL
     const float X_POS_GOAL_MAX = +5.0;
     const float X_POS_GOAL_MIN = -5.0;
     const float Z_POS_GOAL_MAX = -7.0;
@@ -46,7 +48,18 @@ namespace Constant
     // PROBABILITA CHE ESCA UN GOAL PIUTTOSTO CHE UN TNT
     const float PROBABILITY_OF_GOAL = 0.70; // 0.75
     // SECONDI A DISPOSIZIONE DELL'UTENTE PER FINIRE LA PISTA
-    const float GAME_LIMIT_SECONDS = 0;//100.0;
+    const float GAME_LIMIT_SECONDS = 100.0;
+    // ID DELLE TEXTURES
+    const int TEXTURE_ID_LOGO_GOMME     = 0;
+    const int TEXTURE_ID_CARROZZERIA    = 1;
+    const int TEXTURE_ID_SKY            = 2;
+    const int TEXTURE_ID_TNT            = 3;
+    const int TEXTURE_ID_ASFALTO        = 4;
+    const int TEXTURE_ID_ERBA           = 5;
+    const int TEXTURE_ID_SELFIE         = 6;
+    const int TEXTURE_ID_RACING_FLAG    = 7;
+    const int TEXTURE_ID_INFO_USER      = -1;
+    
 }
 
 #endif	/* CONSTANTS_H */

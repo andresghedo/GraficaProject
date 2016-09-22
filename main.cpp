@@ -1,6 +1,5 @@
 #include <math.h>
 #include <time.h>
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
@@ -158,7 +157,7 @@ void drawPistaTexture() {
 
         if(useEnvmap) {
             // disegno il terreno ripetendo una texture su di esso
-            glBindTexture(GL_TEXTURE_2D, 4);
+            glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_ASFALTO);
             glEnable(GL_TEXTURE_2D);
             glDisable(GL_TEXTURE_GEN_S);
             glDisable(GL_TEXTURE_GEN_T);
@@ -202,7 +201,7 @@ void drawArrivoTexture() {
 
     // disegno il terreno ripetendo una texture su di esso
     glDisable(GL_LIGHTING);
-    glBindTexture(GL_TEXTURE_2D, 7);
+    glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_RACING_FLAG);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
@@ -244,7 +243,7 @@ void drawFloorTexture() {
         const int K = 750; //OLD 150 disegna K x K quads
 
         if(useEnvmap) {
-            glBindTexture(GL_TEXTURE_2D, 5);
+            glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_ERBA);
             glEnable(GL_TEXTURE_2D);
             glDisable(GL_TEXTURE_GEN_S);
             glDisable(GL_TEXTURE_GEN_T);
@@ -676,14 +675,14 @@ int main(int argc, char* argv[]) {
     // rasterizzazione poligoni
     glPolygonOffset(1, 1); // indietro di 1
 
-    if (!LoadTexture(0, (char *) "./img/logo.jpg")) return 0;
-    if (!LoadTexture(1, (char *) "./img/envmap_flipped.jpg")) return 0;
-    if (!LoadTexture(2, (char *) "./img/sky_ok.jpg")) return -1;
-    if (!LoadTexture(3, (char *) "./img/tnt.png")) return -1;
-    if (!LoadTexture(4, (char *) "./img/asfalto.png")) return -1;
-    if (!LoadTexture(5, (char *) "./img/erba.jpg")) return -1;
-    if (!LoadTexture(6, (char *) "./img/selfie.jpg")) return -1;
-    if (!LoadTexture(7, (char *) "./img/traguardo.jpg")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_LOGO_GOMME, (char *) "./img/logo_gomme.jpg")) return 0;
+    if (!LoadTexture(Constant::TEXTURE_ID_CARROZZERIA, (char *) "./img/envmap_flipped.jpg")) return 0;
+    if (!LoadTexture(Constant::TEXTURE_ID_SKY, (char *) "./img/sky_ok.jpg")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_TNT, (char *) "./img/tnt.png")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_ASFALTO, (char *) "./img/asfalto.png")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_ERBA, (char *) "./img/erba.jpg")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_SELFIE, (char *) "./img/selfie.jpg")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_RACING_FLAG, (char *) "./img/racing_flag.jpg")) return -1;
 
     bool done = 0;
     bool doneGO = 0;

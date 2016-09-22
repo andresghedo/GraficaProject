@@ -34,7 +34,7 @@ extern bool useShadow; // var globale esterna: per generare l'ombra
 
 void SetupEnvmapTexture() {
     // facciamo binding con la texture 1
-    glBindTexture(GL_TEXTURE_2D, 1);
+    glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_CARROZZERIA);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S); // abilito la generazione automatica delle coord texture S e T
     glEnable(GL_TEXTURE_GEN_T);
@@ -51,7 +51,7 @@ void SetupEnvmapTexture() {
 // TEXTURE RUOTE 
 
 void SetupWheelTexture(Point3 min, Point3 max) {
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LOGO_GOMME);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);

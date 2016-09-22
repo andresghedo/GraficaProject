@@ -132,9 +132,9 @@ void Controller::drawTargetCube(float mozzo) {
     // disegno del cubo con una texture personale su tutti e sei i lati
     glPushMatrix();
     if (isTnt)
-        glBindTexture(GL_TEXTURE_2D, 3);
+        glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_TNT);
     else
-        glBindTexture(GL_TEXTURE_2D, 6);
+        glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_SELFIE);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
@@ -390,7 +390,7 @@ void Controller::SDL_GL_DrawText(TTF_Font *font, // font
     SDL_BlitSurface(initial, 0, intermediary, 0);
 
     /* Informiamo GL della nuova texture */
-    glBindTexture(GL_TEXTURE_2D, -1);
+    glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_INFO_USER);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, intermediary->pixels);
 
@@ -413,7 +413,7 @@ void Controller::SDL_GL_DrawText(TTF_Font *font, // font
 
     /* prepariamoci al rendering del testo */
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, -1);
+    glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_INFO_USER);
     glColor3f(1.0f, 1.0f, 1.0f);
 
     /* Disegnamo un quads come location del testo */

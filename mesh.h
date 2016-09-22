@@ -1,25 +1,27 @@
-// classe Vertex: 
-// i vertici della mesh
-
+/*
+ *  CLASSE Vertex
+ */
 class Vertex {
 public:
-    Point3 p; // posizione
+    Point3 p;
 
-    // attributi per verice
-    Vector3 n; // normale (per vertice)
+    Vector3 n;
 };
 
+/*
+ *  CLASSE Edge
+ */
 class Edge {
 public:
-    Vertex* v[2]; // due puntatori a Vertice (i due estremi dell'edge)
-    // attributi per edge:
+    Vertex* v[2];
 };
 
+/*
+ *  CLASSE Face
+ */
 class Face {
 public:
-    Vertex* v[3]; // tre puntatori a Vertice (i tre vertici del triangolo)
-
-    // costruttore
+    Vertex* v[3];
 
     Face(Vertex* a, Vertex* b, Vertex* c) {
         v[0] = a;
@@ -27,29 +29,28 @@ public:
         v[2] = c;
     }
 
-    // attributi per faccia
-    Vector3 n; // normale (per faccia)
-
-    // computa la normale della faccia
+    Vector3 n;
 
     void ComputeNormal() {
         n = -((v[1]->p - v[0]->p) % (v[2]->p - v[0]->p)).Normalize();
     }
 
-    // attributi per wedge
-
 };
 
+/*
+ *  CLASSE Mesh
+ */
 class Mesh {
-    std::vector<Vertex> v; // vettore di vertici
-    std::vector<Face> f; // vettore di facce
-    std::vector<Edge> e; // vettore di edge (per ora, non usato)
-
+    /* vettore di vertici */
+    std::vector<Vertex> v;
+    /* vettore di facce */
+    std::vector<Face> f;
+    /* vettore di edge */
+    std::vector<Edge> e;
 
 public:
 
-    // costruttore con caricamento
-
+    /* costruttore che carica già la mesh dal file filename */
     Mesh(char *filename) {
         LoadFromObj(filename);
         ComputeNormalsPerFace();
@@ -57,23 +58,25 @@ public:
         ComputeBoundingBox();
     }
 
-    // metodi
-    void RenderNxF(); // manda a schermo la mesh Normali x Faccia
-    void RenderNxV(); // manda a schermo la mesh Normali x Vertice
-    void RenderWire(); // manda a schermo la mesh in wireframe
-
-    bool LoadFromObj(char* filename); //  carica la mesh da un file OFF
+    /* manda a schermo la mesh Normali x Faccia */
+    void RenderNxF();
+    /* manda a schermo la mesh Normali x Vertice */
+    void RenderNxV();
+    /* manda a schermo la mesh in wireframe */
+    void RenderWire();
+    /* carica la mesh da un file OFF */
+    bool LoadFromObj(char* filename);
 
     void ComputeNormalsPerFace();
+
     void ComputeNormalsPerVertex();
 
     void ComputeBoundingBox();
 
-    // centro del axis aligned bounding box
-
+    /* centro del axis aligned bounding box */
     Point3 Center() {
         return (bbmin + bbmax) / 2.0;
     };
 
-    Point3 bbmin, bbmax; // bounding box 
+    Point3 bbmin, bbmax; 
 };

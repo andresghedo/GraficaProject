@@ -1,10 +1,14 @@
-// classe Point3: un punto (o vettore) in 3 dimensioni
-// comprende le operazioni fra punti
-
+/*
+ *  CLASSE Point3
+ * 
+ *  Punto o vettore in 3D, implementa le operazione fra punti 
+ * 
+ */
 class Point3 {
 public:
 
-    float coord[3]; // l'UNICO campo: le cooedinate x, y, z
+    /* coordinate 3D */
+    float coord[3];
 
     float X() const {
         return coord[0];
@@ -18,36 +22,31 @@ public:
         return coord[2];
     }
     
-    // costruttore 1
-
+    /* costruttore con xyz */
     Point3(float x, float y, float z) {
         coord[0] = x;
         coord[1] = y;
         coord[2] = z;
     }
 
-    // costruttore vuoto
-
+    /* costruttore vuoto */
     Point3() {
         coord[0] = coord[1] = coord[2] = 0;
     }
 
 
-    // restituisce la versione di se stesso normalizzata
-
+    /* normalizzazione */
     Point3 Normalize() const {
         return (*this) / modulo();
     }
 
-    // restituisce il modulo
-
+    /* modulo */
     float modulo() const {
         return
         sqrt(coord[0] * coord[0] + coord[1] * coord[1] + coord[2] * coord[2]);
     }
 
-    // operatore "/" binario: divisione per uno scalare (un float)
-
+    /* operatore binario - divisione per uno scalare f */
     Point3 operator/(float f) const {
         return Point3(
                 coord[0] / f,
@@ -56,8 +55,7 @@ public:
                 );
     }
 
-    // operatore "-" unario: inversione del verso del vettore
-
+    /* inversione verso del vettore */
     Point3 operator-()const {
         return Point3(
                 -coord[0],
@@ -66,8 +64,7 @@ public:
                 );
     }
 
-    // operatore "-" binario: differenza fra punti
-
+    /* differenza tra punti */
     Point3 operator-(const Point3 &a)const {
         return Point3(
                 coord[0] - a.coord[0],
@@ -76,8 +73,7 @@ public:
                 );
     }
 
-    // somma fra vettori  
-
+    /* somma tra vettori */
     Point3 operator+(const Point3 &a)const {
         return Point3(
                 coord[0] + a.coord[0],
@@ -87,8 +83,7 @@ public:
     }
 
 
-    // ridefinisco l'operatore binario "%" per fare il CROSS PRODUCT
-
+    /* operatore % */
     Point3 operator%(const Point3 &a)const {
         return Point3(
                 coord[1] * a.coord[2] - coord[2] * a.coord[1],
@@ -97,38 +92,35 @@ public:
                 );
     }
 
-    // mandare il punto come vertice di OpenGl
-
+    /* mandare il punto come vertice di OpenGl */
     void SendAsVertex() const {
         glVertex3fv(coord);
     }
 
-    // mandare il punto come normale di OpenGl
-
+    /* mandare il punto come normale di OpenGl */
     void SendAsNormal() const {
         glNormal3fv(coord);
     }
-    
+
+    /* setta X del punto/vettore */
     void setX(float x) {
         coord[0] = x;
     }
-    
+
+    /* setta Y del punto/vettore */
     void setY(float y) {
         coord[1] = y;
     }
-    
+
+    /* setta Z del punto/vettore */
     void setZ(float z) {
         coord[2] = z;
     }
 };
 
-
-// definiamo Vector3 come SINONIMO di Point3
-// (solo per chiarezza, per distinguere nel codice fra punti e vettori)
+/* definizione di sinonimo */
 typedef Point3 Vector3;
 
 inline void glTranslate(Point3 v) {
     glTranslatef(v.X(), v.Y(), v.Z());
 }
-
-
