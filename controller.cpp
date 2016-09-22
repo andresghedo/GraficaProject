@@ -23,13 +23,13 @@
 #include "car.h"
 #include "constants.h"
 
-Mesh recinzione((char *) "./obj/recinzione.obj");
 Point3 targetPoint = Point3(0, 0, Constant::INITIAL_TARGET_Z);
 Point3 triangleTopPoint = Point3(0, 0, 0);
 bool generate;
 bool isTnt = false;
 bool isGoal = true;
 bool gameOver = false;
+bool playerLoose = false;
 int punteggio = 0;
 int tntChecked = 0;
 int tnt = 0;
@@ -63,36 +63,40 @@ void Controller::Joy(int keymap, bool pressed_or_released) {
 }
 
 bool isInTarget() {
-    printf("TARGET X:%f Z:%f\n", targetPoint.X(), targetPoint.Z());
+//    printf("TARGET X:%f Z:%f\n", targetPoint.X(), targetPoint.Z());
     return ((triangleTopPoint.X() >= targetPoint.X() - Constant::DIM_CUBE) && (triangleTopPoint.X() <= targetPoint.X() + Constant::DIM_CUBE))&&((triangleTopPoint.Z() >= targetPoint.Z() - Constant::DIM_CUBE) && (triangleTopPoint.Z() <= targetPoint.Z() + Constant::DIM_CUBE));
 }
 
-bool generateTarget(float carZ) {
+bool generateTarget(float carX, float carZ) {
 
-    float targetX, targetZ;
-    if ((((float) rand()) / (float) RAND_MAX) > 0.75) { // genero un TNT
+    float targetX, targetZ, newX, newZ;
+    if ((((float) rand()) / (float) RAND_MAX) > Constant::PROBABILITY_OF_GOAL) { // genero un TNT
         isTnt = true;
         isGoal = false;
         tnt += 1;
         targetX = (Constant::X_POS_TNT_MAX - Constant::X_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::X_POS_TNT_MIN;
         targetZ = (Constant::Z_POS_TNT_MAX - Constant::Z_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_TNT_MIN;
+        newX = carX + targetX;
+        newZ = carZ + targetZ;
     } else { // genero un GOAL
         isTnt = false;
         isGoal = true;
         goal += 1;
         targetX = (Constant::X_POS_GOAL_MAX - Constant::X_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::X_POS_GOAL_MIN;
         targetZ = (Constant::Z_POS_GOAL_MAX - Constant::Z_POS_GOAL_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_GOAL_MIN;
+        newX = targetX;
+        newZ = carZ + targetZ;
     }
     if (carZ + targetZ < -425) {
         targetPoint.setX(-900);
         targetPoint.setZ(-900);
     } else {
-        targetPoint.setX(targetX);
-        targetPoint.setZ(carZ + targetZ);
+        targetPoint.setX(newX);
+        targetPoint.setZ(newZ);
     }
 }
 
-void Controller::checkVisibilityTarget(float carZ) {
+void Controller::checkVisibilityTarget(float carX, float carZ) {
     if ((targetPoint.Z() - carZ) > Constant::LIMIT_VISIBILITY_TARGET) {
         generate = true;
         if (isGoal)
@@ -110,13 +114,17 @@ void Controller::checkVisibilityTarget(float carZ) {
     }
 
     if (generate) {
-        generateTarget(carZ);
+        generateTarget(triangleTopPoint.X(), triangleTopPoint.Z());
     }
     if ((triangleTopPoint.Z() < -430) && ((triangleTopPoint.X() > -5.0) && (triangleTopPoint.X() < 5.0))) {
         gameOver = true;
         endTime = Controller::getSeconds();
     }
-    printf("PUNTEGGIO: %d\n", punteggio);
+    if (Constant::GAME_LIMIT_SECONDS - Controller::getSeconds() <= 0) {
+        gameOver = true;
+        playerLoose = true;
+    }
+    //printf("PUNTEGGIO: %d\n", punteggio);
 }
 
 void Controller::drawTargetCube(float mozzo) {
@@ -272,7 +280,7 @@ void Controller::drawTriangleForTarget(float facing, float carX, float carZ) {
 
     triangleTopPoint.setX(xC);
     triangleTopPoint.setZ(zC);
-    printf("MIRINO X: %f    Z: %f\n", triangleTopPoint.X(), triangleTopPoint.Z());
+    //printf("MIRINO X: %f    Z: %f\n", triangleTopPoint.X(), triangleTopPoint.Z());
 
     //    drawLineToDebug(xA, +1, zA, xA, 0, zA);
     //    drawLineToDebug(xB, +1, zB, xB, 0, zB);
@@ -328,6 +336,10 @@ bool Controller::isTargetTnt() {
 bool Controller::isGameOver() {
     //    return (Controller::getSeconds() > 4);
     return gameOver;
+};
+
+bool Controller::isPlayerLoose() {
+    return playerLoose;
 };
 
 int Controller::getScore() {
@@ -445,7 +457,7 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
     glViewport(0, 0, scrW, scrH);
 
     // colore di sfondo (fuori dal mondo)
-    glClearColor(.4, 0, 0, 1);
+    glClearColor(0, 0, 0, 1);
 
     // riempe tutto lo screen buffer di pixel color sfondo
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

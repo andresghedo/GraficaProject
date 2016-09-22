@@ -17,7 +17,7 @@ public:
     void EatKey(int keycode, int* keymap, bool pressed_or_released);
     void Joy(int keymap, bool pressed_or_released);
     void drawTargetCube(float mozzo);
-    void checkVisibilityTarget(float carZ);
+    void checkVisibilityTarget(float carX, float carZ);
     void drawTriangleForTarget(float facing, float carX, float carZ);
     void drawLightTorciaStatua();
     float getTargetX();
@@ -25,6 +25,7 @@ public:
     bool isTargetGoal();
     bool isTargetTnt();
     bool isGameOver();
+    bool isPlayerLoose();
     int getScore();
     int getGoal();
     int getGoalChecked();

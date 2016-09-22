@@ -19,15 +19,15 @@ namespace Constant
     // Random limiti per generazione casuale di un GOAL
     const float X_POS_GOAL_MAX = +5.0;
     const float X_POS_GOAL_MIN = -5.0;
-    const float Z_POS_GOAL_MAX = -10.0;
-    const float Z_POS_GOAL_MIN = -35.0;
+    const float Z_POS_GOAL_MAX = -7.0;
+    const float Z_POS_GOAL_MIN = -20.0;
     // Random limiti per generazione casuale di un TNT
     // Genero un TNT in posizione piu centrale e più vicino alla macchina in corsa 
     // in modo da mettere in difficoltà il Player
     const float X_POS_TNT_MAX = +0;
     const float X_POS_TNT_MIN = -0.0;
-    const float Z_POS_TNT_MAX = -12.0;
-    const float Z_POS_TNT_MIN = -17.0;
+    const float Z_POS_TNT_MAX = -5.0;
+    const float Z_POS_TNT_MIN = -8.0;
     // CUBE TARGET DIMENSION
     const float DIM_CUBE = 0.8;
     const float DIM_X_MIN_TARGET = -DIM_CUBE, DIM_X_MAX_TARGET = DIM_CUBE;
@@ -43,6 +43,10 @@ namespace Constant
     const float RADAR_LENGTH = 250.0;
     // INIZIO Z DELLE LINEE DELLA STRADA
     const float START_Z_STREET_LINES = 500.0;
+    // PROBABILITA CHE ESCA UN GOAL PIUTTOSTO CHE UN TNT
+    const float PROBABILITY_OF_GOAL = 0.70; // 0.75
+    // SECONDI A DISPOSIZIONE DELL'UTENTE PER FINIRE LA PISTA
+    const float GAME_LIMIT_SECONDS = 100.0;
 }
 
 #endif	/* CONSTANTS_H */
