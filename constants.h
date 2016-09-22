@@ -12,7 +12,7 @@ namespace Constant
 {
     const int DISTANCE_LINES = 50;    // distanza tra linee della strada/pista
     const int INITIAL_CAR_X = 0;    // posizione iniziale della macchina X
-    const int INITIAL_CAR_Z = 480;    // posizione iniziale della macchina Z
+    const int INITIAL_CAR_Z = -420;//480;    // posizione iniziale della macchina Z
 
     const int INITIAL_TARGET_Z = +470;    // posizione iniziale della macchina Z
     

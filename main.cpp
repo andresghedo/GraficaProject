@@ -121,7 +121,6 @@ void drawAxis() {
 }
 
 // DISEGNO DEL "CIELO"
-
 void drawSphere(double r, int lats, int longs) {
     int i, j;
     for (i = 0; i <= lats; i++) {
@@ -150,73 +149,52 @@ void drawSphere(double r, int lats, int longs) {
 }
 
 // DISEGNA LA PAVIMENTAZIONE
-
-void drawFloor() {
-    const float S = 500; // OLD 100 size
-    const float H = 0; // altezza
-    const int K = 750; //OLD 150 disegna K x K quads
-
-    // disegna KxK quads
-    glBegin(GL_QUADS);
-    glColor3f(0.6, 0.6, 0.6); // colore uguale x tutti i quads
-    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
-    for (int x = 0; x < K; x++)
-        for (int z = 0; z < K; z++) {
-            float x0 = -S + 2 * (x + 0) * S / K;
-            float x1 = -S + 2 * (x + 1) * S / K;
-            float z0 = -S + 2 * (z + 0) * S / K;
-            float z1 = -S + 2 * (z + 1) * S / K;
-            glVertex3d(x0, H, z0);
-            glVertex3d(x1, H, z0);
-            glVertex3d(x1, H, z1);
-            glVertex3d(x0, H, z1);
-        }
-    glEnd();
-}
-
-// DISEGNA LA PAVIMENTAZIONE
-
 void drawPistaTexture() {
-    const float S = 500; // OLD 100 size
-    const float H = 0; // altezza
-    const int K = 750; //OLD 150 disegna K x K quads
+    
+    if(!useWireframe) {
+        const float S = 500; // OLD 100 size
+        const float H = 0; // altezza
+        const int K = 750; //OLD 150 disegna K x K quads
 
-    // disegno il terreno ripetendo una texture su di esso
-    glBindTexture(GL_TEXTURE_2D, 4);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    // disegna KxK quads
-    glBegin(GL_QUADS);
-    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
-    for (int x = 0; x < K; x++)
-        for (int z = 0; z < K; z++) {
-            // scelgo il colore per quel quad
-            float x0 = -S + 2 * (x + 0) * S / K;
-            float x1 = -S + 2 * (x + 1) * S / K;
-            float z0 = -S + 2 * (z + 0) * S / K;
-            float z1 = -S + 2 * (z + 1) * S / K;
-            if ((x0 <= 4) && (x0 >= -6) && ((z0 < -430) || (z0 > -428))) {
-                glTexCoord2f(0.0, 0.0);
-                glVertex3d(x0, H, z0);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3d(x1, H, z0);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3d(x1, H, z1);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3d(x0, H, z1);
-            }
+        if(useEnvmap) {
+            // disegno il terreno ripetendo una texture su di esso
+            glBindTexture(GL_TEXTURE_2D, 4);
+            glEnable(GL_TEXTURE_2D);
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
+            //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
+
+        if(! useEnvmap) { glColor3ub(210, 210, 210); };
+        // disegna KxK quads
+        glBegin(GL_QUADS);
+        glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+        for (int x = 0; x < K; x++)
+            for (int z = 0; z < K; z++) {
+                // scelgo il colore per quel quad
+                float x0 = -S + 2 * (x + 0) * S / K;
+                float x1 = -S + 2 * (x + 1) * S / K;
+                float z0 = -S + 2 * (z + 0) * S / K;
+                float z1 = -S + 2 * (z + 1) * S / K;
+                if ((x0 <= 4) && (x0 >= -6) && ((z0 < -430) || (z0 > -428))) {
+                    if(useEnvmap) { glTexCoord2f(0.0, 0.0); }
+                    glVertex3d(x0, H, z0);
+                    if(useEnvmap) { glTexCoord2f(1.0, 0.0); }
+                    glVertex3d(x1, H, z0);
+                    if(useEnvmap) { glTexCoord2f(1.0, 1.0); }
+                    glVertex3d(x1, H, z1);
+                    if(useEnvmap) { glTexCoord2f(0.0, 1.0); }
+                    glVertex3d(x0, H, z1);
+                }
+            }
+        glEnd();
+        if(useEnvmap) { glDisable(GL_TEXTURE_2D); }
+    }
     return;
 }
 
 // DISEGNA LA PAVIMENTAZIONE
-
 void drawArrivoTexture() {
     const float S = 500; // OLD 100 size
     const float H = 0; // altezza
@@ -260,41 +238,43 @@ void drawArrivoTexture() {
 // DISEGNA LA PAVIMENTAZIONE
 
 void drawFloorTexture() {
-    const float S = 500; // OLD 100 size
-    const float H = 0; // altezza
-    const int K = 750; //OLD 150 disegna K x K quads
+    if(!useWireframe) {
+        const float S = 500; // OLD 100 size
+        const float H = 0; // altezza
+        const int K = 750; //OLD 150 disegna K x K quads
 
-    // disegno il terreno ripetendo una texture su di esso
-    glBindTexture(GL_TEXTURE_2D, 5);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    // disegna KxK quads
-    glBegin(GL_QUADS);
-    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
-    for (int x = 0; x < K; x++)
-        for (int z = 0; z < K; z++) {
-            // scelgo il colore per quel quad
-
-            float x0 = -S + 2 * (x + 0) * S / K;
-            float x1 = -S + 2 * (x + 1) * S / K;
-            float z0 = -S + 2 * (z + 0) * S / K;
-            float z1 = -S + 2 * (z + 1) * S / K;
-            if ((x0 > 4) || (x0<-6)) {
-                glTexCoord2f(0.0, 0.0);
-                glVertex3d(x0, H, z0);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3d(x1, H, z0);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3d(x1, H, z1);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3d(x0, H, z1);
-            }
+        if(useEnvmap) {
+            glBindTexture(GL_TEXTURE_2D, 5);
+            glEnable(GL_TEXTURE_2D);
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
+            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
+
+        // disegna KxK quads
+        if(!useEnvmap) { glColor3ub(0, 179, 60); }
+        glBegin(GL_QUADS);
+        glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+        for (int x = 0; x < K; x++)
+            for (int z = 0; z < K; z++) {
+                float x0 = -S + 2 * (x + 0) * S / K;
+                float x1 = -S + 2 * (x + 1) * S / K;
+                float z0 = -S + 2 * (z + 0) * S / K;
+                float z1 = -S + 2 * (z + 1) * S / K;
+                if ((x0 > 4) || (x0<-6)) {
+                    if(useEnvmap) { glTexCoord2f(0.0, 0.0); }
+                    glVertex3d(x0, H, z0);
+                    if(useEnvmap) { glTexCoord2f(1.0, 0.0); }
+                    glVertex3d(x1, H, z0);
+                    if(useEnvmap) { glTexCoord2f(1.0, 1.0); }
+                    glVertex3d(x1, H, z1);
+                    if(useEnvmap) { glTexCoord2f(0.0, 1.0); }
+                    glVertex3d(x0, H, z1);
+                }
+            }
+        glEnd();
+        if(useEnvmap) { glDisable(GL_TEXTURE_2D); }
+    }
 }
 
 void drawCircle(float cx, float cy, float r, int num_segments) {
@@ -515,21 +495,21 @@ void drawSky() {
         glColor3f(1, 1, 1);
         glEnable(GL_LIGHTING);
     } else {
-        glBindTexture(GL_TEXTURE_2D, 2);
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_TEXTURE_GEN_S);
-        glEnable(GL_TEXTURE_GEN_T);
-        glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
-        glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-        glColor3f(1, 1, 1);
-        glDisable(GL_LIGHTING);
+        if(useEnvmap) { glBindTexture(GL_TEXTURE_2D, 2); }
+        if(useEnvmap) { glEnable(GL_TEXTURE_2D); }
+        if(useEnvmap) { glEnable(GL_TEXTURE_GEN_S); }
+        if(useEnvmap) { glEnable(GL_TEXTURE_GEN_T); }
+        if(useEnvmap) { glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); } // Env map 
+        if(useEnvmap) { glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); }
+        if(useEnvmap) { glColor3f(1, 1, 1); } else { glColor3f(0, 0, 1); }
+        glDisable(GL_LIGHTING); 
 
         //   drawCubeFill();
         drawSphere(500.0, 20, 20); // old 100
 
-        glDisable(GL_TEXTURE_GEN_S);
-        glDisable(GL_TEXTURE_GEN_T);
-        glDisable(GL_TEXTURE_2D);
+        if(useEnvmap) { glDisable(GL_TEXTURE_GEN_S); }
+        if(useEnvmap) { glDisable(GL_TEXTURE_GEN_T); }
+        if(useEnvmap) { glDisable(GL_TEXTURE_2D); }
         glEnable(GL_LIGHTING);
     }
 
