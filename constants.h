@@ -46,7 +46,7 @@ namespace Constant
     // PROBABILITA CHE ESCA UN GOAL PIUTTOSTO CHE UN TNT
     const float PROBABILITY_OF_GOAL = 0.70; // 0.75
     // SECONDI A DISPOSIZIONE DELL'UTENTE PER FINIRE LA PISTA
-    const float GAME_LIMIT_SECONDS = 100.0;
+    const float GAME_LIMIT_SECONDS = 0;//100.0;
 }
 
 #endif	/* CONSTANTS_H */

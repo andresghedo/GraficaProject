@@ -475,9 +475,9 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
     char punti[3];
     sprintf(punti, "%d", punteggio);
 
-    char stringa_punti[] = "Punteggio: ";
     char str_game_over[] = "GAME OVER!!";
-    char continuare[] = "Premi un tasto\n per continuare";
+    char player_looser[] = "YOU LOOSE!!  TIME'S UP!!";
+    char continuare[] = "Premi << ESC >> per uscire ...";
     
     TTF_Font *fontTitle;
     fontTitle = TTF_OpenFont("./ttf/amatic.ttf", 100);
@@ -485,21 +485,22 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
         fprintf(stderr, "Impossibile caricare il font.\n");
     }
     
-    char tnt[20];
-    sprintf(tnt, "TNT:  %d / %d   ", Controller::getTntChecked(), Controller::getTnt());
-    char goal[20];
-    sprintf(goal, "GOAL:  %d / %d   ", Controller::getGoalChecked(), Controller::getGoal());
-    char point[20];
-    sprintf(point, "SCORE:  %d   ", Controller::getScore());
-    char time[20];
-    sprintf(time, "TIME:  %f ", endTime);
+    char tnt[20], goal[20], point[20], time[20];
+    if(!playerLoose) { sprintf(tnt, "TNT:  %d / %d   ", Controller::getTntChecked(), Controller::getTnt()); }
+    if(!playerLoose) { sprintf(goal, "GOAL:  %d / %d   ", Controller::getGoalChecked(), Controller::getGoal()); }
+    if(!playerLoose) { sprintf(point, "SCORE:  %d   ", Controller::getScore()); }
+    if(!playerLoose) { sprintf(time, "TIME:  %f ", endTime); }
 
     Controller::SDL_GL_DrawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, str_game_over, scrW / 2 - 120, scrH  - 120);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, point, 50, scrH / 2 + 100);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, goal, 50, scrH / 2 + 30);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, tnt, 50, scrH / 2 -40);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, time, 50, scrH / 2 - 110);
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, continuare, 50, scrH / 2 - 180);
+    if(!playerLoose) { 
+        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, point, 50, scrH / 2 + 100);
+        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, goal, 50, scrH / 2 + 30);
+        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, tnt, 50, scrH / 2 -40);
+        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, time, 50, scrH / 2 - 110);
+    } else {
+        Controller::SDL_GL_DrawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, player_looser, scrW / 2 - 200, scrH / 2 + 100);
+    }
+    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, continuare, scrW / 2 - 120, scrH / 2 - 180);
     glFinish();
 
     SDL_GL_SwapWindow(win);
