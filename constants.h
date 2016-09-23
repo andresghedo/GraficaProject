@@ -15,7 +15,7 @@ namespace Constant
     /* posizione iniziale Car X */
     const int INITIAL_CAR_X = 0;
     /* posizione iniziale Car Z */
-    const int INITIAL_CAR_Z = 0;
+    const int INITIAL_CAR_Z = +480;
     /* posizione inizale Goal Z */
     const int INITIAL_TARGET_Z = +470;
     /* limiti Random per generazione casuale di un Goal */

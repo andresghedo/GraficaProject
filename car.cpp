@@ -244,30 +244,31 @@ void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight
         glDisable(usedLight);
 }
 
-// funzione che disegna tutti i pezzi della macchina
-// (carlinga, + 4 route)
-// (da invocarsi due volte: per la macchina, e per la sua ombra)
-// (se usecolor e' falso, NON sovrascrive il colore corrente
-//  e usa quello stabilito prima di chiamare la funzione)
-
+/* funzione che disegna tutti i pezzi della macchina
+   (carlinga, + 4 route)
+   (da invocarsi due volte: per la macchina, e per la sua ombra)
+   (se usecolor e' falso, NON sovrascrive il colore corrente
+   e usa quello stabilito prima di chiamare la funzione) */
 void Car::RenderAllParts(bool usecolor) const {
 
-    // disegna la carliga con una mesh
+    /* disegna la carliga con una mesh */
     glPushMatrix();
-    glScalef(-0.05, 0.05, -0.05); // patch: riscaliamo la mesh di 1/10 
+    glScalef(-0.05, 0.05, -0.05);
     if (!useEnvmap) {
-        if (usecolor) glColor3f(1, 0, 0); // colore rosso, da usare con Lighting
+        /* colore rosso se non uso texture */
+        if (usecolor) glColor3f(1, 0, 0);
     } else {
-        if (usecolor) SetupEnvmapTexture(); // METTO LA TEXTURE DEL CORPO DELLA MACCHINA
+        /* metto la texture alla carrozzeria */
+        if (usecolor) SetupEnvmapTexture();
     }
-    carlinga.RenderNxV(); // rendering delle mesh carlinga usando normali per vertice, DISEGNA IL CORPO DELLA MACCHINA PROPRIO
+    carlinga.RenderNxV();
     if (!usecolor) {
         glDisable(GL_TEXTURE_GEN_S);
         glDisable(GL_TEXTURE_GEN_T);
     }
 
     if (usecolor) glEnable(GL_LIGHTING);
-    // QUESTO CICLO FOR DISEGNA LE RUOTE ...
+    /* ciclo per disegno di ruote e gomme */
     for (int i = 0; i < 2; i++) {
         // i==0 -> disegno ruote destre.
         // i==1 -> disegno ruote sinistre.

@@ -18,36 +18,42 @@
 #define CAMERA_TYPE_MAX 5
 #define PI 3.14159265
 
-float viewAlpha = 20, viewBeta = 40; // angoli che definiscono la vista
-float eyeDist = 5.0; // distanza dell'occhio dall'origine
-int scrH = 750, scrW = 750; // altezza e larghezza viewport (in pixels)
+/* angoli che definiscono la vista */
+float viewAlpha = 20, viewBeta = 40;
+/* distanza dell'occhio dall'origine */
+float eyeDist = 5.0;
+/* altezza e larghezza viewport (in pixels) */
+int scrH = 750, scrW = 750;
 bool useWireframe = false;
 bool useEnvmap = true;
 bool useHeadlight = false;
 bool useShadow = true;
 int cameraType = 0;
-
-Car car; // la nostra macchina
+/* l'entità Car */
+Car car;
+/* l'entità Controller */
 Controller controller;
-int nstep = 0; // numero di passi di FISICA fatti fin'ora
-const int PHYS_SAMPLING_STEP = 10; // numero di millisec che un passo di fisica simula
-
-// Frames Per Seconds
-const int fpsSampling = 3000; // lunghezza intervallo di calcolo fps
-float fps = 0; // valore di fps dell'intervallo precedente
-int fpsNow = 0; // quanti fotogrammi ho disegnato fin'ora nell'intervallo attuale
-Uint32 timeLastInterval = 0; // quando e' cominciato l'ultimo intervallo
-
+/* numero di passi di FISICA fatti fin'ora */
+int nstep = 0;
+/* numero di millisec che un passo di fisica simula */
+const int PHYS_SAMPLING_STEP = 10;
+/* lunghezza intervallo di calcolo fps */
+const int fpsSampling = 3000;
+/* valore di fps dell'intervallo precedente */
+float fps = 0;
+/* quanti fotogrammi ho disegnato fin'ora nell'intervallo attuale */
+int fpsNow = 0;
+/* quando e' cominciato l'ultimo intervallo */
+Uint32 timeLastInterval = 0;
+/* extern functions */
 extern void drawExtremeSX();
 extern void drawMiddleLine();
 extern void drawExtremeDX();
 extern void drawStatua();
-/* qualita del testo scritto e id della realtiva texture */
 
-// setta le matrici di trasformazione in modo
-// che le coordinate in spazio oggetto siano le coord 
-// del pixel sullo schemo
-
+/* setta le matrici di trasformazione in modo
+   che le coordinate in spazio oggetto siano le coord 
+   del pixel sullo schemo */
 void SetCoordToPixel() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -57,11 +63,10 @@ void SetCoordToPixel() {
     glScalef(2.0 / scrW, 2.0 / scrH, 1);
 }
 
-// CARICO PRELIMINARMENTE LE TEXTURE
-
+/* carimento di una texture in path filename */
 bool LoadTexture(int textbind, char *filename) {
 
-    // carica l'immagine tramite una chiamata SDL
+    /* carica l'immagine tramite una chiamata SDL */
     SDL_Surface *s = IMG_Load(filename);
     if (!s) return false;
 
@@ -85,8 +90,7 @@ bool LoadTexture(int textbind, char *filename) {
     return true;
 }
 
-// disegna gli assi nel sist. di riferimento
-
+/* disegna gli assi nel sistema di riferimento */
 void drawAxis() {
     const float K = 0.10;
     glColor3f(0, 1, 0); // GREEN
@@ -119,7 +123,7 @@ void drawAxis() {
 
 }
 
-// DISEGNO DEL "CIELO"
+/* disegan una sfera(usata nel disegno dello sky) */
 void drawSphere(double r, int lats, int longs) {
     int i, j;
     for (i = 0; i <= lats; i++) {
@@ -147,31 +151,29 @@ void drawSphere(double r, int lats, int longs) {
     }
 }
 
-// DISEGNA LA PAVIMENTAZIONE
+/* disegno la pista texturata */
 void drawPistaTexture() {
     
     if(!useWireframe) {
-        const float S = 500; // OLD 100 size
-        const float H = 0; // altezza
-        const int K = 750; //OLD 150 disegna K x K quads
+        const float S = 500;
+        const float H = 0;
+        const int K = 750;
 
         if(useEnvmap) {
-            // disegno il terreno ripetendo una texture su di esso
+            /* disegno il terreno ripetendo una texture su di esso */
             glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_ASFALTO);
             glEnable(GL_TEXTURE_2D);
             glDisable(GL_TEXTURE_GEN_S);
             glDisable(GL_TEXTURE_GEN_T);
-            //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
 
         if(! useEnvmap) { glColor3ub(210, 210, 210); };
-        // disegna KxK quads
+        /* disegna KxK quads */
         glBegin(GL_QUADS);
-        glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+        glNormal3f(0, 1, 0);
         for (int x = 0; x < K; x++)
             for (int z = 0; z < K; z++) {
-                // scelgo il colore per quel quad
                 float x0 = -S + 2 * (x + 0) * S / K;
                 float x1 = -S + 2 * (x + 1) * S / K;
                 float z0 = -S + 2 * (z + 0) * S / K;
@@ -193,27 +195,23 @@ void drawPistaTexture() {
     return;
 }
 
-// DISEGNA LA PAVIMENTAZIONE
+/* disegno l'asfalto in prossimità dell'arrivo con una scacchiera texture */
 void drawArrivoTexture() {
-    const float S = 500; // OLD 100 size
-    const float H = 0; // altezza
-    const int K = 750; //OLD 150 disegna K x K quads
+    const float S = 500;
+    const float H = 0;
+    const int K = 750;
 
-    // disegno il terreno ripetendo una texture su di esso
     glDisable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_RACING_FLAG);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
-    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    // disegna KxK quads
     glBegin(GL_QUADS);
-    glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+    glNormal3f(0, 1, 0);
     for (int x = 371; x <= 378; x++)
         for (int z = 53; z <= 54; z++) {
-            // scelgo il colore per quel quad
             float x0 = -S + 2 * (x + 0) * S / K;
             float x1 = -S + 2 * (x + 1) * S / K;
             float z0 = -S + 2 * (z + 0) * S / K;
@@ -234,13 +232,12 @@ void drawArrivoTexture() {
     return;
 }
 
-// DISEGNA LA PAVIMENTAZIONE
-
+/* disegno erba texturata dove non ho strada */
 void drawFloorTexture() {
     if(!useWireframe) {
-        const float S = 500; // OLD 100 size
-        const float H = 0; // altezza
-        const int K = 750; //OLD 150 disegna K x K quads
+        const float S = 500;
+        const float H = 0;
+        const int K = 750;
 
         if(useEnvmap) {
             glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_ERBA);
@@ -250,10 +247,9 @@ void drawFloorTexture() {
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
 
-        // disegna KxK quads
         if(!useEnvmap) { glColor3ub(0, 179, 60); }
         glBegin(GL_QUADS);
-        glNormal3f(0, 1, 0); // normale verticale uguale x tutti
+        glNormal3f(0, 1, 0);
         for (int x = 0; x < K; x++)
             for (int z = 0; z < K; z++) {
                 float x0 = -S + 2 * (x + 0) * S / K;
@@ -276,6 +272,7 @@ void drawFloorTexture() {
     }
 }
 
+/* disegno di un cerchio pieno(utilizzato per segnalare player e target nel radar) */
 void drawCircle(float cx, float cy, float r, int num_segments) {
     glBegin(GL_POLYGON);
     for (int ii = 0; ii < num_segments; ii++) {
@@ -287,6 +284,7 @@ void drawCircle(float cx, float cy, float r, int num_segments) {
     glEnd();
 }
 
+/* disegno la bandiera a scacchi nel radar */
 void drawFinishFlagRadar() {
 
     float color = 1;
@@ -321,16 +319,17 @@ void drawFinishFlagRadar() {
 
 }
 
+/* disegno il Radar in alto a SX */
 void drawMinimap(int scrH) {
 
     glDisable(GL_LIGHTING);
     float minimap_posx, minimap_pos_target_x;
     float minimap_posz, minimap_pos_target_z;
-    minimap_posx = 70 + (200 * car.px / 40); //70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_posz = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * car.pz / 960)) + 110; //((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+    minimap_posx = 70 + (200 * car.px / 40);
+    minimap_posz = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * car.pz / 960)) + 110;
 
     minimap_pos_target_x = 70 + (200 * controller.getTargetX() / 40); //70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_pos_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110; //((50*car.pz)/100) + 50 + scrH-20-100;//(680)
+    minimap_pos_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110;
 
     if (minimap_posx < 20)
         minimap_posx = 20;
