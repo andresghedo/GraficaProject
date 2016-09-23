@@ -552,6 +552,8 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     drawAxis(); // disegna assi frame MONDO
 
     controller.drawTriangleForTarget(car.facing, car.px, car.pz);
+    printf("CONTROLLER RETRO: %d\n", controller.key[Controller::DEC]);
+    controller.drawReverseLight(car.facing, car.px, car.pz, controller.key[Controller::DEC]);
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
@@ -683,6 +685,8 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(Constant::TEXTURE_ID_ERBA, (char *) "./img/erba.jpg")) return -1;
     if (!LoadTexture(Constant::TEXTURE_ID_SELFIE, (char *) "./img/selfie.jpg")) return -1;
     if (!LoadTexture(Constant::TEXTURE_ID_RACING_FLAG, (char *) "./img/racing_flag.jpg")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_LIGHT_ON, (char *) "./img/light_on.png")) return -1;
+    if (!LoadTexture(Constant::TEXTURE_ID_LIGHT_OFF, (char *) "./img/light_off.png")) return -1;
 
     bool done = 0;
     bool doneGO = 0;

@@ -10,46 +10,48 @@
 
 namespace Constant
 {
-    // DISTANZA TRA LINEE STRADALI
+    /* distanza tra linee stradali */
     const int DISTANCE_LINES = 50;
-    // POSIZIONE INIZIALE GOAL X
+    /* posizione iniziale Car X */
     const int INITIAL_CAR_X = 0;
-    // POSIZIONE INIZIALE GOAL Z
-    const int INITIAL_CAR_Z = 480;
-    // POSIZIONE INIZIALE TARGET Z
+    /* posizione iniziale Car Z */
+    const int INITIAL_CAR_Z = 0;
+    /* posizione inizale Goal Z */
     const int INITIAL_TARGET_Z = +470;
-    // LIMITI RANDOM PER GENERAZIONE CASUALE GOAL
+    /* limiti Random per generazione casuale di un Goal */
     const float X_POS_GOAL_MAX = +5.0;
     const float X_POS_GOAL_MIN = -5.0;
     const float Z_POS_GOAL_MAX = -7.0;
     const float Z_POS_GOAL_MIN = -20.0;
-    // Random limiti per generazione casuale di un TNT
-    // Genero un TNT in posizione piu centrale e più vicino alla macchina in corsa 
-    // in modo da mettere in difficoltà il Player
+    /* limiti Random per generazione casuale di un Tnt */
     const float X_POS_TNT_MAX = +0;
     const float X_POS_TNT_MIN = -0.0;
     const float Z_POS_TNT_MAX = -5.0;
     const float Z_POS_TNT_MIN = -8.0;
-    // CUBE TARGET DIMENSION
+    /* dimesioni di un Cubo Target o Tnt */
     const float DIM_CUBE = 0.8;
     const float DIM_X_MIN_TARGET = -DIM_CUBE, DIM_X_MAX_TARGET = DIM_CUBE;
     const float DIM_Y_MIN_TARGET = 0.15, DIM_Y_MAX_TARGET = 1.75;
     const float DIM_Z_MIN_TARGET = -DIM_CUBE, DIM_Z_MAX_TARGET = DIM_CUBE;
-    // POSIZIONE TORCIA STATUA
+    /* dimesioni di un Rettangolino per retromarcia */
+    const float DIM_X_MIN_REVERSE_LIGHT = -0.05, DIM_X_MAX_REVERSE_LIGHT = +0.05;
+    const float DIM_Y_MIN_REVERSE_LIGHT = -0.02, DIM_Y_MAX_REVERSE_LIGHT = 0.02;
+    const float DIM_Z_MIN_REVERSE_LIGHT = -0.005, DIM_Z_MAX_REVERSE_LIGHT = 0.005;
+    /* posizione torcia XYZ */
     const float POS_TORCIA_X = 0.0;
     const float POS_TORCIA_Y = 70.0;
     const float POS_TORCIA_Z = -440.0;
-    // LIMITE CATTURA TARGET
+    /* limite visibilità di un target */
     const float LIMIT_VISIBILITY_TARGET = 5.0;
-    // RADAR LENGTH IN PIXEL
+    /* lunghezza del radar */
     const float RADAR_LENGTH = 250.0;
-    // INIZIO Z DELLE LINEE DELLA STRADA
+    /* inizio delle linee stradali Z */
     const float START_Z_STREET_LINES = 500.0;
-    // PROBABILITA CHE ESCA UN GOAL PIUTTOSTO CHE UN TNT
+    /* probabilità di un Goal invece che di un Tnt */
     const float PROBABILITY_OF_GOAL = 0.70; // 0.75
-    // SECONDI A DISPOSIZIONE DELL'UTENTE PER FINIRE LA PISTA
+    /* secondi a disposizione dell'utente */
     const float GAME_LIMIT_SECONDS = 100.0;
-    // ID DELLE TEXTURES
+    /* id univoci delle texture */
     const int TEXTURE_ID_LOGO_GOMME     = 0;
     const int TEXTURE_ID_CARROZZERIA    = 1;
     const int TEXTURE_ID_SKY            = 2;
@@ -58,8 +60,15 @@ namespace Constant
     const int TEXTURE_ID_ERBA           = 5;
     const int TEXTURE_ID_SELFIE         = 6;
     const int TEXTURE_ID_RACING_FLAG    = 7;
+    const int TEXTURE_ID_LIGHT_OFF      = 8;
+    const int TEXTURE_ID_LIGHT_ON       = 9;
     const int TEXTURE_ID_INFO_USER      = -1;
-    
+    /* limiti di posizione macchina nel mondo XZ */
+    const float CAR_LIMIT_X             = 20.0;
+    const float CAR_LIMIT_Z_SUP         = 500.0;
+    const float CAR_LIMIT_Z_INF         = -438.0;
+    /* parametro di scala per la statua */
+    const float STATUE_SCALE_PARAMETR   = 60.0;
 }
 
 #endif	/* CONSTANTS_H */

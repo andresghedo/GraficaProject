@@ -1,6 +1,9 @@
-// car.cpp
-// implementazione dei metodi definiti in car.h
-
+/*
+ *  CLASSE Car
+ * 
+ *  Classe che implementa metodi relativi alla macchina
+ * 
+ */
 #include <stdio.h>
 #include <math.h>
 #include <iostream> 
@@ -8,13 +11,13 @@
 #include <math.h> 
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <vector> // la classe vector di STL 
+#include <vector>
 #include "car.h"
 #include "point3.h"
 #include "mesh.h"
 #include "constants.h"
 
-// var globale di tipo mesh
+/* variabili globali di tipo MESH */
 Mesh carlinga((char *) "./obj/Ferrari_chassis.obj"); // chiama il costruttore
 Mesh wheelBR1((char *) "./obj/Ferrari_wheel_back_R.obj");
 Mesh wheelFR1((char *) "./obj/Ferrari_wheel_front_R.obj");
@@ -24,41 +27,33 @@ Mesh striscia((char *) "./obj/street_line.obj");
 Mesh statua((char *) "./obj/statua_corpo.obj");
 Mesh fuocoStatua((char *) "./obj/statua_fuoco.obj");
 
-extern bool useEnvmap; // var globale esterna: per usare l'evnrionment mapping
-extern bool useHeadlight; // var globale esterna: per usare i fari
-extern bool useShadow; // var globale esterna: per generare l'ombra
+/* variabile che indica se utilizzare le texture o colori RGB */
+extern bool useEnvmap;
+/* variabile che indica se utilizzare i fari o meno */
+extern bool useHeadlight;
+/* variabile che indica se utilizzare l'ombra dell'auto o meno */
+extern bool useShadow;
 
-// Funzione che prepara tutto per usare un env map
-
-// TEXTURE MACCHINA CARROZZERIA
-
+/* texturizzazione della carrozzeria */
 void SetupEnvmapTexture() {
-    // facciamo binding con la texture 1
     glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_CARROZZERIA);
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_GEN_S); // abilito la generazione automatica delle coord texture S e T
+    glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); // Env map
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-    glColor3f(1, 1, 1); // metto il colore neutro (viene moltiplicato col colore texture, componente per componente)
-    //glDisable(GL_LIGHTING); // disabilito il lighting OpenGL standard (lo faccio con la texture)
+    glColor3f(1, 1, 1);
 }
 
-// funzione che prepara tutto per creare le coordinate texture (s,t) da (x,y,z)
-// Mappo l'intervallo [ minY , maxY ] nell'intervallo delle T [0..1]
-//     e l'intervallo [ minZ , maxZ ] nell'intervallo delle S [0..1]
-
-// TEXTURE RUOTE 
-
+/* texturizzazione delle gomme dell'auto */
 void SetupWheelTexture(Point3 min, Point3 max) {
     glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LOGO_GOMME);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
 
-    // ulilizzo le coordinate OGGETTO
-    // cioe' le coordnate originali, PRIMA della moltiplicazione per la ModelView
-    // in modo che la texture sia "attaccata" all'oggetto, e non "proiettata" su esso
+    /* ulilizzo le coordinate OGGETTO cioe' le coordnate originali, PRIMA della moltiplicazione per la ModelView
+       in modo che la texture sia "attaccata" all'oggetto, e non "proiettata" su esso */
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
     float sz = 1.0 / (max.Z() - min.Z());
@@ -69,107 +64,105 @@ void SetupWheelTexture(Point3 min, Point3 max) {
     glTexGenfv(GL_T, GL_OBJECT_PLANE, t);
 }
 
-// DoStep: facciamo un passo di fisica (a delta_t costante)
-//
-// Indipendente dal rendering.
-//
-// ricordiamoci che possiamo LEGGERE ma mai SCRIVERE
-
+/* compio un passo di fisica della macchina */
 void Car::DoStep(bool LeftKey, bool RightKey, bool AccKey, bool DecKey) {
-    // computiamo l'evolversi della macchina
-    static int i = 5;
 
-    float vxm, vym, vzm; // velocita' in spazio macchina
-
-    // da vel frame mondo a vel frame macchina
+    float vxm, vym, vzm;
     float cosf = cos(facing * M_PI / 180.0);
     float sinf = sin(facing * M_PI / 180.0);
     vxm = +cosf * vx - sinf*vz;
     vym = vy;
     vzm = +sinf * vx + cosf*vz;
 
-    // gestione dello sterzo
+    /* gestione dello sterzo */
     if (LeftKey) sterzo += velSterzo;
     if (RightKey) sterzo -= velSterzo;
-    sterzo *= velRitornoSterzo; // ritorno a volante dritto
+    /* ritorno al volante dritto */
+    sterzo *= velRitornoSterzo;
 
-    if (AccKey) vzm -= accMax; // accelerazione in avanti 
-    if (DecKey) vzm += accMax; // accelerazione indietro
+    /* accelerazione in avanti */
+    if (AccKey) vzm -= accMax;
+    /* accelerazione indietro */
+    if (DecKey) vzm += accMax;
 
-    // attirti (semplificando)
+    /* attriti */
     vxm *= attritoX;
     vym *= attritoY;
     vzm *= attritoZ;
 
-    // l'orientamento della macchina segue quello dello sterzo
-    // (a seconda della velocita' sulla z)
+    /* l'orientamento della macchina segue quello dello sterzo(a seconda della velocita' sulla z) */
     facing = facing - (vzm * grip) * sterzo;
 
-    // rotazione mozzo ruote (a seconda della velocita' sulla z)
-    float da; //delta angolo
+    /* rotazione mozzo ruote (a seconda della velocita' sulla z) */
+    /* delta angolo */
+    float da;
     da = (360.0 * vzm) / (2.0 * M_PI * raggioRuotaA);
     mozzoA += da;
     da = (360.0 * vzm) / (2.0 * M_PI * raggioRuotaP);
     mozzoP += da;
 
-    // ritorno a vel coord mondo
+    /* ritorno a vel coord mondo */
     vx = +cosf * vxm + sinf*vzm;
     vy = vym;
     vz = -sinf * vxm + cosf*vzm;
 
-    // posizione = posizione + velocita * delta t (ma delta t e' costante)
+    /* posizione = posizione + velocita * delta t (ma delta t e' costante) */
     px += vx;
     py += vy;
     pz += vz;
-    if (pz > 500)
-        pz = 500;
-    if (pz < -438)
-        pz = -438;
-    if (px > 20)
-        px = 20;
-    if (px < -20)
-        px = -20;
+
+    /* metto dei limiti di posizione all'auto */
+    if (pz > Constant::CAR_LIMIT_Z_SUP)
+        pz = Constant::CAR_LIMIT_Z_SUP;
+    if (pz < Constant::CAR_LIMIT_Z_INF)
+        pz = Constant::CAR_LIMIT_Z_INF;
+    if (px > Constant::CAR_LIMIT_X)
+        px = Constant::CAR_LIMIT_X;
+    if (px < -Constant::CAR_LIMIT_X)
+        px = -Constant::CAR_LIMIT_X;
 }
 
-//void drawCube(); // questa e' definita altrove (quick hack)
-void drawAxis(); // anche questa
-
+/* disegno la statua */
 void drawStatua() {
     glPushMatrix();
     glColor3f(0.4, 0.6, 0.5);
     glTranslatef(2.5, -1.0, -450);
-    glScalef(60.0, 60.0, 60.0);
+    glScalef(Constant::STATUE_SCALE_PARAMETR, Constant::STATUE_SCALE_PARAMETR, Constant::STATUE_SCALE_PARAMETR);
     statua.RenderNxV();
+    /* colore rosso e disegno la fiaccola */
     glColor3f(0.8, 0.0, 0.0);
     fuocoStatua.RenderNxV();
     glPopMatrix();
 }
 
+/* disegno la linea stradale continua SX */
 void drawExtremeSX() {
     glPushMatrix();
-    glDisable(GL_LIGHTING); // disabilitato le luci
+    glDisable(GL_LIGHTING);
     glColor3f(1, 1, 1);
     glScalef(0.1, 1, Constant::START_Z_STREET_LINES);
     glTranslatef(Constant::DISTANCE_LINES, 0.01, 0);
     striscia.RenderNxV();
     glPopMatrix();
-    glEnable(GL_LIGHTING); // abilito le luci
+    glEnable(GL_LIGHTING);
 }
 
+/* disegno la linea stradale continua DX */
 void drawExtremeDX() {
     glPushMatrix();
-    glDisable(GL_LIGHTING); // disabilitato le luci
+    glDisable(GL_LIGHTING);
     glColor3f(1, 1, 1);
     glScalef(0.1, 1, Constant::START_Z_STREET_LINES);
     glTranslatef(-Constant::DISTANCE_LINES, 0.01, 0);
     striscia.RenderNxV();
     glPopMatrix();
-    glEnable(GL_LIGHTING); // abilito le luci
+    glEnable(GL_LIGHTING);
 }
 
+/* disegno la linea centrale tratteggiata */
 void drawMiddleLine() {
     float posZ = 0;
-    glDisable(GL_LIGHTING); // disabilitato le luci
+    glDisable(GL_LIGHTING);
     for (int i = 0; i < 300; i++) {
         float z = Constant::START_Z_STREET_LINES / 2.5 + posZ;
         float limitInf = -430 / 2.5;
@@ -185,43 +178,45 @@ void drawMiddleLine() {
             posZ -= 3.0;
         }
     }
-    glEnable(GL_LIGHTING); // abilito le luci
+    glEnable(GL_LIGHTING);
 }
 
+/* inizializzazione dell'oggetto Car */
 void Car::Init() {
-    // inizializzo lo stato della macchina
+    /* inizializzo lo stato della macchina */
     px = Constant::INITIAL_CAR_X;
     pz = Constant::INITIAL_CAR_Z;
-    facing = 0; // posizione e orientamento
+    facing = 0;
     py = 0.0;
+    /* stato */
+    mozzoA = mozzoP = sterzo = 0;
+    /* velocità attuale */
+    vx = vy = vz = 0;
 
-    mozzoA = mozzoP = sterzo = 0; // stato
-    vx = vy = vz = 0; // velocita' attuale
-
-    //velSterzo=3.4;         // A
-    velSterzo = 2.4; // A
-    velRitornoSterzo = 0.93; // B, sterzo massimo = A*B / (1-B)
+    velSterzo = 2.4;
+    velRitornoSterzo = 0.93;
 
     accMax = 0.0011;
 
-    // attriti: percentuale di velocita' che viene mantenuta
-    // 1 = no attrito
-    // <<1 = attrito grande
-    attritoZ = 0.991; // piccolo attrito sulla Z (nel senso di rotolamento delle ruote)
-    attritoX = 0.8; // grande attrito sulla X (per non fare slittare la macchina)
-    attritoY = 1.0; // attrito sulla y nullo
+    /* attriti: percentuale di velocita' che viene mantenuta
+     1 = no attrito
+     <<1 = attrito grande */
+    /* piccolo attrito sulla Z (nel senso di rotolamento delle ruote) */
+    attritoZ = 0.991;
+    /* grande attrito sulla X (per non fare slittare la macchina) */
+    attritoX = 0.8;
+    /* attrito sulla y nullo */
+    attritoY = 1.0;
 
-    // Nota: vel max = accMax*attritoZ / (1-attritoZ)
-
+    /* Nota: vel max = accMax*attritoZ / (1-attritoZ) */
     raggioRuotaA = 0.25;
     raggioRuotaP = 0.35;
 
-    grip = 0.45; // quanto il facing macchina si adegua velocemente allo sterzo
+    /* quanto il facing macchina si adegua velocemente allo sterzo */
+    grip = 0.45;
 }
 
-// attiva una luce di openGL per simulare un faro della macchina
-//
-
+/* attivazione luce come faro della macchina */
 void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight) const {
     int usedLight = GL_LIGHT1 + lightN;
 
@@ -234,10 +229,10 @@ void Car::DrawHeadlight(float x, float y, float z, int lightN, bool useHeadlight
         float col1[4] = {0.5, 0.5, 0.0, 1};
         glLightfv(usedLight, GL_AMBIENT, col1);
 
-        float tmpPos[4] = {x, y, z, 1}; // ultima comp=1 => luce posizionale
+        float tmpPos[4] = {x, y, z, 1};
         glLightfv(usedLight, GL_POSITION, tmpPos);
 
-        float tmpDir[4] = {0, 0, -1, 0}; // ultima comp=1 => luce posizionale
+        float tmpDir[4] = {0, 0, -1, 0};
         glLightfv(usedLight, GL_SPOT_DIRECTION, tmpDir);
 
         glLightf(usedLight, GL_SPOT_CUTOFF, 30);
@@ -327,29 +322,31 @@ void Car::RenderAllParts(bool usecolor) const {
     glPopMatrix();
 }
 
-// disegna a schermo
-
+/* renderizzo la macchina */
 void Car::Render() const {
-    // sono nello spazio mondo
-
-    //drawAxis(); // disegno assi spazio mondo
+    /* sono nello spazio mondo */
     glPushMatrix();
+    /* mi sposto nel mondo Car */
+    glTranslatef(px, py, pz);
+    glRotatef(facing, 0, 1, 0);
+    /* accendi fari SX e DX */
+    DrawHeadlight(-0.3, 0, -1, 0, useHeadlight);
+    DrawHeadlight(+0.3, 0, -1, 1, useHeadlight);
 
-    glTranslatef(px, py, pz); // QUI GLI DAI LE NUOVE XYZ DELLA MACCHINA
-    glRotatef(facing, 0, 1, 0); // QUI RUOTA 
+    /* disegna tutto a parte l'ombra */
+    RenderAllParts(true);
 
-    DrawHeadlight(-0.3, 0, -1, 0, useHeadlight); // accendi faro sinistro
-    DrawHeadlight(+0.3, 0, -1, 1, useHeadlight); // accendi faro destro
-
-    RenderAllParts(true); // DISEGNA TUTTA LA MACCHINA TRANNE L'OMBRA
-
-    // DISEGNA L'OMBRA VERDE!
+    /* se useShadow disegna l'ombra */
     if (useShadow) {
-        glColor3f(0.1, 0.1, 0.1); // OMBRA VERDE
-        glTranslatef(0, 0.03, 0); // alzo l'ombra di un epsilon per evitare z-fighting con il pavimento
-        glScalef(1.01, 0, 1.01); // appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X 
-        glDisable(GL_LIGHTING); // niente lighing per l'ombra
-        RenderAllParts(false); // disegno la macchina appiattita
+        glColor3f(0.1, 0.1, 0.1);
+        /* alzo l'ombra di un epsilon per evitare z-fighting con il pavimento */
+        glTranslatef(0, 0.03, 0);
+        /* appiattisco sulla Y, ingrandisco dell'1% sulla Z e sulla X  */
+        glScalef(1.01, 0, 1.01);
+        /* niente lighing per l'ombra */
+        glDisable(GL_LIGHTING);
+        /* disegno la macchina appiattita */
+        RenderAllParts(false);
 
         glEnable(GL_LIGHTING);
     }

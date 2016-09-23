@@ -19,6 +19,9 @@ public:
     void drawTargetCube(float mozzo);
     void checkVisibilityTarget(float carX, float carZ);
     void drawTriangleForTarget(float facing, float carX, float carZ);
+    void drawReverseLight(float facing, float carX, float carZ, bool retroLight);
+    void drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight);
+    void drawLightingRetro(float x, float y, float z, float cos, float sin);
     void drawLightTorciaStatua();
     float getTargetX();
     float getTargetZ();

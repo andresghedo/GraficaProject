@@ -1,5 +1,3 @@
-# Project: progettoCar4
-
 CPP  = g++
 CC   = gcc
 BIN  = play

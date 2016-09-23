@@ -241,6 +241,121 @@ void Controller::drawTargetCube(float mozzo) {
     glPopMatrix();
 }
 
+void Controller::drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight) {
+
+    // disegno del cubo con una texture personale su tutti e sei i lati
+    glPushMatrix();
+
+    if(retroLight)
+        glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LIGHT_ON);
+    else
+        glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LIGHT_OFF);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_GEN_MODE, GL_REPLACE);
+
+    glTranslatef(x, y, z);
+    glRotatef(facing, 0, 1, 0);
+    glColor3ub(255,255,255);
+    glDisable(GL_LIGHTING);
+    glBegin(GL_QUADS);
+    /* Front. */
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+
+    /* Down. */
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+
+    /* Back. */
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    /* Up. */
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    /* SideLeft. */
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    /* SideRight. */
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+
+    glLineWidth(1);
+    glColor3f(0, 0, 0);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glEnd();
+
+    glBegin(GL_LINES);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
+    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
+    glEnd();
+    glPopMatrix();
+}
+
 void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2, float colorR, float colorG, float colorB) {
     glColor3f(colorR, colorG, colorB); // GREEN
     glBegin(GL_LINES);
@@ -280,19 +395,77 @@ void Controller::drawTriangleForTarget(float facing, float carX, float carZ) {
 
     triangleTopPoint.setX(xC);
     triangleTopPoint.setZ(zC);
-    //printf("MIRINO X: %f    Z: %f\n", triangleTopPoint.X(), triangleTopPoint.Z());
 
-    //    drawLineToDebug(xA, +1, zA, xA, 0, zA);
-    //    drawLineToDebug(xB, +1, zB, xB, 0, zB);
-    //    drawLineToDebug(xC, +1, zC, xC, 0, zC);
-
-    // X and +
     drawLineToDebug(xA, 0.6, zA, xB, 0.3, zB, 1, 0, 0); //x
     drawLineToDebug(xB, 0.6, zB, xA, 0.3, zA, 1, 0, 0); //x
     drawLineToDebug(xA, 0.45, zA, xB, 0.45, zB, 1, 0, 0); //+
     drawLineToDebug(xC, 0.3, zC, xC, 0.6, zC, 1, 0, 0); //+
 
     glEnd();
+}
+
+void Controller::drawReverseLight(float facing, float carX, float carZ, bool retroLight) {
+    float angle = 360 - facing;
+    float cosA = cos(angle * M_PI / 180.0);
+    float sinA = sin(angle * M_PI / 180.0);
+    float ZDistance = -1.3; // distanza da baricentro Z
+    float XDistanceDX = 0.2; // distanza da baricentro Z
+    float XDistanceSX = -0.15; // distanza da baricentro Z
+
+    float Xdx = -XDistanceDX * cosA - ZDistance * sinA;
+    float Xsx = -XDistanceSX * cosA - ZDistance * sinA;
+    float Zdx = -XDistanceDX * sinA + ZDistance * cosA;
+    float Zsx = -XDistanceSX * sinA + ZDistance * cosA;
+
+    //TOP DEL TRIANGOLO
+    float xPolygonDX = carX - Xdx;
+    float xPolygonSX = carX - Xsx;
+    float zPolygonDX = carZ - Zdx;
+    float zPolygonSX = carZ - Zsx;
+
+    drawLineToDebug(xPolygonSX, 0.4, zPolygonSX, xPolygonSX, 0.45, zPolygonSX, 0, 0, 0);
+    drawLineToDebug(xPolygonDX, 0.4, zPolygonDX, xPolygonDX, 0.45, zPolygonDX, 0, 0, 0);
+    Controller::drawReverseLightPolygon(xPolygonSX, 0.4, zPolygonSX, facing, retroLight);
+    Controller::drawReverseLightPolygon(xPolygonDX, 0.4, zPolygonDX, facing, retroLight);
+    if(retroLight)
+        Controller::drawLightingRetro(carX, 0.4, carZ, cosA, sinA);
+    else
+        glDisable(GL_LIGHT5);
+}
+
+void Controller::drawLightingRetro(float x, float y, float z, float cos, float sin) {
+    
+    float dirX = 0.0;
+    float dirZ = 0.0;
+    
+    if(cos > 0.4) {
+        dirZ = 1.0;
+        z += 0.5;
+    } else if (cos < -0.4) {
+        dirZ = -1.0;
+        z -= 0.5;
+    }
+
+    if(sin > 0.4) {
+        dirX = -1.0;
+    } else if (sin < -0.4) {
+        dirX = 1.0;
+    }
+
+    glEnable(GL_LIGHT5);
+    GLfloat ambient[] = {1.0, 0.6, 0.0, 1.0};
+    glLightfv(GL_LIGHT5, GL_AMBIENT, ambient);
+    GLfloat diffuse[] = {0.0, 0, 0, 1.0};
+    glLightfv(GL_LIGHT5, GL_DIFFUSE, diffuse);
+    GLfloat position[] = {x, y, z, 1}; // ultima comp=0 => luce direzionale
+    glLightfv(GL_LIGHT5, GL_POSITION, position);
+    GLfloat spot_direction[] = {dirX, 0, dirZ, 0};
+    glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
+    glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 1.0);
+    glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 80.0);
+    glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 2);
+    float attenuation = 0.5;
+    glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, attenuation);
 }
 
 void Controller::drawLightTorciaStatua() {
