@@ -93,20 +93,22 @@ bool LoadTexture(int textbind, char *filename) {
 /* disegna gli assi nel sistema di riferimento */
 void drawAxis() {
     const float K = 0.10;
-    glColor3f(0, 1, 0); // GREEN
+    glColor3f(0, 1, 0);
+    /* disegno linee */
     glBegin(GL_LINES);
     glVertex3f(-2, 0, 0);
     glVertex3f(+2, 0, 0);
 
-    glColor3f(1, 0, 0); // RED
+    glColor3f(1, 0, 0);
     glVertex3f(0, -2, 0);
     glVertex3f(0, +2, 0);
 
-    glColor3f(0, 0, 1); // BLUE
+    glColor3f(0, 0, 1);
     glVertex3f(0, 0, -2);
     glVertex3f(0, 0, +2);
     glEnd();
 
+    /* disegno i triangolini per le frecce */
     glBegin(GL_TRIANGLES);
     glVertex3f(0, +2, 0);
     glVertex3f(K, +2 - K, 0);
@@ -123,7 +125,7 @@ void drawAxis() {
 
 }
 
-/* disegan una sfera(usata nel disegno dello sky) */
+/* disegna una sfera(usata nel disegno dello sky) */
 void drawSphere(double r, int lats, int longs) {
     int i, j;
     for (i = 0; i <= lats; i++) {
@@ -178,6 +180,7 @@ void drawPistaTexture() {
                 float x1 = -S + 2 * (x + 1) * S / K;
                 float z0 = -S + 2 * (z + 0) * S / K;
                 float z1 = -S + 2 * (z + 1) * S / K;
+                /* disegno solo i quadrati relativi alla strada */
                 if ((x0 <= 4) && (x0 >= -6) && ((z0 < -430) || (z0 > -428))) {
                     if(useEnvmap) { glTexCoord2f(0.0, 0.0); }
                     glVertex3d(x0, H, z0);
@@ -216,6 +219,7 @@ void drawArrivoTexture() {
             float x1 = -S + 2 * (x + 1) * S / K;
             float z0 = -S + 2 * (z + 0) * S / K;
             float z1 = -S + 2 * (z + 1) * S / K;
+            /* sono in prossimità di fine pista texturo con la bandiera a scacchi */
             if ((x0 <= 4) && (x0 >= -6) && (z0 >= -430) && (z0 <= -428)) {
                 glTexCoord2f(0.0, 0.0);
                 glVertex3d(x0, H, z0);
@@ -320,54 +324,64 @@ void drawFinishFlagRadar() {
 }
 
 /* disegno il Radar in alto a SX */
-void drawMinimap(int scrH) {
+void drawRadar(int scrH) {
 
     glDisable(GL_LIGHTING);
-    float minimap_posx, minimap_pos_target_x;
-    float minimap_posz, minimap_pos_target_z;
-    minimap_posx = 70 + (200 * car.px / 40);
-    minimap_posz = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * car.pz / 960)) + 110;
+    float radar_car_x, radar_target_x;
+    float radar_car_z, radar_target_z;
+    /* posizione della macchina nel Radar proporzionata */
+    radar_car_x = 70 + (200 * car.px / 40);
+    radar_car_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * car.pz / 960)) + 110;
+    /* posizione del target corrente nel Radar proporzionata */
+    radar_target_x = 70 + (200 * controller.getTargetX() / 40);
+    radar_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110;
 
-    minimap_pos_target_x = 70 + (200 * controller.getTargetX() / 40); //70;//((50*car.px)/100) + 50 + 20 ;//(70)
-    minimap_pos_target_z = scrH - Constant::RADAR_LENGTH + (-1 * (Constant::RADAR_LENGTH * controller.getTargetZ() / 960)) + 110;
+    /* se è fuori dalla mappa riporto all'estremo la posizione della macchina */
+    if (radar_car_x < 20)
+        radar_car_x = 20;
+    else if (radar_car_x > 120)
+        radar_car_x = 120;
 
-    if (minimap_posx < 20)
-        minimap_posx = 20;
-    else if (minimap_posx > 120)
-        minimap_posx = 120;
+    /* se è fuori dalla mappa riporto all'estremo la posizione del target corrente */
+    if (radar_target_x < 20)
+        radar_target_x = 20;
+    else if (radar_target_x > 120)
+        radar_target_x = 120;
 
-// *************target e car **************************************************
+    /* disegno il cerchiolino della macchina nella posizione radar */
     glColor3ub(255, 0, 0);
-    drawCircle(minimap_posx, minimap_posz, 3, 300);
+    drawCircle(radar_car_x, radar_car_z, 3, 300);
 
-    if (controller.isTargetGoal())
+    /* disegno il cerchiolino del target nella posizione radar */
+    if (controller.isTargetGoal()) /* colore verde se è un goal */
         glColor3ub(0, 153, 51);
     else
-        glColor3ub(0, 0, 0);
+        glColor3ub(0, 0, 0); /* colore nero se è un TNT */
 
+    /* se la posizione X è -900 vuol dire che il giocatore è arrivato alla fine e non disegno il target */
     if (controller.getTargetX() != -900)
-        drawCircle(minimap_pos_target_x, minimap_pos_target_z, 5, 300);
-// ****************************************************************************
-// ***********Linee strada*****************************************************
+        drawCircle(radar_target_x, radar_target_z, 5, 300);
+
+    /* colore bianco per linee stradali */
     glColor3f(1, 1, 1);
-    
+
     glBegin(GL_POLYGON);
-    // LINEA SX
+    /* disegno della linea SX stradale */
     glVertex2d(45.0, scrH - Constant::RADAR_LENGTH - 20);
     glVertex2d(45.0, scrH - 20);
     glVertex2d(47.0, scrH - 20);
     glVertex2d(47.0, scrH - Constant::RADAR_LENGTH - 20);
     glEnd();
-    
+
     glBegin(GL_POLYGON);
-    // LINEA DX
+    /* disegno della linea DX stradale */
     glVertex2d(95.0, scrH - Constant::RADAR_LENGTH - 20);
     glVertex2d(95.0, scrH - 20);
     glVertex2d(93.0, scrH - 20);
     glVertex2d(93.0, scrH - Constant::RADAR_LENGTH - 20);
     glEnd();
     
-    // Linea centrale tratteggiata
+    /* disegno della linea tratteggiata stradale */
     for (int i = 0; i < Constant::RADAR_LENGTH - 10; i += 4) {
         glBegin(GL_POLYGON);
         glVertex2d(69, scrH - Constant::RADAR_LENGTH - 20 + i);
@@ -376,8 +390,8 @@ void drawMinimap(int scrH) {
         glVertex2d(71, scrH - Constant::RADAR_LENGTH - 20 + i);
         glEnd();
     }
-// ****************************************************************************
 
+    /* colore nero per il bordo del radar */
     glColor3ub(0, 0, 0);
     glBegin(GL_LINE_LOOP);
     glVertex2d(20, scrH - 20 - Constant::RADAR_LENGTH);
@@ -386,8 +400,10 @@ void drawMinimap(int scrH) {
     glVertex2d(120, scrH - 20 - Constant::RADAR_LENGTH);
     glEnd();
 
+    /* disegno la scacchiera di arrivo */
     drawFinishFlagRadar();
 
+    /* disegno il grigio della strada */
     glColor3ub(210, 210, 210);
     glBegin(GL_POLYGON);
     glVertex2d(45, scrH - 20 - Constant::RADAR_LENGTH);
@@ -395,6 +411,8 @@ void drawMinimap(int scrH) {
     glVertex2d(95, scrH - 20);
     glVertex2d(95, scrH - 20 - Constant::RADAR_LENGTH);
     glEnd();
+
+    /* disegno il verde del fuori pista */
     glColor3ub(0, 179, 60);
     glBegin(GL_POLYGON);
     glVertex2d(20, scrH - 20 - Constant::RADAR_LENGTH);
@@ -405,8 +423,7 @@ void drawMinimap(int scrH) {
     glEnable(GL_LIGHTING);
 }
 
-// setto la posizione della camera
-
+/* setto la posizione della camera */
 void setCamera() {
 
     double px = car.px;
@@ -418,17 +435,16 @@ void setCamera() {
     double camd, camh, ex, ey, ez, cx, cy, cz;
     double cosff, sinff;
 
-    // controllo la posizione della camera a seconda dell'opzione selezionata
+    /* controllo la posizione della camera a seconda dell'opzione selezionata */
     switch (cameraType) {
         case CAMERA_BACK_CAR:
-            //printf("[DEBUG] Camera:  CAMERA_BACK_CAR\n");
             camd = 2.5;
             camh = 1.0;
-            // PUNTO DI AZIONE
+            /* PUNTO DI AZIONE */
             ex = px + camd*sinf;
             ey = py + camh;
             ez = pz + camd*cosf;
-            // PUNTO VERSO CUI GUARDO
+            /* PUNTO VERSO CUI GUARDO */
             cx = px - camd*sinf;
             cy = py + camh;
             cz = pz - camd*cosf;
@@ -478,11 +494,10 @@ void setCamera() {
     }
 }
 
-// disegna il cielo
-
+/* disegna il cielo */
 void drawSky() {
-    int H = 100;
 
+    /* se voglio mesh in bianco nero */
     if (useWireframe) {
         glDisable(GL_TEXTURE_2D);
         glColor3f(0, 0, 0);
@@ -499,11 +514,11 @@ void drawSky() {
         if(useEnvmap) { glEnable(GL_TEXTURE_GEN_T); }
         if(useEnvmap) { glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); } // Env map 
         if(useEnvmap) { glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP); }
+        /* se non uso texture uso il colore BLU */
         if(useEnvmap) { glColor3f(1, 1, 1); } else { glColor3f(0, 0, 1); }
         glDisable(GL_LIGHTING); 
 
-        //   drawCubeFill();
-        drawSphere(500.0, 20, 20); // old 100
+        drawSphere(500.0, 20, 20);
 
         if(useEnvmap) { glDisable(GL_TEXTURE_GEN_S); }
         if(useEnvmap) { glDisable(GL_TEXTURE_GEN_T); }
@@ -516,74 +531,75 @@ void drawSky() {
 /* Esegue il Rendering della scena */
 void rendering(SDL_Window *win, TTF_Font *font) {
 
-    // un frame in piu'!!!
+    /* incremento dei frame */
     fpsNow++;
-
-    glLineWidth(3); // larchezza linee che vengono disegnate in scena
-
-    // settiamo il viewport
+    /* larghezza linee */
+    glLineWidth(3);
+    /* setting viewport */
     glViewport(0, 0, scrW, scrH);
-
-    // colore sfondo = bianco
+    /* colore sfondo bianco */
     glClearColor(1, 1, 1, 1);
-
-
-    // settiamo la matrice di proiezione
+    /* matrice di proiezione */
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(70, //fovy,
-            ((float) scrW) / scrH, //aspect Y/X,
-            0.2, //distanza del NEAR CLIPPING PLANE in coordinate vista
-            1000 //distanza del FAR CLIPPING PLANE in coordinate vista
-            );
+    gluPerspective(70,
+        ((float) scrW) / scrH, /* aspect Y/X, */
+        0.2, /* distanza del NEAR CLIPPING PLANE in coordinate vista */
+        1000 /* distanza del FAR CLIPPING PLANE in coordinate vista */
+        );
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // riempe tutto lo screen buffer di pixel color sfondo
+    /* riempe tutto lo screen buffer di pixel color sfondo */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     setCamera();
 
-    float tmpv[4] = {0, 1, 2, 0}; // ultima comp=0 => luce direzionale
+    /* luce principale del mondo */
+    float tmpv[4] = {0, 1, 2, 0};
     glLightfv(GL_LIGHT0, GL_POSITION, tmpv);
+    /* disegno la luce della statua */
     controller.drawLightTorciaStatua();
-
-    drawAxis(); // disegna assi frame MONDO
-
+    /* disegno assi XYZ del MONDO(Per debug) */
+    drawAxis();
+    /* disegno il mirino */
     controller.drawMirino(car.facing, car.px, car.pz);
+    /* disegno le luci posteriori dell'auto */
     controller.drawReverseLight(car.facing, car.px, car.pz, controller.key[Controller::DEC]);
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
 
     glEnable(GL_LIGHTING);
-
-    // settiamo matrice di modellazione
-    drawAxis(); // disegna assi frame OGGETTO
-
-    drawSky(); // DISEGNO CIELO
-    drawFloorTexture(); // DISEGNO SUOLO
-    drawPistaTexture(); // DISEGNO PISTA
+    /* disegno del cielo */
+    drawSky();
+    /* disegno del suolo texturato(erba) */
+    drawFloorTexture();
+    /* disegno della pista texturata */
+    drawPistaTexture();
+    /* disegno dell'arrivo texturato con la bandiera a scacchi */
     drawArrivoTexture();
-    drawExtremeSX(); // DISEGNO POKEBALL
+    /* disegno linea SX stradale */
+    drawExtremeSX();
+    /* disegno della linea tratteggiata */
     drawMiddleLine();
-    drawExtremeDX(); // DISEGNO POKEBALL
+    /* disegno linea SX stradale */
+    drawExtremeDX();
+    /* disegno della statua della liertà */
     drawStatua();
-
+    /* disegno il target(sia esso goal o tnt) */
     controller.drawTargetCube();
-    car.Render(); // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
+    /* render della macchina */
+    car.Render();
 
-    // attendiamo la fine della rasterizzazione di 
-    // tutte le primitive mandate
+    /* attendiamo la fine della rasterizzazione di tutte le primitive mandate */
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
 
-    // disegnamo i fps (frame x sec) come una barra a sinistra.
-    // (vuota = 0 fps, piena = 100 fps)
-
-    //DISEGNA LA BARRA A SX
+    // disegnamo i fps (frame x sec) come una barra a sinistra.(vuota = 0 fps, piena = 100 fps) */
     SetCoordToPixel();
-
+    
+    /* disegno barra a sx */
     glBegin(GL_QUADS);
     float y = scrH * fps / 100;
     float ramp = fps / 100;
@@ -598,7 +614,9 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     glEnable(GL_LIGHTING);
 
     glLineWidth(2);
-    drawMinimap(scrH);
+    /* disegno del Radar in alto a SX */
+    drawRadar(scrH);
+    /* mi preparo il testo da mettere nella barra di stato */
     char tnt[20];
     sprintf(tnt, "TNT:  %d / %d   ", controller.getTntChecked(), controller.getTnt());
     char goal[20];
@@ -610,23 +628,21 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     sprintf(time, "TIME:  %lf ", -Constant::GAME_LIMIT_SECONDS + controller.getSeconds());
     strcat(point, time);
     glDisable(GL_LIGHTING);
+    /* disegno la barra di stato con le info utente(punti, tempo, etc...) */
     controller.drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW - 600, scrH - 100);
     glFinish();
-    // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
-    //printf("Time in sec: %d\n", (int) controller.getSeconds());
 }
 
+/* ridisegno della finestra */
 void redraw() {
-    // ci automandiamo un messaggio che (s.o. permettendo)
-    // ci fara' ridisegnare la finestra
     SDL_Event e;
     e.type = SDL_WINDOWEVENT;
     e.window.event = SDL_WINDOWEVENT_EXPOSED;
     SDL_PushEvent(&e);
 }
 
-/*Scheletro adottato nelle prime esercitazioni SDL*/
+/* MAIN del programma */
 int main(int argc, char* argv[]) {
     SDL_Window *win;
     SDL_GLContext mainContext;
@@ -634,15 +650,17 @@ int main(int argc, char* argv[]) {
     SDL_Joystick *joystick;
     static int keymap[Controller::NKEYS] = {SDLK_a, SDLK_d, SDLK_w, SDLK_s};
 
-    // inizializzazione di SDL
+    /* inizializzo SDL */
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
 
+    /* inizializzo TTF per le scritte */
     if (TTF_Init() < 0) {
         fprintf(stderr, "Impossibile inizializzare TTF: %s\n", SDL_GetError());
         SDL_Quit();
         return (2);
     }
 
+    /* ricavo un font dalla cartella ./ttf/ */
     TTF_Font *font;
     font = TTF_OpenFont("./ttf/amatic.ttf", 45);
     if (font == NULL) {
@@ -655,26 +673,23 @@ int main(int argc, char* argv[]) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    // facciamo una finestra di scrW x scrH pixels
+    /* facciamo una finestra di scrW x scrH pixels */
     win = SDL_CreateWindow(argv[0], 0, 0, scrW, scrH, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-    //Create our opengl context and attach it to our window
+    /* ricavo il context */
     mainContext = SDL_GL_CreateContext(win);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_NORMALIZE); // opengl, per favore, rinormalizza le normali 
-    // prima di usarle
-    //glEnable(GL_CULL_FACE);
     glFrontFace(GL_CW); // consideriamo Front Facing le facce ClockWise
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_POLYGON_OFFSET_FILL); // caro openGL sposta i 
-    // frammenti generati dalla
-    // rasterizzazione poligoni
     glPolygonOffset(1, 1); // indietro di 1
 
+    /* Caricamento preventivo delle Texture */
     if (!LoadTexture(Constant::TEXTURE_ID_LOGO_GOMME, (char *) "./img/logo_gomme.jpg")) return 0;
     if (!LoadTexture(Constant::TEXTURE_ID_CARROZZERIA, (char *) "./img/envmap_flipped.jpg")) return 0;
     if (!LoadTexture(Constant::TEXTURE_ID_SKY, (char *) "./img/sky_ok.jpg")) return -1;
@@ -686,24 +701,30 @@ int main(int argc, char* argv[]) {
     if (!LoadTexture(Constant::TEXTURE_ID_LIGHT_ON, (char *) "./img/light_on.png")) return -1;
     if (!LoadTexture(Constant::TEXTURE_ID_LIGHT_OFF, (char *) "./img/light_off.png")) return -1;
 
+    /* decreta a fine del gioco */
     bool done = 0;
+    /* decreta quando uscire dalla schermata di GameOver */
     bool doneGO = 0;
     while (!done) {
 
         SDL_Event e;
 
-        // guardo se c'e' un evento:
+        /* controllo se c'è un evento utente*/
         if (SDL_PollEvent(&e)) {
-            // se si: processa evento
+            /* processo in base al tasto premuto */
             switch (e.type) {
                 case SDL_KEYDOWN:
-                    // pressione di un tasto movimento macchina
+                    /* setto l'input per la macchina */
                     controller.EatKey(e.key.keysym.sym, keymap, true);
-                    // cambia camera
+                    /* cambio posizione camera */
                     if (e.key.keysym.sym == SDLK_F1) cameraType = (cameraType + 1) % CAMERA_TYPE_MAX;
+                    /* vedo le mesh nude bianco e nero */
                     if (e.key.keysym.sym == SDLK_F2) useWireframe = !useWireframe;
+                    /* si/no texture */
                     if (e.key.keysym.sym == SDLK_F3) useEnvmap = !useEnvmap;
+                    /* fanali anteriori */
                     if (e.key.keysym.sym == SDLK_F4) useHeadlight = !useHeadlight;
+                    /* mostro ombra della macchina o meno */
                     if (e.key.keysym.sym == SDLK_F5) useShadow = !useShadow;
                     break;
                 case SDL_KEYUP:
@@ -714,12 +735,10 @@ int main(int argc, char* argv[]) {
                     doneGO = 1;
                     break;
                 case SDL_WINDOWEVENT:
-                    // dobbiamo ridisegnare la finestra
+                    /* ridisegno la finestra */
                     if (e.window.event == SDL_WINDOWEVENT_EXPOSED) {
                         rendering(win, font);
-                        //printf("[DEBUG] windows event if!\n");
                     } else {
-                        //printf("[DEBUG] windows event else!\n");
                         windowID = SDL_GetWindowID(win);
                         if (e.window.windowID == windowID) {
                             switch (e.window.event) {
@@ -729,7 +748,6 @@ int main(int argc, char* argv[]) {
                                     scrH = e.window.data2;
                                     glViewport(0, 0, scrW, scrH);
                                     rendering(win, font);
-                                    //redraw(); // richiedi ridisegno
                                     break;
                                 }
                             }
@@ -737,26 +755,25 @@ int main(int argc, char* argv[]) {
                     }
                     break;
 
+                    /* mi muovo con gli eventi mouse se la telecameta è CAMERA_MOUSE */
                 case SDL_MOUSEMOTION:
                     if (e.motion.state & SDL_BUTTON(1) & cameraType == CAMERA_MOUSE) {
                         viewAlpha += e.motion.xrel;
                         viewBeta += e.motion.yrel;
-                        //          if (viewBeta<-90) viewBeta=-90;
-                        if (viewBeta<+5) viewBeta = +5; //per non andare sotto la macchina
+                        /* per non andare sotto la macchina */
+                        if (viewBeta<+5) viewBeta = +5;
                         if (viewBeta>+90) viewBeta = +90;
-                        // redraw(); // richiedi un ridisegno (non c'e' bisongo: si ridisegna gia' 
-                        // al ritmo delle computazioni fisiche)
                     }
                     break;
 
                 case SDL_MOUSEWHEEL:
                     if (e.wheel.y < 0) {
-                        // avvicino il punto di vista (zoom in)
+                        /* Zoom IN */
                         eyeDist = eyeDist * 0.9;
                         if (eyeDist < 1) eyeDist = 1;
                     };
                     if (e.wheel.y > 0) {
-                        // allontano il punto di vista (zoom out)
+                        /* Zoom OUT */
                         eyeDist = eyeDist / 0.9;
                     };
                     break;
@@ -766,30 +783,24 @@ int main(int argc, char* argv[]) {
                         if (e.jaxis.value < -3200) {
                             controller.Joy(0, true);
                             controller.Joy(1, false);
-                            //	      printf("%d <-3200 \n",e.jaxis.value);
                         }
                         if (e.jaxis.value > 3200) {
                             controller.Joy(0, false);
                             controller.Joy(1, true);
-                            //	      printf("%d >3200 \n",e.jaxis.value);
                         }
                         if (e.jaxis.value >= -3200 && e.jaxis.value <= 3200) {
                             controller.Joy(0, false);
                             controller.Joy(1, false);
-                            //	      printf("%d in [-3200,3200] \n",e.jaxis.value);
                         }
                         rendering(win, font);
-                        //redraw();
                     }
                     break;
                 case SDL_JOYBUTTONDOWN: // Handle Joystick Button Presses 
                     if (e.jbutton.button == 0) {
                         controller.Joy(2, true);
-                        //	   printf("jbutton 0\n");
                     }
                     if (e.jbutton.button == 2) {
                         controller.Joy(3, true);
-                        //	   printf("jbutton 2\n");
                     }
                     break;
                 case SDL_JOYBUTTONUP: // Handle Joystick Button Presses 
@@ -798,10 +809,8 @@ int main(int argc, char* argv[]) {
                     break;
             }
         } else {
-            //printf("[DEBUG]Else while\n");
-            // nessun evento: siamo IDLE
 
-            Uint32 timeNow = SDL_GetTicks(); // che ore sono?
+            Uint32 timeNow = SDL_GetTicks();
 
             if (timeLastInterval + fpsSampling < timeNow) {
                 fps = 1000.0 * ((float) fpsNow) / (timeNow - timeLastInterval);
@@ -810,10 +819,10 @@ int main(int argc, char* argv[]) {
             }
 
             bool doneSomething = false;
-            int guardia = 0; // sicurezza da loop infinito
+            /* sicurezza da loop infiniti */
+            int guardia = 0;
 
-            // finche' il tempo simulato e' rimasto indietro rispetto
-            // al tempo reale...
+            /* finche' il tempo simulato e' rimasto indietro rispetto al tempo reale...*/
             while (nstep * PHYS_SAMPLING_STEP < timeNow) {
                 car.DoStep(controller.key[Controller::LEFT], controller.key[Controller::RIGHT], controller.key[Controller::ACC], controller.key[Controller::DEC]);
                 nstep++;
@@ -822,32 +831,33 @@ int main(int argc, char* argv[]) {
                 if (guardia++ > 1000) {
                     done = true;
                     break;
-                } // siamo troppo lenti!
+                }
             }
-
+            /* controllo i vincoli di gioco se non sono in gameover*/
             if ((doneSomething)&&(!controller.isGameOver())) {
                 rendering(win, font);
                 controller.checkConstraintsGame(car.pz);
-            } else if (controller.isGameOver()) {
+            } else if (controller.isGameOver()) { /* se sono in gameover finisco il ciclo di gioco */
                 done = true;
             }
         }
     }
 
+    /* ciclo per schermata game over */
     while (!doneGO) {
         SDL_Event e;
 
-        // guardo se c'e' un evento:
         if (SDL_PollEvent(&e)) {
-            // se si: processa evento
             switch (e.type) {
                 case SDL_KEYDOWN:
+                    /* esco definitivamente dal gioco con <<ESC>> */
                     if (e.key.keysym.sym == SDLK_ESCAPE)
                         doneGO = true;
                     break;
                 case SDL_QUIT:
                     doneGO = true;
                     break;
+                /* resize */
                 case SDL_WINDOWEVENT:
                     windowID = SDL_GetWindowID(win);
                     if (e.window.windowID == windowID) {
@@ -865,9 +875,11 @@ int main(int argc, char* argv[]) {
                     break;
             }
         } else {
+            /* mostro il layout finale */
             controller.drawGameOverLayout(win, font, scrH, scrW);
         }
     }
+    /* destroy e fine */
     SDL_GL_DeleteContext(mainContext);
     SDL_DestroyWindow(win);
     SDL_Quit();
