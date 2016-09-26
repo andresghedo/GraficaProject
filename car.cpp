@@ -261,6 +261,7 @@ void Car::RenderAllParts(bool usecolor) const {
         /* metto la texture alla carrozzeria */
         if (usecolor) SetupEnvmapTexture();
     }
+    /* renderizzo carrozzeria */
     carlinga.RenderNxV();
     if (!usecolor) {
         glDisable(GL_TEXTURE_GEN_S);
@@ -269,9 +270,8 @@ void Car::RenderAllParts(bool usecolor) const {
 
     if (usecolor) glEnable(GL_LIGHTING);
     /* ciclo per disegno di ruote e gomme */
+    /* i=0 ruote dx i=1 ruote sx */
     for (int i = 0; i < 2; i++) {
-        // i==0 -> disegno ruote destre.
-        // i==1 -> disegno ruote sinistre.
         int sign;
         if (i == 0) sign = 1;
         else sign = -1;
@@ -289,8 +289,8 @@ void Car::RenderAllParts(bool usecolor) const {
 
         if (usecolor) glColor3f(.6, .6, .6);
         if (usecolor) SetupWheelTexture(wheelFR1.bbmin, wheelFR1.bbmax);
-        wheelFR1.RenderNxF(); // Gomma davanti
-        // provare x credere
+        /* gomma anteriore */
+        wheelFR1.RenderNxF();
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
         wheelFR2.RenderNxV(); // cerchione davanti
@@ -309,7 +309,8 @@ void Car::RenderAllParts(bool usecolor) const {
 
         if (usecolor) glColor3f(.6, .6, .6);
         if (usecolor) SetupWheelTexture(wheelBR1.bbmin, wheelBR1.bbmax);
-        wheelBR1.RenderNxF(); //gomme dietro
+        /* gomma posteriore */
+        wheelBR1.RenderNxF();
         glDisable(GL_TEXTURE_2D);
         if (usecolor) glColor3f(0.9, 0.9, 0.9);
         wheelBR2.RenderNxV(); //cerchione dietro
@@ -319,7 +320,8 @@ void Car::RenderAllParts(bool usecolor) const {
             glDisable(GL_TEXTURE_GEN_T);
         }
         glPopMatrix();
-    }// FINE DISEGNO RUOTE
+    }
+    /* fine disegno ruote */
     glPopMatrix();
 }
 

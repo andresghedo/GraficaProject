@@ -550,8 +550,7 @@ void rendering(SDL_Window *win, TTF_Font *font) {
 
     drawAxis(); // disegna assi frame MONDO
 
-    controller.drawTriangleForTarget(car.facing, car.px, car.pz);
-    printf("CONTROLLER RETRO: %d\n", controller.key[Controller::DEC]);
+    controller.drawMirino(car.facing, car.px, car.pz);
     controller.drawReverseLight(car.facing, car.px, car.pz, controller.key[Controller::DEC]);
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
@@ -571,7 +570,7 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     drawExtremeDX(); // DISEGNO POKEBALL
     drawStatua();
 
-    controller.drawTargetCube(car.mozzoA);
+    controller.drawTargetCube();
     car.Render(); // DISEGNA LA MACCHINA--> SENZA QUESTO LA MACCHINA NON SI VEDE
 
     // attendiamo la fine della rasterizzazione di 
@@ -611,7 +610,7 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     sprintf(time, "TIME:  %lf ", -Constant::GAME_LIMIT_SECONDS + controller.getSeconds());
     strcat(point, time);
     glDisable(GL_LIGHTING);
-    controller.SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW - 600, scrH - 100);
+    controller.drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, strcat(tntAndGoal, point), scrW - 600, scrH - 100);
     glFinish();
     // ho finito: buffer di lavoro diventa visibile
     SDL_GL_SwapWindow(win);
@@ -828,11 +827,9 @@ int main(int argc, char* argv[]) {
 
             if ((doneSomething)&&(!controller.isGameOver())) {
                 rendering(win, font);
-                controller.checkVisibilityTarget(car.px, car.pz);
+                controller.checkConstraintsGame(car.pz);
             } else if (controller.isGameOver()) {
-                // tempo libero!!!
                 done = true;
-                //controller.drawGameOverLayout(win, font, scrH, scrW);
             }
         }
     }

@@ -1,21 +1,17 @@
-/* 
- * File:   controller.cpp
- * Author: andrea
+/*
+ *  CLASSE Controller
  * 
- * Created on 5 settembre 2016, 15.47
+ *  Classe che implementa metodi utili in tutto il progetto richiamabili dal main.gcc
+ * 
  */
-
 #include <stdio.h>
 #include <math.h> 
 #include <time.h>
 #include <cstdlib>
-
 #include <GL/gl.h>
 #include <GL/glu.h>
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-
 #include <vector> 
 #include "controller.h"
 #include "point3.h"
@@ -23,54 +19,71 @@
 #include "car.h"
 #include "constants.h"
 
+/* posizione XYZ del target corrente(sia esso un goal o un TNT) */
 Point3 targetPoint = Point3(0, 0, Constant::INITIAL_TARGET_Z);
-Point3 triangleTopPoint = Point3(0, 0, 0);
+/* posizione XYZ del mirino */
+Point3 mirinoPoint = Point3(0, 0, 0);
+/* booleano che decreta la generazione di un target o meno */
 bool generate;
+/* booleano che decreta se il target è un TNT */
 bool isTnt = false;
+/* booleano che decreta se il target è un Goal */
 bool isGoal = true;
+/* booleano che decreta la fine del gioco */
 bool gameOver = false;
+/* booleano che decreta se il player ha perso o meno */
 bool playerLoose = false;
+/* punteggio corrente dell'utente */
 int punteggio = 0;
+/* TNT fatti esplodere */
 int tntChecked = 0;
+/* TNT generati */
 int tnt = 0;
+/* Goal catturati */
 int goalChecked = 0;
+/* Goal generati */
 int goal = 0;
+/* tempo di inizio gioco */
 clock_t startTime;
+/* tempo di concludione del gioco */
 double endTime = 0;
 
+/* inizializzaione del Controller */
 void Controller::Init() {
     srand(time(NULL));
     startTime = clock();
     for (int i = 0; i < NKEYS; i++) key[i] = false;
 }
 
+/* torna il numero di secondi da quando è iniziato il gioco */
 double Controller::getSeconds() {
     clock_t currentTime = clock();
     clock_t clockTicksTaken = currentTime - startTime;
     return clockTicksTaken / (double) CLOCKS_PER_SEC;
 }
 
+/* memorizzazione del tasto premuto dall'utente */
 void Controller::EatKey(int keycode, int* keymap, bool pressed_or_released) {
     for (int i = 0; i < NKEYS; i++) {
         if (keycode == keymap[i]) key[i] = pressed_or_released;
     }
 }
 
-// da invocare quando e' stato premuto/rilasciato un jbutton
-
+/* da invocare quando e' stato premuto/rilasciato un jbutton */
 void Controller::Joy(int keymap, bool pressed_or_released) {
     key[keymap] = pressed_or_released;
 }
 
+/* metodo che sancisce se il mirino ha centrato il target(sia esso un goal o un tnt) */
 bool isInTarget() {
-//    printf("TARGET X:%f Z:%f\n", targetPoint.X(), targetPoint.Z());
-    return ((triangleTopPoint.X() >= targetPoint.X() - Constant::DIM_CUBE) && (triangleTopPoint.X() <= targetPoint.X() + Constant::DIM_CUBE))&&((triangleTopPoint.Z() >= targetPoint.Z() - Constant::DIM_CUBE) && (triangleTopPoint.Z() <= targetPoint.Z() + Constant::DIM_CUBE));
+    return ((mirinoPoint.X() >= targetPoint.X() - Constant::DIM_CUBE) && (mirinoPoint.X() <= targetPoint.X() + Constant::DIM_CUBE))&&((mirinoPoint.Z() >= targetPoint.Z() - Constant::DIM_CUBE) && (mirinoPoint.Z() <= targetPoint.Z() + Constant::DIM_CUBE));
 }
 
+/* genera un target e setta la nuova posizione. Con una certa probabilità sarà un goal piuttosto che un tnt */
 bool generateTarget(float carX, float carZ) {
 
     float targetX, targetZ, newX, newZ;
-    if ((((float) rand()) / (float) RAND_MAX) > Constant::PROBABILITY_OF_GOAL) { // genero un TNT
+    if ((((float) rand()) / (float) RAND_MAX) > Constant::PROBABILITY_OF_GOAL) { /* genero un TNT */
         isTnt = true;
         isGoal = false;
         tnt += 1;
@@ -78,7 +91,7 @@ bool generateTarget(float carX, float carZ) {
         targetZ = (Constant::Z_POS_TNT_MAX - Constant::Z_POS_TNT_MIN) * ((((float) rand()) / (float) RAND_MAX)) + Constant::Z_POS_TNT_MIN;
         newX = carX + targetX;
         newZ = carZ + targetZ;
-    } else { // genero un GOAL
+    } else { /* genero un GOAL */
         isTnt = false;
         isGoal = true;
         goal += 1;
@@ -87,25 +100,29 @@ bool generateTarget(float carX, float carZ) {
         newX = targetX;
         newZ = carZ + targetZ;
     }
-    if (carZ + targetZ < -425) {
-        targetPoint.setX(-900);
-        targetPoint.setZ(-900);
-    } else {
+    /* se supero il limite posizione all "infinito" */
+    if (carZ + targetZ < Constant::LIMIT_GENERATE_TARGET) {
+        targetPoint.setX(-9000);
+        targetPoint.setZ(-9000);
+    } else { /* altrimenti setto le nuove posizioni */
         targetPoint.setX(newX);
         targetPoint.setZ(newZ);
     }
 }
 
-void Controller::checkVisibilityTarget(float carX, float carZ) {
+/* controllo i vincoli di gioco(punteggi, visibilità target, ecc ...) */
+void Controller::checkConstraintsGame(float carZ) {
+    /* se ho passato un target senza catturarlo del limite ne genero un altro e
+       se era un goal tolgo un punto */
     if ((targetPoint.Z() - carZ) > Constant::LIMIT_VISIBILITY_TARGET) {
         generate = true;
         if (isGoal)
             punteggio -= 1;
-    } else if (isInTarget() && isGoal) {
+    } else if (isInTarget() && isGoal) { /* se catturo un goal +1 */
         goalChecked += 1;
         punteggio += 1;
         generate = true;
-    } else if (isInTarget() && isTnt) {
+    } else if (isInTarget() && isTnt) { /* se catturo un tnt -1 */
         tntChecked += 1;
         punteggio -= 1;
         generate = true;
@@ -113,21 +130,23 @@ void Controller::checkVisibilityTarget(float carX, float carZ) {
         generate = false;
     }
 
+    /* genero un nuovo target */
     if (generate) {
-        generateTarget(triangleTopPoint.X(), triangleTopPoint.Z());
+        generateTarget(mirinoPoint.X(), mirinoPoint.Z());
     }
-    if ((triangleTopPoint.Z() < -430) && ((triangleTopPoint.X() > -5.0) && (triangleTopPoint.X() < 5.0))) {
+    /* decreto il GAME OVER se passo la scacchiera in prossimità della statua */
+    if ((mirinoPoint.Z() < Constant::LIMIT_GENERATE_TARGET - 5) && ((mirinoPoint.X() > -5.0) && (mirinoPoint.X() < 5.0))) {
         gameOver = true;
         endTime = Controller::getSeconds();
     }
+    /* se scade il tempo decreto la perdita del player */
     if (Constant::GAME_LIMIT_SECONDS - Controller::getSeconds() <= 0) {
         gameOver = true;
         playerLoose = true;
     }
-    //printf("PUNTEGGIO: %d\n", punteggio);
 }
 
-void Controller::drawTargetCube(float mozzo) {
+void Controller::drawTargetCube() {
 
     // disegno del cubo con una texture personale su tutti e sei i lati
     glPushMatrix();
@@ -241,7 +260,7 @@ void Controller::drawTargetCube(float mozzo) {
     glPopMatrix();
 }
 
-void Controller::drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight) {
+void drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight) {
 
     // disegno del cubo con una texture personale su tutti e sei i lati
     glPushMatrix();
@@ -356,23 +375,39 @@ void Controller::drawReverseLightPolygon(float x, float y, float z, float facing
     glPopMatrix();
 }
 
-void drawLineToDebug(float x1, float y1, float z1, float x2, float y2, float z2, float colorR, float colorG, float colorB) {
-    glColor3f(colorR, colorG, colorB); // GREEN
+/* disegna un linea tra due punti della view */
+void drawLine(float x1, float y1, float z1, float x2, float y2, float z2, float colorR, float colorG, float colorB) {
+    glColor3f(colorR, colorG, colorB);
     glBegin(GL_LINES);
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
     glEnd();
 }
 
-void Controller::drawTriangleForTarget(float facing, float carX, float carZ) {
+/*
+ Disegno del mirino così composto:
+
+           1     2     3
+             \   |   /
+              \  |  / 
+               \ | /
+          4 ____\|/____ 5
+                /|\
+               / | \
+              /  |  \
+             /   |   \ 
+           6     8     9
+ */
+void Controller::drawMirino(float facing, float carX, float carZ) {
+    /* calcoli sull'angolo per applicare la rotazione */
     float angle = 360 - facing;
     float cosA = cos(angle * M_PI / 180.0);
     float sinA = sin(angle * M_PI / 180.0);
-    float Z2B = 2.5; // distanza da baricentro Z
-    float Z2BTop = 2.5; // distanza da baricentro Z
-    float X2B = 0.1; // distanza da baricentro X
-    float X2BTop = 0; // distanza da baricentro Z
-    float y = 0.5;
+    /* distanze dal baricentro della macchina */
+    float Z2B = 2.5;
+    float Z2BTop = 2.5;
+    float X2B = 0.1;
+    float X2BTop = 0;
 
     float X1 = X2B * cosA - Z2B * sinA;
     float Z1 = X2B * sinA + Z2B * cosA;
@@ -389,19 +424,61 @@ void Controller::drawTriangleForTarget(float facing, float carX, float carZ) {
     float xB = carX - X2;
     float zB = carZ - Z2;
 
-    //TOP DEL TRIANGOLO
     float xC = carX - X3;
     float zC = carZ - Z3;
 
-    triangleTopPoint.setX(xC);
-    triangleTopPoint.setZ(zC);
+    /* centro del mirino */
+    mirinoPoint.setX(xC);
+    mirinoPoint.setZ(zC);
 
-    drawLineToDebug(xA, 0.6, zA, xB, 0.3, zB, 1, 0, 0); //x
-    drawLineToDebug(xB, 0.6, zB, xA, 0.3, zA, 1, 0, 0); //x
-    drawLineToDebug(xA, 0.45, zA, xB, 0.45, zB, 1, 0, 0); //+
-    drawLineToDebug(xC, 0.3, zC, xC, 0.6, zC, 1, 0, 0); //+
+    /* disegno della linea 1-9 */
+    drawLine(xA, 0.6, zA, xB, 0.3, zB, 1, 0, 0);
+    /* disegno della linea 3-6 */
+    drawLine(xB, 0.6, zB, xA, 0.3, zA, 1, 0, 0);
+    /* disegno della linea 4-5 */
+    drawLine(xA, 0.45, zA, xB, 0.45, zB, 1, 0, 0);
+    /* disegno della linea 2-8 */
+    drawLine(xC, 0.3, zC, xC, 0.6, zC, 1, 0, 0);
 
     glEnd();
+}
+
+/* disegno la luce per la retromarcia */
+void drawLightingRetro(float x, float y, float z, float cos, float sin) {
+
+    float dirX = 0.0;
+    float dirZ = 0.0;
+    /* in base al coseno setto la direzione Z verso cui la luce deve puntare */
+    if(cos > 0.4) {
+        dirZ = 1.0;
+        z += 0.5;
+    } else if (cos < -0.4) {
+        dirZ = -1.0;
+        z -= 0.5;
+    }
+    /* in base al coseno setto la direzione X verso cui la luce deve puntare */
+    if(sin > 0.4) {
+        dirX = -1.0;
+    } else if (sin < -0.4) {
+        dirX = 1.0;
+    }
+
+    glEnable(GL_LIGHT5);
+    GLfloat ambient[] = {1.0, 0.6, 0.0, 1.0};
+    glLightfv(GL_LIGHT5, GL_AMBIENT, ambient);
+    GLfloat diffuse[] = {0.0, 0, 0, 1.0};
+    glLightfv(GL_LIGHT5, GL_DIFFUSE, diffuse);
+    /* no luce direzionale */
+    GLfloat position[] = {x, y, z, 1};
+    glLightfv(GL_LIGHT5, GL_POSITION, position);
+    GLfloat spot_direction[] = {dirX, 0, dirZ, 0};
+    glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
+    glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 1.0);
+    glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 80.0);
+    glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 2);
+    /* attenuazione relativamente alta per non propagare troppo la luce */
+    float attenuation = 0.5;
+    glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, attenuation);
 }
 
 void Controller::drawReverseLight(float facing, float carX, float carZ, bool retroLight) {
@@ -423,60 +500,27 @@ void Controller::drawReverseLight(float facing, float carX, float carZ, bool ret
     float zPolygonDX = carZ - Zdx;
     float zPolygonSX = carZ - Zsx;
 
-    drawLineToDebug(xPolygonSX, 0.4, zPolygonSX, xPolygonSX, 0.45, zPolygonSX, 0, 0, 0);
-    drawLineToDebug(xPolygonDX, 0.4, zPolygonDX, xPolygonDX, 0.45, zPolygonDX, 0, 0, 0);
-    Controller::drawReverseLightPolygon(xPolygonSX, 0.4, zPolygonSX, facing, retroLight);
-    Controller::drawReverseLightPolygon(xPolygonDX, 0.4, zPolygonDX, facing, retroLight);
+    glLineWidth(8);
+    drawLine(xPolygonSX, 0.4, zPolygonSX, xPolygonSX, 0.45, zPolygonSX, 0, 0, 0);
+    drawLine(xPolygonDX, 0.4, zPolygonDX, xPolygonDX, 0.45, zPolygonDX, 0, 0, 0);
+    drawReverseLightPolygon(xPolygonSX, 0.4, zPolygonSX, facing, retroLight);
+    drawReverseLightPolygon(xPolygonDX, 0.4, zPolygonDX, facing, retroLight);
+
+    /* abilito o disabilito la luce in base a se sono in retro o meno */
     if(retroLight)
-        Controller::drawLightingRetro(carX, 0.4, carZ, cosA, sinA);
+        drawLightingRetro(carX, 0.4, carZ, cosA, sinA);
     else
         glDisable(GL_LIGHT5);
 }
 
-void Controller::drawLightingRetro(float x, float y, float z, float cos, float sin) {
-    
-    float dirX = 0.0;
-    float dirZ = 0.0;
-    
-    if(cos > 0.4) {
-        dirZ = 1.0;
-        z += 0.5;
-    } else if (cos < -0.4) {
-        dirZ = -1.0;
-        z -= 0.5;
-    }
-
-    if(sin > 0.4) {
-        dirX = -1.0;
-    } else if (sin < -0.4) {
-        dirX = 1.0;
-    }
-
-    glEnable(GL_LIGHT5);
-    GLfloat ambient[] = {1.0, 0.6, 0.0, 1.0};
-    glLightfv(GL_LIGHT5, GL_AMBIENT, ambient);
-    GLfloat diffuse[] = {0.0, 0, 0, 1.0};
-    glLightfv(GL_LIGHT5, GL_DIFFUSE, diffuse);
-    GLfloat position[] = {x, y, z, 1}; // ultima comp=0 => luce direzionale
-    glLightfv(GL_LIGHT5, GL_POSITION, position);
-    GLfloat spot_direction[] = {dirX, 0, dirZ, 0};
-    glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
-    glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 1.0);
-    glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 80.0);
-    glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 2);
-    float attenuation = 0.5;
-    glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, attenuation);
-}
-
+/* disegno la luce della fiaccola */
 void Controller::drawLightTorciaStatua() {
     glEnable(GL_LIGHT4);
     GLfloat ambient[] = {1, 0.0, 0.0, 1.0};
     glLightfv(GL_LIGHT4, GL_AMBIENT, ambient);
     GLfloat diffuse[] = {0.4, 0, 0, 1.0};
     glLightfv(GL_LIGHT4, GL_DIFFUSE, diffuse);
-    //GLfloat specular[] = { 1.0, 0.0, 1.0, 0.0 };
-    //glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    GLfloat position[] = {Constant::POS_TORCIA_X, Constant::POS_TORCIA_Y, Constant::POS_TORCIA_Z, 1}; // ultima comp=0 => luce direzionale
+    GLfloat position[] = {Constant::POS_TORCIA_X, Constant::POS_TORCIA_Y, Constant::POS_TORCIA_Z, 1};
     glLightfv(GL_LIGHT4, GL_POSITION, position);
     GLfloat spot_direction[] = {0, 0, -1.0, 0};
     glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
@@ -484,61 +528,70 @@ void Controller::drawLightTorciaStatua() {
     glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90.0);
     glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0);
     float attenuation = 1;
+    /* genero l'intermittenza in base al modulo */
     if (SDL_GetTicks() % 3 == 0)
         attenuation = 0.02;
     glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, attenuation);
-    //glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 12.0);
 }
 
+/* fornisce all'esterno la posizione X del target corrente */
 float Controller::getTargetX() {
     return targetPoint.X();
 };
 
+/* fornisce all'esterno la posizione Z del target corrente */
 float Controller::getTargetZ() {
     return targetPoint.Z();
 };
 
+/* booleano che decreta se il target è un Goal o meno */
 bool Controller::isTargetGoal() {
     return isGoal;
 };
 
+/* booleano che decreta se il target è un TNT o meno */
 bool Controller::isTargetTnt() {
     return isTnt;
 };
 
+/* booleano che decreta la fine del gioco */
 bool Controller::isGameOver() {
     //    return (Controller::getSeconds() > 4);
     return gameOver;
 };
 
+/* booleano che decreta se il è scaduto il time */
 bool Controller::isPlayerLoose() {
     return playerLoose;
 };
 
+/* ritorna lo score del player corrente */
 int Controller::getScore() {
     return punteggio;
 };
 
+/* ritorna il numero di Goal generati */
 int Controller::getGoal() {
     return goal;
 };
 
+/* ritorna il numero di Goal catturati */
 int Controller::getGoalChecked() {
     return goalChecked;
 };
 
+/* ritorna il numero di TNT generati */
 int Controller::getTnt() {
     return tnt;
 };
 
+/* ritorna il numero di TNT fatti esplodere */
 int Controller::getTntChecked() {
     return tntChecked;
 };
 
-void Controller::SDL_GL_DrawText(TTF_Font *font, // font
-        char fgR, char fgG, char fgB, char fgA, // colore testo
-        char bgR, char bgG, char bgB, char bgA, // colore background
-        char *text, int x, int y) { // qualità del testo
+/* funzione che renderizza del testo in un box */
+void Controller::drawText(TTF_Font *font, char fgR, char fgG, char fgB, char fgA, char bgR, char bgG, char bgB, char bgA, char *text, int x, int y) {
     SDL_Color tmpfontcolor = {fgR, fgG, fgB, fgA};
     SDL_Color tmpfontbgcolor = {bgR, bgG, bgB, bgA};
     SDL_Surface *initial;
@@ -546,23 +599,17 @@ void Controller::SDL_GL_DrawText(TTF_Font *font, // font
     SDL_Rect location;
     int w, h;
 
-    /* Usiamo SDL_TTF per il rendering del testo */
     initial = NULL;
     initial = TTF_RenderText_Shaded(font, text, tmpfontcolor, tmpfontbgcolor);
 
-
-    /* Convertiamo il testo in un formato conosciuto */
     w = initial->w;
     h = initial->h;
 
-    /* Allochiamo una nuova surface RGB */
     intermediary = SDL_CreateRGBSurface(0, w, h, 32,
             0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
 
-    /* Copiamo il contenuto dalla prima alla seconda surface */
     SDL_BlitSurface(initial, 0, intermediary, 0);
 
-    /* Informiamo GL della nuova texture */
     glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_INFO_USER);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, intermediary->pixels);
@@ -584,12 +631,10 @@ void Controller::SDL_GL_DrawText(TTF_Font *font, // font
     glVertex2f(location.x - 2, location.y + h + 2);
     glEnd();
 
-    /* prepariamoci al rendering del testo */
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_INFO_USER);
     glColor3f(1.0f, 1.0f, 1.0f);
 
-    /* Disegnamo un quads come location del testo */
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 1.0f);
     glVertex2f(location.x, location.y);
@@ -601,38 +646,26 @@ void Controller::SDL_GL_DrawText(TTF_Font *font, // font
     glVertex2f(location.x, location.y + h);
     glEnd();
 
-    /* Disegnamo un contorno al quads */
     glColor3f(0.0f, 0.0f, 0.0f);
-    //  glBegin(GL_LINE_STRIP);
-    //    glVertex2f((GLfloat)location.x-1, (GLfloat)location.y-1);
-    //    glVertex2f((GLfloat)location.x + w +1, (GLfloat)location.y-1);
-    //    glVertex2f((GLfloat)location.x + w +1, (GLfloat)location.y + h +1);
-    //    glVertex2f((GLfloat)location.x-1    , (GLfloat)location.y + h +1);
-    //    glVertex2f((GLfloat)location.x-1, (GLfloat)location.y-1);
-    //  glEnd();
 
-    /* Bad things happen if we delete the texture before it finishes */
     glFinish();
 
-    /* return the deltas in the unused w,h part of the rect */
     location.w = initial->w;
     location.h = initial->h;
 
-    /* Clean up */
     glDisable(GL_TEXTURE_2D);
     SDL_FreeSurface(initial);
     SDL_FreeSurface(intermediary);
 
 }
 
+/* disegna il layout di GameOver diversificando se l'utente ha perso o ha portato a termine il gioco */
 void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, int scrW) {
-    // settiamo il viewport
-    glViewport(0, 0, scrW, scrH);
 
-    // colore di sfondo (fuori dal mondo)
+    glViewport(0, 0, scrW, scrH);
+    /* sfondo nero */
     glClearColor(0, 0, 0, 1);
 
-    // riempe tutto lo screen buffer di pixel color sfondo
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
@@ -644,10 +677,8 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
 
     glLineWidth(2);
 
-    // conversione della variabile punteggio
     char punti[3];
     sprintf(punti, "%d", punteggio);
-
     char str_game_over[] = "GAME OVER!!";
     char player_looser[] = "YOU LOOSE!!  TIME'S UP!!";
     char continuare[] = "Premi << ESC >> per uscire ...";
@@ -664,16 +695,16 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
     if(!playerLoose) { sprintf(point, "SCORE:  %d   ", Controller::getScore()); }
     if(!playerLoose) { sprintf(time, "TIME:  %f ", endTime); }
 
-    Controller::SDL_GL_DrawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, str_game_over, scrW / 2 - 120, scrH  - 120);
+    Controller::drawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, str_game_over, scrW / 2 - 120, scrH  - 120);
     if(!playerLoose) { 
-        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, point, 50, scrH / 2 + 100);
-        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, goal, 50, scrH / 2 + 30);
-        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, tnt, 50, scrH / 2 -40);
-        Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, time, 50, scrH / 2 - 110);
+        Controller::drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, point, 50, scrH / 2 + 100);
+        Controller::drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, goal, 50, scrH / 2 + 30);
+        Controller::drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, tnt, 50, scrH / 2 -40);
+        Controller::drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, time, 50, scrH / 2 - 110);
     } else {
-        Controller::SDL_GL_DrawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, player_looser, scrW / 2 - 200, scrH / 2 + 100);
+        Controller::drawText(fontTitle, 0, 0, 0, 0, 210, 210, 210, 255, player_looser, scrW / 2 - 200, scrH / 2 + 100);
     }
-    Controller::SDL_GL_DrawText(font, 0, 0, 0, 0, 210, 210, 210, 255, continuare, scrW / 2 - 120, scrH / 2 - 180);
+    Controller::drawText(font, 0, 0, 0, 0, 210, 210, 210, 255, continuare, scrW / 2 - 120, scrH / 2 - 180);
     glFinish();
 
     SDL_GL_SwapWindow(win);

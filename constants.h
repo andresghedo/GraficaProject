@@ -69,6 +69,8 @@ namespace Constant
     const float CAR_LIMIT_Z_INF         = -438.0;
     /* parametro di scala per la statua */
     const float STATUE_SCALE_PARAMETR   = 60.0;
+    /* limite oltre il quale non devo più generare target */
+    const float LIMIT_GENERATE_TARGET = -425.0;
 }
 
 #endif	/* CONSTANTS_H */
