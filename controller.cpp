@@ -22,7 +22,7 @@
 /* posizione XYZ del target corrente(sia esso un goal o un TNT) */
 Point3 targetPoint = Point3(0, 0, Constant::INITIAL_TARGET_Z);
 /* posizione XYZ del mirino */
-Point3 mirinoPoint = Point3(0, 0, 0);
+Point3 mirinoPoint = Point3(0, 0.4, 0);
 /* booleano che decreta la generazione di un target o meno */
 bool generate;
 /* booleano che decreta se il target è un TNT */
@@ -398,7 +398,7 @@ void drawLine(float x1, float y1, float z1, float x2, float y2, float z2, float 
              /   |   \ 
            6     8     9
  */
-void Controller::drawMirino(float facing, float carX, float carZ) {
+void Controller::drawMirino(float facing, float carX, float carZ, bool draw) {
     /* calcoli sull'angolo per applicare la rotazione */
     float angle = 360 - facing;
     float cosA = cos(angle * M_PI / 180.0);
@@ -431,6 +431,7 @@ void Controller::drawMirino(float facing, float carX, float carZ) {
     mirinoPoint.setX(xC);
     mirinoPoint.setZ(zC);
 
+    if(draw) {
     /* disegno della linea 1-9 */
     drawLine(xA, 0.6, zA, xB, 0.3, zB, 1, 0, 0);
     /* disegno della linea 3-6 */
@@ -439,8 +440,7 @@ void Controller::drawMirino(float facing, float carX, float carZ) {
     drawLine(xA, 0.45, zA, xB, 0.45, zB, 1, 0, 0);
     /* disegno della linea 2-8 */
     drawLine(xC, 0.3, zC, xC, 0.6, zC, 1, 0, 0);
-
-    glEnd();
+    }
 }
 
 /* disegno la luce per la retromarcia */
@@ -522,7 +522,7 @@ void Controller::drawLightTorciaStatua() {
     glLightfv(GL_LIGHT4, GL_DIFFUSE, diffuse);
     GLfloat position[] = {Constant::POS_TORCIA_X, Constant::POS_TORCIA_Y, Constant::POS_TORCIA_Z, 1};
     glLightfv(GL_LIGHT4, GL_POSITION, position);
-    GLfloat spot_direction[] = {0, 0, -1.0, 0};
+    GLfloat spot_direction[] = {0, -1.0, 0, 0};
     glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
     glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 1.0);
     glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90.0);
@@ -542,6 +542,21 @@ float Controller::getTargetX() {
 /* fornisce all'esterno la posizione Z del target corrente */
 float Controller::getTargetZ() {
     return targetPoint.Z();
+};
+
+/* fornisce all'esterno la posizione X del mirino */
+float Controller::getMirinoX() {
+    return mirinoPoint.X();
+};
+
+/* fornisce all'esterno la posizione Y del mirino */
+float Controller::getMirinoY() {
+    return mirinoPoint.Y();
+};
+
+/* fornisce all'esterno la posizione Z del mirino */
+float Controller::getMirinoZ() {
+    return mirinoPoint.Z();
 };
 
 /* booleano che decreta se il target è un Goal o meno */

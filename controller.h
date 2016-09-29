@@ -23,7 +23,7 @@ public:
     /* gestione dei vincli di gioco(cattura goal/tnt, time, fine gioco etc...) */
     void checkConstraintsGame(float carZ);
     /* disegno del mirino */
-    void drawMirino(float facing, float carX, float carZ);
+    void drawMirino(float facing, float carX, float carZ, bool draw);
     /* disegno della luce di retromarcia/freno */
     void drawReverseLight(float facing, float carX, float carZ, bool retroLight);
     /* disegno della luca della statua intermittente */
@@ -32,6 +32,12 @@ public:
     float getTargetX();
     /* fornisce all'esterno la posizione Z del target corrente */
     float getTargetZ();
+    /* fornisce all'esterno la posizione X del mirino corrente */
+    float getMirinoX();
+    /* fornisce all'esterno la posizione Z del mirino corrente */
+    float getMirinoZ();
+    /* fornisce all'esterno la posizione Y del mirino corrente */
+    float getMirinoY();
     /* booleano che decreta se il target è un Goal o meno */
     bool isTargetGoal();
     /* booleano che decreta se il target è un TNT o meno */

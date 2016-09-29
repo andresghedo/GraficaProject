@@ -15,7 +15,8 @@
 #define CAMERA_TOP_CAR 2
 #define CAMERA_PILOT 3
 #define CAMERA_MOUSE 4
-#define CAMERA_TYPE_MAX 5
+#define CAMERA_MIRINO 5
+#define CAMERA_TYPE_MAX 6
 #define PI 3.14159265
 
 /* angoli che definiscono la vista */
@@ -450,6 +451,19 @@ void setCamera() {
             cz = pz - camd*cosf;
             gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
             break;
+        case CAMERA_MIRINO:
+            camd = 0.0;
+            camh = 0.0;
+            /* PUNTO DI AZIONE */
+            ex = controller.getMirinoX() + camd*sinf;
+            ey = controller.getMirinoY() + camh;
+            ez = controller.getMirinoZ() + camd*cosf;
+            /* PUNTO VERSO CUI GUARDO */
+            cx = controller.getMirinoX() - 100 * sinf;
+            cy = controller.getMirinoY() + camh;
+            cz = controller.getMirinoZ() - 100 * cosf;
+            gluLookAt(ex, ey, ez, cx, cy, cz, 0.0, 1.0, 0.0);
+            break;
         case CAMERA_TOP_FIXED:
             camd = 0.5;
             camh = 0.55;
@@ -563,7 +577,8 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     /* disegno assi XYZ del MONDO(Per debug) */
     drawAxis();
     /* disegno il mirino */
-    controller.drawMirino(car.facing, car.px, car.pz);
+    bool mirino = (cameraType != CAMERA_MIRINO);
+    controller.drawMirino(car.facing, car.px, car.pz, mirino);
     /* disegno le luci posteriori dell'auto */
     controller.drawReverseLight(car.facing, car.px, car.pz, controller.key[Controller::DEC]);
     static float tmpcol[4] = {1, 1, 1, 1};
