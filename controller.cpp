@@ -520,7 +520,7 @@ void Controller::drawLightTorciaStatua() {
     glLightfv(GL_LIGHT4, GL_AMBIENT, ambient);
     GLfloat diffuse[] = {0.4, 0, 0, 1.0};
     glLightfv(GL_LIGHT4, GL_DIFFUSE, diffuse);
-    GLfloat position[] = {Constant::POS_TORCIA_X, Constant::POS_TORCIA_Y, Constant::POS_TORCIA_Z, 1};
+    GLfloat position[] = {Constant::POS_TORCIA_X, Constant::POS_TORCIA_Y + 10, Constant::POS_TORCIA_Z, 1};
     glLightfv(GL_LIGHT4, GL_POSITION, position);
     GLfloat spot_direction[] = {0, -1.0, 0, 0};
     glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
@@ -530,7 +530,7 @@ void Controller::drawLightTorciaStatua() {
     float attenuation = 1;
     /* genero l'intermittenza in base al modulo */
     if (SDL_GetTicks() % 3 == 0)
-        attenuation = 0.02;
+        attenuation = 0.05;
     glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, attenuation);
 }
 
@@ -672,6 +672,25 @@ void Controller::drawText(TTF_Font *font, char fgR, char fgG, char fgB, char fgA
     SDL_FreeSurface(initial);
     SDL_FreeSurface(intermediary);
 
+}
+
+void setNebbia() {
+    GLfloat fogColor[4] = {0.6, 0.6, 0.6, 1.0};
+    glFogi (GL_FOG_MODE, GL_LINEAR);
+    glFogfv (GL_FOG_COLOR, fogColor);
+    glFogf (GL_FOG_START, 0.0);
+    glFogf (GL_FOG_END, 20.0);
+    glClearColor(0.5, 0.5, 0.5, 1.0);
+}
+
+void Controller::drawNebbia(bool nebbia) {
+
+    if(nebbia) {
+        setNebbia();
+        glEnable(GL_FOG);
+    }
+    else
+        glDisable(GL_FOG);
 }
 
 /* disegna il layout di GameOver diversificando se l'utente ha perso o ha portato a termine il gioco */

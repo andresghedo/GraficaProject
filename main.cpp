@@ -29,6 +29,7 @@ bool useWireframe = false;
 bool useEnvmap = true;
 bool useHeadlight = false;
 bool useShadow = true;
+bool nebbia = false;
 int cameraType = 0;
 /* l'entità Car */
 Car car;
@@ -606,6 +607,8 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     controller.drawTargetCube();
     /* render della macchina */
     car.Render();
+    /* mostro o meno la nebbia */
+    controller.drawNebbia(nebbia);
 
     /* attendiamo la fine della rasterizzazione di tutte le primitive mandate */
     glDisable(GL_DEPTH_TEST);
@@ -741,6 +744,8 @@ int main(int argc, char* argv[]) {
                     if (e.key.keysym.sym == SDLK_F4) useHeadlight = !useHeadlight;
                     /* mostro ombra della macchina o meno */
                     if (e.key.keysym.sym == SDLK_F5) useShadow = !useShadow;
+                    /* gioco con la nebbia meno */
+                    if (e.key.keysym.sym == SDLK_F6) nebbia = !nebbia;
                     break;
                 case SDL_KEYUP:
                     controller.EatKey(e.key.keysym.sym, keymap, false);

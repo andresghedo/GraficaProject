@@ -62,6 +62,8 @@ public:
     void drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, int scrW);
     /* torna il numero di secondi di gioco correnti */
     double getSeconds();
+    /* disegna o meno la nebbia*/
+    void drawNebbia(bool nebbia);
 
     /* costruttore */
     Controller() {
