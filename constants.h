@@ -31,7 +31,7 @@ namespace Constant
     /* dimesioni di un Cubo Target o Tnt */
     const float DIM_CUBE = 0.8;
     const float DIM_X_MIN_TARGET = -DIM_CUBE, DIM_X_MAX_TARGET = DIM_CUBE;
-    const float DIM_Y_MIN_TARGET = 0.15, DIM_Y_MAX_TARGET = 1.75;
+    const float DIM_Y_MIN_TARGET = 0.55, DIM_Y_MAX_TARGET = 2.15;
     const float DIM_Z_MIN_TARGET = -DIM_CUBE, DIM_Z_MAX_TARGET = DIM_CUBE;
     /* dimesioni di un Rettangolino per retromarcia */
     const float DIM_X_MIN_REVERSE_LIGHT = -0.05, DIM_X_MAX_REVERSE_LIGHT = +0.05;

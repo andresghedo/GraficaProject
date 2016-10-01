@@ -21,7 +21,7 @@ public:
     /* disegno di un cubo goal o tnt */
     void drawTargetCube();
     /* gestione dei vincli di gioco(cattura goal/tnt, time, fine gioco etc...) */
-    void checkConstraintsGame(float carZ);
+    void checkConstraintsGame(float carZ, bool nebbia);
     /* disegno del mirino */
     void drawMirino(float facing, float carX, float carZ, bool draw);
     /* disegno della luce di retromarcia/freno */

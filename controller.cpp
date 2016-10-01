@@ -22,7 +22,7 @@
 /* posizione XYZ del target corrente(sia esso un goal o un TNT) */
 Point3 targetPoint = Point3(0, 0, Constant::INITIAL_TARGET_Z);
 /* posizione XYZ del mirino */
-Point3 mirinoPoint = Point3(0, 0.4, 0);
+Point3 mirinoPoint = Point3(0, 1.0, 0);
 /* booleano che decreta la generazione di un target o meno */
 bool generate;
 /* booleano che decreta se il target è un TNT */
@@ -47,6 +47,10 @@ int goal = 0;
 clock_t startTime;
 /* tempo di concludione del gioco */
 double endTime = 0;
+/* coordinate del punto di luce per simulare lo shadowing dei target*/
+float l[] = { 0.0,  60.0, 0.0 };
+/* normal al piano */
+float n[] = { 0.0,  -1.0, 0.0 };
 
 /* inizializzaione del Controller */
 void Controller::Init() {
@@ -111,7 +115,7 @@ bool generateTarget(float carX, float carZ) {
 }
 
 /* controllo i vincoli di gioco(punteggi, visibilità target, ecc ...) */
-void Controller::checkConstraintsGame(float carZ) {
+void Controller::checkConstraintsGame(float carZ, bool nebbia) {
     /* se ho passato un target senza catturarlo del limite ne genero un altro e
        se era un goal tolgo un punto */
     if ((targetPoint.Z() - carZ) > Constant::LIMIT_VISIBILITY_TARGET) {
@@ -121,6 +125,8 @@ void Controller::checkConstraintsGame(float carZ) {
     } else if (isInTarget() && isGoal) { /* se catturo un goal +1 */
         goalChecked += 1;
         punteggio += 1;
+        /* se c'è la nebbia incremento ancora di +1*/
+        if (nebbia) { punteggio += 1; }
         generate = true;
     } else if (isInTarget() && isTnt) { /* se catturo un tnt -1 */
         tntChecked += 1;
@@ -146,9 +152,167 @@ void Controller::checkConstraintsGame(float carZ) {
     }
 }
 
+void glShadowProjection(float * l, float * n) {
+
+    float d, c;
+    float mat[16];
+
+    // These are c and d (corresponding to the tutorial)
+    d = n[0]*l[0] + n[1]*l[1] + n[2]*l[2];
+    c = targetPoint.X()*n[0] + 0.15*n[1] + targetPoint.Z()*n[2] - d;
+
+    // Create the matrix. OpenGL uses column by column ordering
+    mat[0]  = l[0]*n[0]+c;
+    mat[4]  = n[1]*l[0];
+    mat[8]  = n[2]*l[0];
+    mat[12] = -l[0]*c-l[0]*d;
+
+    mat[1]  = n[0]*l[1];
+    mat[5]  = l[1]*n[1]+c;
+    mat[9]  = n[2]*l[1]; 
+    mat[13] = -l[1]*c-l[1]*d;
+
+    mat[2]  = n[0]*l[2];        
+    mat[6]  = n[1]*l[2]; 
+    mat[10] = l[2]*n[2]+c; 
+    mat[14] = -l[2]*c-l[2]*d;
+
+    mat[3]  = n[0];
+    mat[7]  = n[1];
+    mat[11] = n[2];
+    mat[15] = -d;
+
+    // Finally multiply the matrices together *plonk*
+    glMultMatrixf(mat);
+}
+/* funzione che disegna il poligono del target o il poligono dei fanalini del retro auto in base agli input */
+void drawPolygon(bool texture, int npolygon) {
+
+    float x_min_polygon, x_max_polygon, y_min_polygon, y_max_polygon, z_min_polygon, z_max_polygon;
+
+    switch (npolygon)
+    {
+        /* dimensioni per target */
+        case(1):
+            x_min_polygon = Constant::DIM_X_MIN_TARGET;
+            x_max_polygon = Constant::DIM_X_MAX_TARGET;
+            y_min_polygon = Constant::DIM_Y_MIN_TARGET;
+            y_max_polygon = Constant::DIM_Y_MAX_TARGET;
+            z_min_polygon = Constant::DIM_Z_MIN_TARGET;
+            z_max_polygon = Constant::DIM_Z_MAX_TARGET;
+            break;
+        /* dimensioni fanalini retro */
+        case(2):
+            x_min_polygon = Constant::DIM_X_MIN_REVERSE_LIGHT;
+            x_max_polygon = Constant::DIM_X_MAX_REVERSE_LIGHT;
+            y_min_polygon = Constant::DIM_Y_MIN_REVERSE_LIGHT;
+            y_max_polygon = Constant::DIM_Y_MAX_REVERSE_LIGHT;
+            z_min_polygon = Constant::DIM_Z_MIN_REVERSE_LIGHT;
+            z_max_polygon = Constant::DIM_Z_MAX_REVERSE_LIGHT;
+            break;
+        default:
+            break;
+    }
+    
+    glBegin(GL_QUADS);
+    /* Front. */
+    if(texture) { glTexCoord2f(1.0, 1.0); }
+    glVertex3f(x_min_polygon, y_min_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(0.0, 1.0); }
+    glVertex3f(x_max_polygon, y_min_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(0.0, 0.0); }
+    glVertex3f(x_max_polygon, y_max_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(1.0, 0.0); }
+    glVertex3f(x_min_polygon, y_max_polygon, z_max_polygon);
+
+    /* Down. */
+    if(texture) { glTexCoord2f(0.0, 0.0); }
+    glVertex3f(x_min_polygon, y_min_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(1.0, 0.0); }
+    glVertex3f(x_max_polygon, y_min_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(1.0, 1.0); }
+    glVertex3f(x_max_polygon, y_min_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(0.0, 1.0); }
+    glVertex3f(x_min_polygon, y_min_polygon, z_max_polygon);
+
+    /* Back. */
+    if(texture) { glTexCoord2f(0.0, 0.0); }
+    glVertex3f(x_min_polygon, y_max_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(1.0, 0.0); }
+    glVertex3f(x_max_polygon, y_max_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(1.0, 1.0); }
+    glVertex3f(x_max_polygon, y_min_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(0.0, 1.0); }
+    glVertex3f(x_min_polygon, y_min_polygon, z_min_polygon);
+
+    /* Up. */
+    if(texture) { glTexCoord2f(0.0, 0.0); }
+    glVertex3f(x_min_polygon, y_max_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(1.0, 0.0); }
+    glVertex3f(x_max_polygon, y_max_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(1.0, 1.0); }
+    glVertex3f(x_max_polygon, y_max_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(0.0, 1.0); }
+    glVertex3f(x_min_polygon, y_max_polygon, z_min_polygon);
+
+    /* SideLeft. */
+    if(texture) { glTexCoord2f(0.0, 0.0); }
+    glVertex3f(x_min_polygon, y_max_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(1.0, 0.0); }
+    glVertex3f(x_min_polygon, y_max_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(1.0, 1.0); }
+    glVertex3f(x_min_polygon, y_min_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(0.0, 1.0); }
+    glVertex3f(x_min_polygon, y_min_polygon, z_min_polygon);
+
+    /* SideRight. */
+    if(texture) { glTexCoord2f(0.0, 0.0); }
+    glVertex3f(x_max_polygon, y_max_polygon, z_min_polygon);
+    if(texture) { glTexCoord2f(1.0, 0.0); }
+    glVertex3f(x_max_polygon, y_max_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(1.0, 1.0); }
+    glVertex3f(x_max_polygon, y_min_polygon, z_max_polygon);
+    if(texture) { glTexCoord2f(0.0, 1.0); }
+    glVertex3f(x_max_polygon, y_min_polygon, z_min_polygon);
+
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+
+    glLineWidth(1);
+    glColor3f(0, 0, 0);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(x_min_polygon, y_min_polygon, z_max_polygon);
+    glVertex3f(x_max_polygon, y_min_polygon, z_max_polygon);
+    glVertex3f(x_max_polygon, y_max_polygon, z_max_polygon);
+    glVertex3f(x_min_polygon, y_max_polygon, z_max_polygon);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(x_min_polygon, y_max_polygon, z_min_polygon);
+    glVertex3f(x_max_polygon, y_max_polygon, z_min_polygon);
+    glVertex3f(x_max_polygon, y_min_polygon, z_min_polygon);
+    glVertex3f(x_min_polygon, y_min_polygon, z_min_polygon);
+    glEnd();
+
+    glBegin(GL_LINES);
+    glVertex3f(x_min_polygon, y_min_polygon, z_max_polygon);
+    glVertex3f(x_min_polygon, y_min_polygon, z_min_polygon);
+
+    glVertex3f(x_max_polygon, y_min_polygon, z_max_polygon);
+    glVertex3f(x_max_polygon, y_min_polygon, z_min_polygon);
+
+    glVertex3f(x_min_polygon, y_max_polygon, z_max_polygon);
+    glVertex3f(x_min_polygon, y_max_polygon, z_min_polygon);
+
+    glVertex3f(x_max_polygon, y_max_polygon, z_max_polygon);
+    glVertex3f(x_max_polygon, y_max_polygon, z_min_polygon);
+    glEnd();
+    glPopMatrix();
+}
+
 void Controller::drawTargetCube() {
 
-    // disegno del cubo con una texture personale su tutti e sei i lati
     glPushMatrix();
     if (isTnt)
         glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_TNT);
@@ -159,110 +323,24 @@ void Controller::drawTargetCube() {
     glDisable(GL_TEXTURE_GEN_T);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_GEN_MODE, GL_REPLACE);
 
+    /* disegno il cubo target */
     glTranslatef(targetPoint.X(), targetPoint.Y(), targetPoint.Z());
-    glRotatef(90, 0, 1, 0);
     glColor3f(1, 1, 1);
     glDisable(GL_LIGHTING);
-    glBegin(GL_QUADS);
-    /* Front. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
+    drawPolygon(true, 1);
 
-    /* Down. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-
-    /* Back. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    /* Up. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    /* SideLeft. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    /* SideRight. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
-
-    glLineWidth(1);
+    /* disegno l'ombra del cubo target */
+    glPushMatrix();
+    glTranslatef(targetPoint.X(), targetPoint.Y(), targetPoint.Z());
+    glShadowProjection(l, n);
+    glDisable(GL_LIGHTING);
     glColor3f(0, 0, 0);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glEnd();
-
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glEnd();
-
-    glBegin(GL_LINES);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MIN_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MIN_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MAX_TARGET);
-    glVertex3f(Constant::DIM_X_MAX_TARGET, Constant::DIM_Y_MAX_TARGET, Constant::DIM_Z_MIN_TARGET);
-    glEnd();
+    drawPolygon(false, 1);
     glPopMatrix();
 }
 
 void drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight) {
 
-    // disegno del cubo con una texture personale su tutti e sei i lati
     glPushMatrix();
 
     if(retroLight)
@@ -278,101 +356,7 @@ void drawReverseLightPolygon(float x, float y, float z, float facing, bool retro
     glRotatef(facing, 0, 1, 0);
     glColor3ub(255,255,255);
     glDisable(GL_LIGHTING);
-    glBegin(GL_QUADS);
-    /* Front. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-
-    /* Down. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-
-    /* Back. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    /* Up. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    /* SideLeft. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    /* SideRight. */
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
-
-    glLineWidth(1);
-    glColor3f(0, 0, 0);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glEnd();
-
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glEnd();
-
-    glBegin(GL_LINES);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MIN_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MIN_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MAX_REVERSE_LIGHT);
-    glVertex3f(Constant::DIM_X_MAX_REVERSE_LIGHT, Constant::DIM_Y_MAX_REVERSE_LIGHT, Constant::DIM_Z_MIN_REVERSE_LIGHT);
-    glEnd();
-    glPopMatrix();
+    drawPolygon(true, 2);
 }
 
 /* disegna un linea tra due punti della view */
@@ -433,13 +417,13 @@ void Controller::drawMirino(float facing, float carX, float carZ, bool draw) {
 
     if(draw) {
     /* disegno della linea 1-9 */
-    drawLine(xA, 0.6, zA, xB, 0.3, zB, 1, 0, 0);
+    drawLine(xA, 1.0, zA, xB, 0.7, zB, 1, 0, 0);
     /* disegno della linea 3-6 */
-    drawLine(xB, 0.6, zB, xA, 0.3, zA, 1, 0, 0);
+    drawLine(xB, 1.0, zB, xA, 0.7, zA, 1, 0, 0);
     /* disegno della linea 4-5 */
-    drawLine(xA, 0.45, zA, xB, 0.45, zB, 1, 0, 0);
+    drawLine(xA, 0.85, zA, xB, 0.85, zB, 1, 0, 0);
     /* disegno della linea 2-8 */
-    drawLine(xC, 0.3, zC, xC, 0.6, zC, 1, 0, 0);
+    drawLine(xC, 0.7, zC, xC, 1.0, zC, 1, 0, 0);
     }
 }
 

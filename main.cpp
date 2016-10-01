@@ -856,7 +856,7 @@ int main(int argc, char* argv[]) {
             /* controllo i vincoli di gioco se non sono in gameover*/
             if ((doneSomething)&&(!controller.isGameOver())) {
                 rendering(win, font);
-                controller.checkConstraintsGame(car.pz);
+                controller.checkConstraintsGame(car.pz, nebbia);
             } else if (controller.isGameOver()) { /* se sono in gameover finisco il ciclo di gioco */
                 done = true;
             }
