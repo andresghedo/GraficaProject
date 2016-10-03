@@ -41,6 +41,8 @@ int tntChecked = 0;
 int tnt = 0;
 /* Goal catturati */
 int goalChecked = 0;
+/* Goal catturati con la nebbia */
+int goalCheckedNebbia = 0;
 /* Goal generati */
 int goal = 0;
 /* tempo di inizio gioco */
@@ -126,7 +128,7 @@ void Controller::checkConstraintsGame(float carZ, bool nebbia) {
         goalChecked += 1;
         punteggio += 1;
         /* se c'è la nebbia incremento ancora di +1*/
-        if (nebbia) { punteggio += 1; }
+        if (nebbia) { punteggio += 1; goalCheckedNebbia +=1; }
         generate = true;
     } else if (isInTarget() && isTnt) { /* se catturo un tnt -1 */
         tntChecked += 1;
@@ -159,7 +161,7 @@ void glShadowProjection(float * l, float * n) {
 
     // These are c and d (corresponding to the tutorial)
     d = n[0]*l[0] + n[1]*l[1] + n[2]*l[2];
-    c = targetPoint.X()*n[0] + 0.15*n[1] + targetPoint.Z()*n[2] - d;
+    c = targetPoint.X()*n[0] + 0.05*n[1] + targetPoint.Z()*n[2] - d;
 
     // Create the matrix. OpenGL uses column by column ordering
     mat[0]  = l[0]*n[0]+c;
@@ -311,7 +313,7 @@ void drawPolygon(bool texture, int npolygon) {
     glPopMatrix();
 }
 
-void Controller::drawTargetCube() {
+void Controller::drawTargetCube(bool shadow, bool UseWireFrame) {
 
     glPushMatrix();
     if (isTnt)
@@ -330,33 +332,44 @@ void Controller::drawTargetCube() {
     drawPolygon(true, 1);
 
     /* disegno l'ombra del cubo target */
-    glPushMatrix();
-    glTranslatef(targetPoint.X(), targetPoint.Y(), targetPoint.Z());
-    glShadowProjection(l, n);
-    glDisable(GL_LIGHTING);
-    glColor3f(0, 0, 0);
-    drawPolygon(false, 1);
-    glPopMatrix();
+    if(shadow) {
+        glPushMatrix();
+        glTranslatef(targetPoint.X(), targetPoint.Y(), targetPoint.Z());
+        glShadowProjection(l, n);
+        glDisable(GL_LIGHTING);
+        if(!UseWireFrame) { glColor3f(0, 0, 0); } else { glColor3f(1, 1, 1); }
+        drawPolygon(false, 1);
+        glPopMatrix();
+    }
 }
 
-void drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight) {
+void drawReverseLightPolygon(float x, float y, float z, float facing, bool retroLight, bool useWireFrame) {
 
     glPushMatrix();
 
-    if(retroLight)
-        glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LIGHT_ON);
-    else
-        glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LIGHT_OFF);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_GEN_MODE, GL_REPLACE);
+    if(!useWireFrame) {
+        if(retroLight)
+            glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LIGHT_ON);
+        else
+            glBindTexture(GL_TEXTURE_2D, Constant::TEXTURE_ID_LIGHT_OFF);
+        glEnable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_GEN_S);
+        glDisable(GL_TEXTURE_GEN_T);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_GEN_MODE, GL_REPLACE);
+    }
 
     glTranslatef(x, y, z);
     glRotatef(facing, 0, 1, 0);
-    glColor3ub(255,255,255);
-    glDisable(GL_LIGHTING);
-    drawPolygon(true, 2);
+
+    if(!useWireFrame) {
+        glColor3ub(255,255,255);
+        glDisable(GL_LIGHTING);
+        drawPolygon(true, 2);
+    } else {
+        glColor3ub(255,255,255);
+        glDisable(GL_LIGHTING);
+        drawPolygon(false, 2);
+    }
 }
 
 /* disegna un linea tra due punti della view */
@@ -465,7 +478,7 @@ void drawLightingRetro(float x, float y, float z, float cos, float sin) {
     glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, attenuation);
 }
 
-void Controller::drawReverseLight(float facing, float carX, float carZ, bool retroLight) {
+void Controller::drawReverseLight(float facing, float carX, float carZ, bool retroLight, bool useWireFrame) {
     float angle = 360 - facing;
     float cosA = cos(angle * M_PI / 180.0);
     float sinA = sin(angle * M_PI / 180.0);
@@ -487,8 +500,8 @@ void Controller::drawReverseLight(float facing, float carX, float carZ, bool ret
     glLineWidth(8);
     drawLine(xPolygonSX, 0.4, zPolygonSX, xPolygonSX, 0.45, zPolygonSX, 0, 0, 0);
     drawLine(xPolygonDX, 0.4, zPolygonDX, xPolygonDX, 0.45, zPolygonDX, 0, 0, 0);
-    drawReverseLightPolygon(xPolygonSX, 0.4, zPolygonSX, facing, retroLight);
-    drawReverseLightPolygon(xPolygonDX, 0.4, zPolygonDX, facing, retroLight);
+    drawReverseLightPolygon(xPolygonSX, 0.4, zPolygonSX, facing, retroLight, useWireFrame);
+    drawReverseLightPolygon(xPolygonDX, 0.4, zPolygonDX, facing, retroLight, useWireFrame);
 
     /* abilito o disabilito la luce in base a se sono in retro o meno */
     if(retroLight)
@@ -577,6 +590,11 @@ int Controller::getGoal() {
 /* ritorna il numero di Goal catturati */
 int Controller::getGoalChecked() {
     return goalChecked;
+};
+
+/* ritorna il numero di Goal catturati con la nebbia */
+int Controller::getGoalCheckedNebbia() {
+    return goalCheckedNebbia;
 };
 
 /* ritorna il numero di TNT generati */
@@ -707,9 +725,9 @@ void Controller::drawGameOverLayout(SDL_Window *win, TTF_Font *font, int scrH, i
         fprintf(stderr, "Impossibile caricare il font.\n");
     }
     
-    char tnt[20], goal[20], point[20], time[20];
+    char tnt[20], goal[40], point[20], time[20];
     if(!playerLoose) { sprintf(tnt, "TNT:  %d / %d   ", Controller::getTntChecked(), Controller::getTnt()); }
-    if(!playerLoose) { sprintf(goal, "GOAL:  %d / %d   ", Controller::getGoalChecked(), Controller::getGoal()); }
+    if(!playerLoose) { sprintf(goal, "GOAL:  %d(%d con nebbia) / %d   ", Controller::getGoalChecked(), Controller::getGoalCheckedNebbia(), Controller::getGoal()); }
     if(!playerLoose) { sprintf(point, "SCORE:  %d   ", Controller::getScore()); }
     if(!playerLoose) { sprintf(time, "TIME:  %f ", endTime); }
 

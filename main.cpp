@@ -576,12 +576,12 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     /* disegno la luce della statua */
     controller.drawLightTorciaStatua();
     /* disegno assi XYZ del MONDO(Per debug) */
-    drawAxis();
+    //drawAxis();
     /* disegno il mirino */
     bool mirino = (cameraType != CAMERA_MIRINO);
     controller.drawMirino(car.facing, car.px, car.pz, mirino);
     /* disegno le luci posteriori dell'auto */
-    controller.drawReverseLight(car.facing, car.px, car.pz, controller.key[Controller::DEC]);
+    controller.drawReverseLight(car.facing, car.px, car.pz, controller.key[Controller::DEC], useWireframe);
     static float tmpcol[4] = {1, 1, 1, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tmpcol);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 127);
@@ -604,7 +604,7 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     /* disegno della statua della liertà */
     drawStatua();
     /* disegno il target(sia esso goal o tnt) */
-    controller.drawTargetCube();
+    controller.drawTargetCube(useShadow, useWireframe);
     /* render della macchina */
     car.Render();
     /* mostro o meno la nebbia */
@@ -638,7 +638,7 @@ void rendering(SDL_Window *win, TTF_Font *font) {
     char tnt[20];
     sprintf(tnt, "TNT:  %d / %d   ", controller.getTntChecked(), controller.getTnt());
     char goal[20];
-    sprintf(goal, "GOAL:  %d / %d   ", controller.getGoalChecked(), controller.getGoal());
+    sprintf(goal, "GOAL:  %d(%d con nebbia) / %d   ", controller.getGoalChecked(), controller.getGoalCheckedNebbia(), controller.getGoal());
     char *tntAndGoal = strcat(tnt, goal);
     char point[20];
     sprintf(point, "SCORE:  %d   ", controller.getScore());
@@ -680,7 +680,7 @@ int main(int argc, char* argv[]) {
 
     /* ricavo un font dalla cartella ./ttf/ */
     TTF_Font *font;
-    font = TTF_OpenFont("./ttf/amatic.ttf", 45);
+    font = TTF_OpenFont("./ttf/amatic.ttf", 32);
     if (font == NULL) {
         fprintf(stderr, "Impossibile caricare il font.\n");
     }

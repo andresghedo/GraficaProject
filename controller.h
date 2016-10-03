@@ -19,13 +19,13 @@ public:
     /* gestione joystick */
     void Joy(int keymap, bool pressed_or_released);
     /* disegno di un cubo goal o tnt */
-    void drawTargetCube();
+    void drawTargetCube(bool shadow, bool UseWireFrame);
     /* gestione dei vincli di gioco(cattura goal/tnt, time, fine gioco etc...) */
     void checkConstraintsGame(float carZ, bool nebbia);
     /* disegno del mirino */
     void drawMirino(float facing, float carX, float carZ, bool draw);
     /* disegno della luce di retromarcia/freno */
-    void drawReverseLight(float facing, float carX, float carZ, bool retroLight);
+    void drawReverseLight(float facing, float carX, float carZ, bool retroLight, bool useWireFrame);
     /* disegno della luca della statua intermittente */
     void drawLightTorciaStatua();
     /* fornisce all'esterno la posizione X del target corrente */
@@ -52,6 +52,8 @@ public:
     int getGoal();
     /* ritorna il numero di Goal catturati */
     int getGoalChecked();
+    /* ritorna il numero di Goal catturati con la nebbia */
+    int getGoalCheckedNebbia();
     /* ritorna il numero di TNT generati */
     int getTnt();
     /* ritorna il numero di TNT fatti esplodere */
