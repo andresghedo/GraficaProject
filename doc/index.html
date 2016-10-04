@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>GRA</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" type="text/css" id="theme" href="css/theme-default.css"/>
+        <style type="text/css">
+            @font-face {
+                font-family: "Amatic";
+                font-size: 60px;
+                src: url('./ttf/amatic.ttf') format("truetype");
+            }
+            h1.amatic, span.amatic { 
+                font-family: "Amatic", Verdana, Tahoma;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page-container">
+            <div class="page-sidebar" style="position: fixed; bottom: 0%; top: 0%; overflow: hidden;">
+                <ul class="x-navigation" style="overflow-y: auto; height: 100%;">
+                    <li class="xn-profile">
+                        <div class="profile">
+                            <div class="profile-image">
+                                <img src="img/selfie.jpg" alt="Andrea Sghedoni"/>
+                            </div>
+                            <div class="profile-data">
+                                <div class="profile-data-name" style='font-size: 20px;'>Andrea Sghedoni</div>
+                                <div class="profile-data-title">andrea.sghedoni4@studio.unibo.it</div>
+                                <div class="profile-data-title">MATR. 0000736038</div>
+                                <div class="profile-data-title">@ Alma Mater Studiorum, UniBo</div>
+                            </div>
+                        </div>                                                                        
+                    </li>
+                    <li class="xn-title">Naviga</li>
+                    <li><a href="#intro"><span class="fa fa-ellipsis-h"></span><span class="xn-text amatic" style="font-size: 30px;">Introduzione</span></a></li>
+                    <li><a href="#regole"><span class="fa fa-book"></span><span class="xn-text amatic" style="font-size: 30px;">Regole di gioco</span></a></li>
+                    
+                    <li class="xn-openable">
+                        <a href="#"><span class="fa fa-gamepad"></span><span class="xn-text amatic" style="font-size: 30px;">Implementazione</span></a>
+                        <ul>
+                            <li><a href="#trasformazioni"><span class="fa fa-arrows"></span><span class="xn-text amatic" style="font-size: 25px;">Le Trasformazioni</span></a></li>
+                            <li><a href="#comandi"><span class="fa fa-gamepad"></span><span class="xn-text amatic" style="font-size: 30px;">I Comandi</span></a></li>
+                            <li><a href="#illuminazione"><span class="fa fa-lightbulb-o"></span><span class="xn-text amatic" style="font-size: 30px;">Illuminazione</span></a></li>
+                            <li><a href="#radar"><span class="fa fa-map-marker"></span><span class="xn-text amatic" style="font-size: 30px;">Il Radar</span></a></li>
+                            <li><a href="#score"><span class="glyphicon glyphicon-time"></span><span class="xn-text amatic" style="font-size: 30px;">Lo Score</span></a></li>
+                            <li><a href="#mirino"><span class="fa fa-crosshairs"></span><span class="xn-text amatic" style="font-size: 30px;">Il mirino</span></a></li>
+                            <li><a href="#mesh"><span class="glyphicon glyphicon-tower"></span><span class="xn-text amatic" style="font-size: 30px;">Le Mesh</span></a></li>
+                            <li><a href="#texture"><span class="fa fa-picture-o"></span><span class="xn-text amatic" style="font-size: 30px;">Le Texture</span></a></li>
+                            <li><a href="#camera"><span class="fa fa-camera"></span><span class="xn-text amatic" style="font-size: 30px;">La Camera</span></a></li>
+                            <li><a href="#nebbia"><span class="glyphicon glyphicon-cloud"></span><span class="xn-text amatic" style="font-size: 30px;">La Nebbia</span></a></li>
+                            <li><a href="#ombre"><span class="glyphicon glyphicon-send"></span><span class="xn-text amatic" style="font-size: 30px;">Le Ombre</span></a></li>
+                            <li><a href="#gameover"><span class="glyphicon glyphicon-off"></span><span class="xn-text amatic" style="font-size: 30px;">Il Game Over</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#conclusioni"><span class="fa fa-ellipsis-h"></span><span class="xn-text amatic" style="font-size: 30px;">Conclusioni</span></a></li>
+                </ul>
+            </div>
+            
+            <div class="page-content">
+                <div class="page-content-wrap">
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body" style='font-size: 22px; color: black;'>                            
+                                    <h1 id='intro' class='col-md-offset-5 amatic' style="font-size: 90px;">Introduzione</h1>
+                                    <p>La seguente documentazione è relativa al progetto del corso GRAFICA, tenuto presso l'Università degli Studi di Bologna dal Professore 
+                                        Casciola nell'anno accademico 2015/2016. L'obiettivo che ci si prefissa è la realizzazione di un semplice videogioco che racchiuda 
+                                        le principali argomentazioni affrontate nel corso. Il software è pensato per ambiente UNIX e sviluppato con il linguaggio C++,
+                                        utilizzandolo col paradigma ad oggetti. 
+                                        La gestione della grafica è resa possibile dalle librerie <b><i>OpenGL</i></b> e <b><i>SDL</i></b>, studiate nel corso.
+                                        In particolare la prima si preoccupa di amministrare oggetti grafici 3D ad altre prestazioni, mentre la seconda ha il compito di gestire finestre e 
+                                        ricevere segnali esterni.
+                                        L'interattività con l'utente è affidata ad un ciclo degli eventi, che tramite polling(chiamata <i>SDL_PollEvent(e)</i> della libreria OpenGL) rileva gli input esterni(<i>SDL_Event</i>) e reagisce in base a questi.
+                                    <p>Il progetto parte da una primo scheletro affrontato durante il corso in classe ed è stato integrato, in modo consistente, con nuove 
+                                        funzionalità su linee guida del professore e necessarie per rendere l'eseguibile un videogioco a tutti gli effetti.
+                                        Queste hanno riguardato soprattutto l'aggiunta di nuovi oggetti nella scena, di nuove illuminazioni, di texture e della costruzione di una logica 
+                                        di gioco.
+
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/screen_gioco.png"  height="566" width="1000">
+                                            <figcaption>Fig. 1 - Il gioco</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='regole' class='col-md-offset-5 amatic' style="font-size: 90px;">Regole di gioco</h1>
+                                    <p>L'utente ha lo scopo di guidare la macchina, identificata come una <i>Ferrari</i> da <i>Formula 1</i>, su una pista stradale rettilinea e catturare 
+                                        quanti più possibili <b><i>GOAL</i></b>(rappresentati da un cubo, texturati con un'immagine del sottoscritto). L'arrivo è previsto in prossimità della 
+                                        <i>Statua della Libertà</i>, la quale è visibile in lontananza fin dal punto di partenza e illuminata con la propria caratteristica fiaccola.
+                                        Il giocatore ha al massimo <b><i>100 secondi</i></b> per completare la pista, dove, una volta scaduti questi, viene dichiarata la sconfitta se la 
+                                        macchina non giunge all'arrivo.
+                                        Ogni volta che l'utente riesce a catturare un GOAL riceve un <b><i>+1</i></b> punto, mentre se lo lascia scappare viene penalizzato con <b><i>-1</i></b>. 
+                                        Questi vengono generati continuamente ogni qual volta che l'utente riesca a catturarne uno o lo superi, senza riuscire a catturarlo.
+                                    <p>Un'ulteriore difficoltà inserita è la presenza di <b><i>TNT</i></b>, che stanno a rappresentare cubi-ostacoli da schivare sulla pista. Questi si 
+                                        alternano ai GOAL sulla pista e se il giocatore, erroneamente, ne investe uno con l'autovettura verrà penalizzato di un <b><i>-1</i></b>.
+                                    <p>Ad ogni step viene generato un GOAL con probabilità <b><i>0.7</i></b> o, in alternativa, un TNT con probabilità <b><i>0.3</i></b>.
+                                        I cubi ostacolo vengono posizionati molto vicini ed in direzione in cui si sta muovendo l'auto, in modo che questi appaiano nella scena velocemente, 
+                                        costringendo l'utente a cambiare direzione repentineamente per non cadere in penalità.
+                                    <p>Tramite il pulsante F6 è possibile attivare la <b><i>Nebbia</i></b> nella scena di gioco, questa riduce sensibilmente la visibilità della pista al
+                                        pilota, di conseguenza l'utente ha la possibilità di accumulare più punti alla cattura di un GOAL(<b><i>+2</i></b>, invece di +1).
+                                    <p>Il giocatore può vedere tramite il Radar a che punto è della pista, rispetto all'arrivo e adottare la strategia, a suo modo di vedere, 
+                                        migliore per arrivare al traguardo in tempo.
+
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='trasformazioni' class='col-md-offset-4 amatic' style="font-size: 90px;">Le Trasformazioni in OpenGL</h1>
+                                    <p>Per affrontare il progetto è stato necessario capire a fondo il funzionamento delle trasformazioni geometriche e
+                                        la loro gestione nelle librerie OpenGL. Per ogni vertice si ha lo scopo di mappare coordinate mondo in coordinate
+                                        schermo del device, su cui verrà rappresentata la scena di gioco.
+                                        L'ordine delle trasformazioni segue l'ordine sottodescritto:
+                                    <p> <b><i>1-TRASF.MODELLAZIONE</i></b> -> <b><i>2-TRASF.VISTA</i></b> -> <b><i>3-TRASF.PROIEZIONE</i></b> -> <b><i>4-TRASF. WINDOW-VIEWPORT</i></b>
+                                    <p>Si ricorda che l'ordine delle trasformazioni è invertito rispetto all'ordine con cui queste vengono gestite
+                                        nel codice. Di conseguenza, nel sorgente, vedremo eseguite prima le trasformazioni di proiezione, poi di vista ed infine quelle di modellazione.
+                                    <p>1-Le trasformazioni di modellazione agiscono sulla matrice <i>MODELVIEW</i> ed hanno l'obiettivo di ricavare le coordinate mondo
+                                        di un particolare oggetto/vertice. Solitamente sono composta dalle chiamate <i>glScale</i>, <i>glRotate</i> e <i>glTranslate</i>, nell'ordine specificato,
+                                        e comprese tra un <i>glPushMatrix</i> e <i>glPopMatrix</i> per circoscrivere la trasformazione di modellazione ad un particolare elemento.
+                                    <p>2-Le trasformazioni di vista agiscono sempre sulla matrice <i>MODELVIEW</i> ed hanno il compito di posizionare la scena davanti alla Camera(la quale ha
+                                        l'obiettivo nell'Origine e l'asse Z che cresce alle spalle della Camera). Nel progetto questa è stata implementata grazie alla chamata <i>glLookAt</i>.
+                                    <p>3-Le trasformazioni di proiezione, lavorando sulla matrice <i>PROJECTION</i>, decretano un volume di vista, dove la porzione di scena che rientra all'interno di questo verrà deformata e 
+                                        rappresentata in coordinate 2D sul device di output. Nel progetto è stata adottata una traformazione prospettica, la quale crea un cono avente la punta
+                                        nell'obbiettivo della Camera. Questo setting viene specificato nella chiamata <i>gluPerspective</i>.
+                                    <p>4-Le trasformazioni Window-Viewport sono gestite automaticamente dalla libreria. Nel progetto è stato necessario settare la Viewport tramite la chiamata
+                                        <i>glViewPort</i>, la quale setta il numero corretto di pixel nel Frame Buffer.
+
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='comandi' class='col-md-offset-5 amatic' style="font-size: 90px;">I Comandi</h1>
+                                    Gli input utente possono essere riassunti come segue:
+                                    <ul>
+                                        <li><b>W</b> per accellerare, <b>S</b> per retromarcia/freno, <b>A</b> per curvare a SX, <b>D</b> per curvare a DX</li>
+                                        <li><b>F1</b> per cambiare Visuale/Camera</li>
+                                        <li><b>F2</b> per attivare/disattivare la modalità Wireframe</li>
+                                        <li><b>F3</b> per abilitare/disabilitare le texture e attivare il gioco in colori RGB</li>
+                                        <li><b>F4</b> per attivare/disattivare i fanali dell'auto</li>
+                                        <li><b>F5</b> per attivare/disattivare le ombre(in particolare quelle della macchina e dei target)</li>
+                                        <li><b>F6</b> per attivare la nebbia nel gioco</li>
+                                    </ul>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='illuminazione' class='col-md-offset-5 amatic' style="font-size: 90px;">Illuminazione</h1>
+                                    <p>L'illuminazione è affidata principalmente all'alternarsi di 4 luci, quali una luce persistente ad illuminare il mondo, i fanali dell'auto, 
+                                        i fanali retrovisori e la fiaccola della Statua della Libertà.
+                                        Le luci possono essere accese e/o spente grazie alle chiamate <i>glEnable(GL_LIGHTX)</i> e <i>glDisable(GL_LIGHTX)</i>.
+                                    <p>La luce che illumina il mondo è permanentemente accesa, posta nella giusta posizione tramite l'opzione <i>GL_POSITION</i> della chiamata glLightfv.
+
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/mondo_illuminato.png"  height="300" width="500">
+                                            <figcaption>Fig. 2 - Mondo Illuminato</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/mondo_spento.png"  height="300" width="500">
+                                            <figcaption>Fig. 3 - Mondo Spento</figcaption>
+                                        </figure>
+                                    </div>
+
+                                    <p>I fari della macchina sono attivati tramite il pulsante F4 della tastiera, richiamando la funzione <i>DrawHeadlight</i> della classe <i>Car</i>. Questa si preoccupa di accendere 
+                                        una luce direzionale verso l'asse z negativo, del sistema di riferimento dell'auto, con un angolo di illuminazione di <i>30°</i>. Quest'ultima caratteristica è rappresentabile 
+                                        tramite il parametro <i>GL_SPOT_CUTOFF</i>, reso disponibile da <i>OpenGL</i> stesso.</p>
+
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/fanali.png"  height="300" width="500">
+                                            <figcaption>Fig. 4 - Fanali della macchina accesi</figcaption>
+                                        </figure>
+                                    </div>
+
+                                    <p>I fanali retrovisori si attivano quando l'utente è in fase di retromarcia/freno e la luce relativa ad essi è rappresentata da una 
+                                        luce direzionale, la cui, appunto, direzione varia in base al seno/coseno dell'angolo in cui si trova la macchina rispetto al 
+                                        sistema di riferimento mondo. L'angolo di propagazione della luce è stato posto a <i>80°</i> ed un'attenuazione abbastanza alta(0.5 tramite il 
+                                        parametro <i>GL_LINEAR_ATTENUATION</i>) per circoscrivere la luce in un'area non esagerata.
+                                        Il metodo che implementa questo lighting è presente nel metodo <i>drawLightingRetro</i> della classe <i>Controller</i>.
+
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/retro_illuminato.png"  height="300" width="500">
+                                            <figcaption>Fig. 5 - Macchina in Retromarcia</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/retro_spento.png"  height="300" width="500">
+                                            <figcaption>Fig. 6 - Macchina non in Retromarcia</figcaption>
+                                        </figure>
+                                    </div>
+
+                                    <p>L'effetto voluto dall'illuminazione della Statua, derivante dalla stessa fiaccola, è il colore rosso riflesso sulla statua, cosa resa 
+                                        possibile dal parametro <i>GL_AMBIENT</i> che prende in input un array di float, indicanti l'RGBA che la luce deve produrre sul materiale 
+                                        incidente.
+                                        La luce, posizionata in corrispondenza della mesh fiaccola, irradia in direzione <i>-Y</i> e l'intermittenza è data dal variare, continuo nel 
+                                        tempo, del parametro di <i>GL_LINEAR_ATTENUATION</i>.    
+                                        Il metodo che implemeta la luce sopradescritta è <i>drawLightTorciaStatua</i> della classe <i>Controller</i>.
+
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/statua_illuminata.png"  height="270" width="315">
+                                            <figcaption>Fig. 7 - Statua illuminata dalla fiaccola</figcaption>
+                                        </figure>
+                                    </div> 
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='radar' class='col-md-offset-5 amatic' style="font-size: 90px;">Il Radar</h1>
+                                    <p>Il radar è una finestrella composta da geometrie, disegnate a schermo in 2D, con lo scopo di orientare l'utente all'interno del mondo di gioco. Sostanzialmente l'utente, con un colpo d'occhio nella parte alta-sinistra dello schermo di gioco, 
+                                        è in grado di capire velocemente quanto disti dal traguardo(rappresentato dalla bandiera a scacchi) e dal target corrente presente in pista(sia esso un Goal o un TNT).
+                                    <p>L'auto del giocatore è rappresentata da un cerchiolino rosso, il Goal da un cerchiolino verde ed il TNT da un cerchiolino nero.
+                                        La posizione dell'auto, dei target e dell'arrivo sono tutte proporzionate tra la lunghezza della finestra radar e la lunghezza reale della pista, in modo da rendere veritiera 
+                                        la distanza dal traguardo.
+                                        I calcoli e l'implementazione del Radar sono affidate al metodo <i>drawRadar</i> del file <i>main.cpp</i>.
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/radar.png"  height="277" width="145">
+                                            <figcaption>Fig. 8 - Il Radar</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='score' class='col-md-offset-5 amatic' style="font-size: 90px;">Lo Score</h1>
+                                    <p> Ad ogni istante della partita il giocatore può controllare i punteggi che sta ottenendo, i quali sono mostrati in 
+                                        un box costantemente in alto a destra della schermata di gioco.
+                                        Il metodo che implementa questa funzionalità è <i>drawText</i>, della classe <i>Controller</i>, che prendendo in input parametri per la rappresentazione del box e la stringa,
+                                        applica una texture(contenente il testo con un font scelto) ad un <i>GL_QUADS</i>.
+                                    <p> Le statistiche stanno a riassumere il numero di Goal catturati(con o senza nebbia, sul numero totale di Goal generati), il numero di Tnt esplosi(sul numero 
+                                        totale di Tnt generati), il punteggio totalizzato fino a quell'istante ed infine il numero di secondi mancanti, allo scadere.
+
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/score.png"  height="93" width="690">
+                                            <figcaption>Fig. 9 - Lo Score</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='mirino' class='col-md-offset-5 amatic' style="font-size: 90px;">Il mirino</h1>
+                                    <p> L'utente per totalizzare i punti deve catturare i Goal, toccandoli con il Mirino. La rappresentazione
+                                        grafica di questo non è particolarmente interessante, perchè costruito con semplici oggetti <i>GL_LINES</i>.
+                                        La parte interessante risiede nella trasformazione geometrica di rotazione 2D(rispetto agli assi X e Z), necessaria per far si che il 
+                                        mirino si ritrovi sempre nella corretta posizione, davanti all'autovettura, indipendentemente dall'angolazione dell'auto, rispetto 
+                                        al sistema di riferimento mondo. I calcoli possono essere ritrovati nel metodo <i>drawMirino</i> del <i>Controller</i>.
+
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/mirino.png"  height="400" width="600">
+                                            <figcaption>Fig. 10 - Il mirino</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='mesh' class='col-md-offset-5 amatic' style="font-size: 90px;">Le Mesh</h1>
+                                    <p> Gli oggetti della scena di gioco individuati come Mesh fanno riferimento principalmente alla Ferrari ed alla Statua della Libertà.
+                                        La classe Mesh si preoccupa del reperimento dei dati da file .obj esterni tramite la funzione LoadFromObj, della renderizzazione 
+                                        tramite le differenti tecniche <i>NormalixFaccia</i> o <i>NormalixVertice</i>.
+                                        Gli oggetti possono essere aperti, visualizzati e modificati con vari software in circolazione. Nel corso è stato adottato <i>Blender</i>,
+                                        software libero e multipiattaforma perfetto per la modellazione di oggetti 3D.
+                                        In particolare, con la necessità di avere la fiaccola della statua di un colore differente dal resto del corpo, si sono utilizzate
+                                        le potenzialità del tool, riuscendo a separare la fiaccola dal corpo con lo strumento <i>Bisect</i>.
+                                        In realtà anche le linee stradali sono ricavate da mesh molto semplici(lo si può notare premendo F2 durante il gioco), questo perchà con le trasformazioni messe a 
+                                        disposizione da <i>OpenGL</i>, la manipolazione degli oggetti risulta molto agevole.
+                                    <p> La tecnica di shading che viene impegnata in quasi tutto il progetto è il <b><i>Gouraud Shading</i></b>(fornito appunto dal metodo <i>RenderNxV</i> della classe <i>Mesh</i>), dove 
+                                        il colore non è uniforme all'interno della stessa faccia ma viene applicata l'interpolazione anche all'interno di essa. I miglioramenti, rispetto alla tecnica
+                                        di <b><i>Flat Shading</i></b>(implementata nel metodo <i>RenderNxF</i> della classe <i>Mesh</i>) sono notevoli, come mostrato nelle Fig. 14 e 15.
+                                        L'algoritmo di <i>Gouraud Shading</i> è più oneroso, ma evita l'effetto tassellazione, dato appunto dai colori uniformi delle faccette.
+                                    <div class="col-md-4" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/blender_ferrari.png"  height="280" width="500">
+                                            <figcaption>Fig. 11 - Mesh car in Blender</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-4" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/blender_statua.png"  height="280" width="500">
+                                            <figcaption>Fig. 12 - Mesh statua in Blender</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-4" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/blender_fiaccola.png"  height="280" width="500">
+                                            <figcaption>Fig. 13 - Mesh fiaccola in Blender</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/flat.png"  height="800" width="500">
+                                            <figcaption>Fig. 14 - Flat Shading sulla statua</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/gouraud.png"  height="800" width="500">
+                                            <figcaption>Fig. 15 - Gouraud Shading sulla statua</figcaption>
+                                        </figure>
+                                    </div>
+                                    
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='texture' class='col-md-offset-5 amatic' style="font-size: 90px;">Le Texture</h1>
+                                    <p>Le texture sono le immagini che vengono applicate ad oggetti della scena per introdurre realismo nella scena.
+                                        L'attivazione dell'utilizzo di texture è data dal comando <i>glEnable(GL_TEXTURE_2D)</i> ed è possibile generare le coordinate texture
+                                        tramite la chiamata <i>glTexGen</i>. 
+                                    <p>La generazione automatica delle coordinate texture è stata implementata nella carlinga dell'auto, nelle gomme e nel cielo.
+                                        Altrimenti è possibile specificare le coordinate texture per ogni vertice dell'oggetto a cui si intende applicare l'immagine.
+                                        In questo ultimo metodo è necessario disabilitare la generazione automatica tramite le chiamate <i>glDisable(GL_TEXTURE_GEN_S)</i> e <i>glDisable(GL_TEXTURE_GEN_T)</i> e 
+                                        specificare le coordinate texture tramite il comando <i>glTextCoord</i>.
+                                    <p>La chiamata <i>glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_GEN_MODE, GL_MODULATE|GL_REPLACE)</i> decreta il colore della texture.
+                                        Ad esempio GL_MODULATE  combina il colore texture con la luminosità, mentre GL_REPLACE pone univocamente il colore texture.
+                                    <div class='row'>
+                                        <div class="col-md-offset-1 col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/asfalto.png"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 16 - Texture asfalto
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/envmap_flipped.jpg"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 17 - Texture carlinga
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/erba.jpg"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 18 - Texture erba
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/light_off.png"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 19 - Texture luce post. spenta
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/light_on.png"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 20 - Texture luce post. accesa
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-offset-1 col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/logo_gomme.jpg"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 21 - Texture gomme
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/racing_flag.jpg"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 22 - Texture arrivo
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/selfie.jpg"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 23 - Texture foto personale
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/sky_ok.jpg"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 24 - Texture cielo
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 40px; margin-bottom: 40px;">
+                                            <figure style="text-align:center">
+                                                <img src="./img/txt/tnt.png"  height="250" width="250">
+                                                <figcaption>
+                                                    Fig. 25 - Texture TNT
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                    </div>
+
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+                                    <h1 id='camera' class='col-md-offset-5 amatic' style="font-size: 90px;">La Camera</h1>
+                                    <p>L'utente, come specificato nel paragrafo dei comandi, ha la possibilità di cambiare la visuale della Camera tramite il pulsante F1. Queste sono delle trasformazioni di vista che 
+                                        agiscono sulla matrice <i>MODELVIEW</i> e tramite il metodo <i>gluLookAt</i> si decreta quale porzione del mondo rendere visibile, posizionandola davanti alla Cam.
+                                        Queste sono i 6 differenti tipi di visuale:
+                                    <ul>
+                                        <li><b><i>CAMERA_BACK_CAR</i></b> - Camera di default e ideale per il gioco</li>
+                                        <li><b><i>CAMERA_TOP_FIXED</i></b> - Camera posizionata su un lato della carlinga</li>
+                                        <li><b><i>CAMERA_TOP_CAR</i></b> - Camera che visualizza la macchina dall'alto</li>
+                                        <li><b><i>CAMERA_PILOT</i></b> - Camera posizionata nell'abitacolo per simulare la camera pilota</li>
+                                        <li><b><i>CAMERA_MOUSE</i></b> - Camera posizionata nell'origine delle coordinate mondo x,y,z(0,0,0). Possibilità di zoom con la rotella del mouse</li>
+                                        <li><b><i>CAMERA_MIRINO</i></b> - Camera posizionata nel mirino, l'auto non è inquadrata</li>
+                                    </ul>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='nebbia' class='col-md-offset-5 amatic' style="font-size: 90px;">La Nebbia</h1>
+                                    <p>Come accennato nel paragrafo <i>"Regole del gioco"</i>, l'utente ha la possibilità di attivare la nebbia nel proprio paesaggio, avendo così
+                                        l'opportunità di guadagnare ben 2 punti per ogni Goal catturato.
+                                    <p>Questa funzionalità è sviluppata nel metodo <i>drawNebbia</i>(e ricorsivamente in quello private <i>setNebbia</i>) della classe <i>Controller</i>.
+                                        La nebbia è abilitata e disabilitata dai comandi <i>glEnable(GL_FOG)</i> e <i>glDisable(GL_FOG)</i>, il colore di questa può essere settato grazie
+                                        al parametro <i>GL_FOG_COLOR</i> della chiamata <i>glFogfv</i>. I parametri <i>GL_FOG_START</i> e <i>GL_FOG_END</i> invece hanno il compito di settare la propagazione della nebbia.
+
+                                    <div class="col-md-12" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/nebbia.png"  height="566" width="1000">
+                                            <figcaption>Fig. 26 - La nebbia</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='ombre' class='col-md-offset-5 amatic' style="font-size: 90px;">Le Ombre</h1>
+                                    <p>L'implementazione delle ombre riguarda principalmente due oggetti come l'auto e il target. La logica è quella di creare una forma appiattita
+                                        dell'oggetto di cui si vuole l'ombra da applicare al suolo.
+                                    <p>Nel caso dell'auto si ridisegna l'auto con lo stesso metodo <i>RenderAllParts</i> della classe Car appiattendola completamente sull'asse Y 
+                                        nella chiamata <i>glScalef</i>, durante la trasformazione di modellazione.
+                                    <p>Nel caso dell'ombra del cubo si è seguito l'esempio fornito dal docente(<i>'/opengl_1516/opengl_advanced/shadow'</i>) dove l'idea è sempre quella di 
+                                        ottenere una forma appiattita al suolo. In questo caso però è interessante come siano parametrizzate le coordinate del punto di luce 
+                                        per simulare lo shadowing dei target sull'asfalto. Variando questi parametri si è potuto notare come l'ombra si adattasse di conseguenza 
+                                        alla posizione del punto luce(ingrandendosi, rimpicciolendosi, spostarsi verso sx o dx).
+                                        Questa funzionalità può essere ritrovata nei metodi <i>drawTargetCube</i> e <i>glShadowProjection</i> della classe Controller.
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/no_ombra_car.png"  height="370" width="340">
+                                            <figcaption>Fig. 27 - Macchina senza ombra</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/ombra_car.png"  height="370" width="340">
+                                            <figcaption>Fig. 28 - Macchina con ombra</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/no_ombra_target.png"  height="370" width="340">
+                                            <figcaption>Fig. 29 - Target senza ombra</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/ombra_target.png"  height="370" width="340">
+                                            <figcaption>Fig. 30 - Target con ombra</figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='gameover' class='col-md-offset-5 amatic' style="font-size: 90px;">Il Game Over</h1>
+                                    <p>Dalle logiche implementate, il gioco può terminare a causa di due avvenimenti: lo scadere dei secondi a disposizione
+                                        oppure al raggiungimento del fine pista.
+                                        Se il giocatore è riuscito a portate a termine la sfida gli apparirà una schermata con nella Fig.31, con il riassunto delle statistiche ed il tempo impiegato,
+                                        in caso contrario apparirà una schermata di sconfitta, notificando all'utente la fine dei secondi a disposizione.
+                                        La schermata è gestita da un ciclo degli eventi <i>SDL</i> che permetterà l'uscita definitiva dal gioco alla pressione del tasto <i>Esc</i>.
+
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/game_over.png"  height="370" width="600">
+                                            <figcaption>
+                                                Fig. 31 - Schermata di GameOver
+                                            </figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 40px; margin-bottom: 40px;">
+                                        <figure style="text-align:center">
+                                            <img src="./img/loose.png"  height="370" width="600">
+                                            <figcaption>
+                                                Fig. 32 - Schermata di sconfitta
+                                            </figcaption>
+                                        </figure>
+                                    </div>
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+
+                                    <h1 id='conclusioni' class='col-md-offset-5 amatic' style="font-size: 90px;">Conclusioni</h1>
+                                    In conclusione, si ritiene che il progetto abbia le basi minime per esser definito un videogioco. Nonostante il progetto sia incentrato sulla grafica, 
+                                    è stato necessario implementare anche un minimo di logica backend per rendere la giocabilità un minimo avvincente.
+                                    <p>Una delle difficoltà maggiori è stata nel capire come ragionasse <i>OpenGl</i> nelle trasformazioni, il loro ordine e la loro esecuzione. La documentazione
+                                        di <i>OpenGl</i> si limita ad una breve descrizione delle chiamate e dei parametri in input, spesso per arrivare al risultato desiderato si è dovuto provare 
+                                        empiricamente più volte variando gli input in pasto alle funzioni.
+                                    <p>Il calcolo della posizione esatta del mirino è stata un'altra parte su cui ci si è dovuti soffermare, ricorrendo alle formule di rotazione 2D(sugli assi X e Z).
+                                    <p>La gestione della luce è stato uno sviluppo molto interessante da affrontare, soprattutto i fanali retrovisori, dove la direzione della luce deve 
+                                        rispettare l'angolo corrente della macchina, rispetto alla pista.
+                                    <p>La comprensione delle texture è stata fondamentale, soprattutto per quanto rigurda la generazione automatica delle coordinate texture e l'integrazione 
+                                        tra queste e coordinate oggetto, nel caso in cui si abbia la necessità di specificarle.
+                                    <p>Gli sviluppi futuri possibili sono innumerevoli, come ad esempio prevedere la pista non rettilinea ma a forma di circuito, oppure contestualizzare la pista 
+                                        all'interno di un autodromo, non ponendo limiti a mesh e animazioni.
+                                    <div class='col-md-12' style="text-align:center"><p><a href="#intro"><span class="xn-text amatic" style="font-size: 50px;">Torna Su<span class="fa fa-hand-o-up"></span></span></a></p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div>
+        <script type="text/javascript" src="js/plugins/jquery/jquery.min.js"></script>
+        <script type="text/javascript" src="js/plugins/jquery/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="js/plugins/bootstrap/bootstrap.min.js"></script>        
+        <script type="text/javascript" src="js/actions.js"></script>        
+    </body>
+</html>
+
+
+
+
+

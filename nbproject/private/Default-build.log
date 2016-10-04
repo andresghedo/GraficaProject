@@ -1,4 +1,0 @@
-g++ -c main.cpp -o main.o 
-g++ -c car.cpp -o car.o 
-g++ -c mesh.cpp -o mesh.o 
-g++ main.o car.o mesh.o -o progettoCar4 -L/usr/X11R6 -lGL -lGLU -lSDL2_image -lSDL2 -lm
